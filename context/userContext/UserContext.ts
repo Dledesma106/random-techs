@@ -1,10 +1,11 @@
 import { createContext} from 'react';
-import { IUser } from './interfaces';
+import { IUser } from '../../models/interfaces';
+import { ILoginJson } from './UserProvider';
 
 
 interface UserContextProps{
     user: IUser;
-    loginUser: () => Promise<void>;
+    loginUser: (data:ILoginJson) => Promise<void>;
     logoutUser: () => void;
     isLoggedIn: () => boolean;
 }

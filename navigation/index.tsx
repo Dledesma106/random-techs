@@ -9,15 +9,15 @@ import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
 import { ColorSchemeName, Pressable } from 'react-native';
-import { Entypo } from '@expo/vector-icons'
-import Colors from '../constants/Colors';
-import useColorScheme from '../hooks/useColorScheme';
-import ModalScreen from '../screens/ModalScreen';
+import { useUser } from '../hooks/useUser';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import Login from '../screens/Login';
 import Home from '../screens/Home'
-import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
+import { DrawerParamList, RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
 import LinkingConfiguration from './LinkingConfiguration';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import RegisterTask from '../screens/RegisterTask';
+import RegisterExpense from '../screens/RegisterExpense';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
@@ -33,26 +33,40 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
  * A root stack navigator is often used for displaying modals on top of all other content.
  * https://reactnavigation.org/docs/modal
  */
+
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
+  const {user} = useUser()
+
   return (
-    <Stack.Navigator>
-      <Stack.Screen name="Home" component={BottomTabNavigator} options={{ headerShown: false }} />
+    <Stack.Navigator initialRouteName='Login'>
+      <Stack.Screen name="Drawer" component={DrawerNavigator} options={{ headerShown: false, title: user.fullName }}/>
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
       <Stack.Screen name='Login' component={Login} options={{title:'Login'}}/>
-      <Stack.Group screenOptions={{ presentation: 'modal' }}>
-        <Stack.Screen name="Modal" component={ModalScreen} />
-      </Stack.Group>
     </Stack.Navigator>
   );
+}
+
+const Drawer = createDrawerNavigator<DrawerParamList>()
+
+function DrawerNavigator(){
+
+  return(
+    <Drawer.Navigator initialRouteName='Home'>
+      <Drawer.Screen name="Home" component={Home} options={{title:'Inicio'}}/>
+      <Drawer.Screen name='RegisterExpense' component={RegisterExpense} options={{title:'Registrar un gasto'}}/>
+      <Drawer.Screen name='RegisterTask' component={RegisterTask} options={{title:'Registrar una tarea'}}/>
+    </Drawer.Navigator>
+  )
 }
 
 /**
  * A bottom tab navigator displays tab buttons on the bottom of the display to switch screens.
  * https://reactnavigation.org/docs/bottom-tab-navigator
- */
-const BottomTab = createBottomTabNavigator<RootTabParamList>();
+*/
+/* const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
   const colorScheme = useColorScheme();
@@ -80,24 +94,25 @@ function BottomTabNavigator() {
           ),
         })}
       />
-      {/* <BottomTab.Screen
+      <BottomTab.Screen
         name="TabTwo"
         component={TabTwoScreen}
         options={{
           title: 'Tab Two',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
-      /> */}
+      />
     </BottomTab.Navigator>
   );
-}
+} */
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
  */
-function TabBarIcon(props: {
+/* function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
   color: string;
 }) {
   return <FontAwesome size={30} style={{ marginBottom: -3 }} {...props} />;
 }
+ */

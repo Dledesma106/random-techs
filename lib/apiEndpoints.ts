@@ -1,4 +1,4 @@
-export const baseUrl = process.env.BASE_URL || 'http://localhost:3000/'
+export const baseUrl = process.env.BASE_URL || 'http://192.168.0.42:3000/'
 export const baseApiUrl = baseUrl + 'api/'
 export const authUrl = baseApiUrl + 'auth/'
 export const logoutUrl = authUrl + 'logout/'
