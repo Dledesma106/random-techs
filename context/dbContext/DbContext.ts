@@ -1,5 +1,6 @@
 import { createContext} from 'react';
 import { IActivity, IBranch, IClient, IExpense, ITask } from '../../models/interfaces';
+import { TaskStatus } from '../../models/types';
 
 
 //Database API, it uses AsyncStorage to save the technician's tasks, expenses, activities and all the other entities necessary for registering new tasks
@@ -7,6 +8,7 @@ import { IActivity, IBranch, IClient, IExpense, ITask } from '../../models/inter
 //it also handles getting the data for rendering
 interface DbContextProps{
     getTasks: ()=>Promise<ITask[]>
+    getTasksByStatus: (status:TaskStatus)=>Promise<ITask[]>
     getExpenses: ()=>Promise<IExpense[]>
     getActivities: ()=>Promise<IActivity[]>
     getClients: ()=>Promise<IClient[]>

@@ -10,6 +10,7 @@ import Expense from '../../models/Expense'
 import fetcher from '../../lib/fetcher'
 import Client from '../../models/Client'
 import Branch from '../../models/Branch'
+import { TaskStatus } from '../../models/types'
 
 
 export interface ILoginJson{
@@ -27,28 +28,26 @@ const DbProvider = ({children}:ProviderProps) => {
         //console.log('getting the tasks from db')
         const synchedTasks = await Task.getAll()
         const unsynchedTasks = await Task.getAllUnsynched()
-        if(synchedTasks && unsynchedTasks) return synchedTasks.concat(unsynchedTasks)
-        if(!synchedTasks && unsynchedTasks) return unsynchedTasks
-        if(!unsynchedTasks && synchedTasks) return synchedTasks
-        return []
+        return synchedTasks.concat(unsynchedTasks)
+    }
+    async function getTasksByStatus(status:TaskStatus){
+        //console.log('getting the tasks from db')
+        const synchedTasks = await Task.getAll()
+        const unsynchedTasks = await Task.getAllUnsynched()
+        const tasks = synchedTasks.concat(unsynchedTasks)
+        return tasks.filter((task:ITask )=> task.status === status)
     }
 
     async function getActivities(){
         const synchedActivties = await Activity.getAll()
         const unsynchedActivties = await Activity.getAllUnsynched()
-        if(synchedActivties && unsynchedActivties) return synchedActivties.concat(unsynchedActivties)
-        if(!synchedActivties && unsynchedActivties) return unsynchedActivties
-        if(!unsynchedActivties && synchedActivties) return synchedActivties
-        return []
+        return synchedActivties.concat(unsynchedActivties)
     }
 
     async function getExpenses(){
         const synchedExpenses = await Expense.getAll()
         const unsynchedExpenses = await Expense.getAllUnsynched()
-        if(synchedExpenses && unsynchedExpenses) return synchedExpenses.concat(unsynchedExpenses)
-        if(!synchedExpenses && unsynchedExpenses) return unsynchedExpenses
-        if(!unsynchedExpenses && synchedExpenses) return synchedExpenses
-        return []
+        return synchedExpenses.concat(unsynchedExpenses)
     }
 
     async function refreshTasks(){
@@ -102,7 +101,7 @@ const DbProvider = ({children}:ProviderProps) => {
 
 
     return(
-        <DbContext.Provider value={{getTasks, getActivities, getExpenses, getClients, getBranches, refreshTasks, saveTask, saveActivity, saveExpense}}>
+        <DbContext.Provider value={{getTasks, getTasksByStatus, getActivities, getExpenses, getClients, getBranches, refreshTasks, saveTask, saveActivity, saveExpense}}>
             {children}
         </DbContext.Provider>
     )

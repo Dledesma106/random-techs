@@ -100,6 +100,7 @@ const DB = {
             return list
         } catch (e) {
             console.log(e)
+            return []
         }
     }
 }
