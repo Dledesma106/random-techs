@@ -1,5 +1,5 @@
 //Interfaces for every model
-
+import mongoose from 'mongoose'
 import * as types from './types'
 
 //User fields
@@ -42,9 +42,7 @@ export interface ICity{
 }
 
 export interface IBranch{
-  _id?:string,
-  id?:string, //local id, used when the objects are created on the app, and then sent to the server
-  isSynched:boolean,
+  _id:string,
   number:number,
   city:ICity,
   client:IClient,
@@ -65,9 +63,7 @@ export interface IPreventive {
 }
 
 export interface ITask {
-  _id?:string,
-  id?:string, //local id, used when the objects are created on the app, and then sent to the server
-  isSynched:boolean,
+  _id?:string | mongoose.Types.ObjectId,
   branch:IBranch,
   business:IBusiness,
   assigned?:IUser,
@@ -85,9 +81,7 @@ export interface ITask {
 }
 
 export interface IExpense {
-  _id?:string,
-  id?:string, //local id, used when the objects are created on the app, and then sent to the server
-  isSynched:boolean,
+  _id?:string | mongoose.Types.ObjectId,
   doneBy:IUser,
   expenseType:types.ExpenseType,
   paySource:types.PaySource,
@@ -100,9 +94,7 @@ export interface IExpense {
 }
 
 export interface IActivity{
-  _id?:string,
-  id?:string, //local id, used when the objects are created on the app, and then sent to the server
-  isSynched:boolean,
+  _id?:string | mongoose.Types.ObjectId,
   name:string,
   description:string,
   startDate:Date,

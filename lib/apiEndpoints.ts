@@ -8,5 +8,6 @@ const techBase = baseApiUrl + 'tech/'
 
 export const tech:any ={
     tasks: techBase + 'tasks/',
-    expenses: techBase + 'expenses/'
+    expenses: techBase + 'expenses/',
+    activities: techBase + 'activities/'
 }

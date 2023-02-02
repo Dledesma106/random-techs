@@ -1,37 +1,42 @@
 import { IExpense } from "./interfaces";
 import DB from "../lib/DB";
+import mongoose from "mongoose";
 
 const collection='Expense'
 const unsynched='Unsynched'+collection
 
 const Expense = {
     get: async(id:string) =>{
-        return DB.readItem<IExpense>(collection, id)
+        return DB.read<IExpense>(collection, id)
     },
     set: async(expense:IExpense)=>{
-        return DB.updateItem<IExpense>(collection, expense)
-    },
-    new: async(expense:IExpense)=>{
-        return DB.createItem<IExpense>(collection, expense)
+        if(!DB.read(collection, expense._id as string)) DB.create(collection, expense)
+        DB.update<IExpense>(collection, expense)
     },
     delete: async(id:string) =>{
-        return DB.deleteItem<IExpense>(collection, id)
+        DB.delete<IExpense>(collection, id)
     },
     getAll: async() => {
         return DB.getCollection<IExpense>(collection)
     },
     setUnsynched: async(expense:IExpense)=>{
-        return DB.updateItem<IExpense>(unsynched, expense)
-    },
-    newUnsynched: async(expense:IExpense)=>{
-        return DB.createItem<IExpense>(unsynched, expense)
+        if(!DB.read(unsynched, expense._id as string)) DB.create(unsynched, expense)
+        DB.update<IExpense>(unsynched, expense)
     },
     deleteUnsynched: async(id:string) =>{
-        return DB.deleteItem<IExpense>(unsynched, id)
+        DB.delete<IExpense>(unsynched, id)
     },
     getAllUnsynched: async() => {
         return DB.getCollection<IExpense>(unsynched)
-    }
+    },
+    markAsSynched: async(expense:IExpense) => {
+        DB.delete(unsynched, expense._id as string)
+        DB.create(collection, expense)
+    },
+    markAsUnsynched: async(expense:IExpense) => {
+        DB.delete(collection, expense._id as string)
+        DB.create(unsynched, expense)
+    },
 
 }
 

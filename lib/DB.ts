@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import mongoose from 'mongoose';
 import { RemoteId, LocalId } from '../models/types';
 //
 
@@ -27,38 +28,37 @@ to delete an object
 then, getting the collections is trivial
 */
 interface Identified {
-    _id:RemoteId,
-    id:LocalId
+    _id: string | mongoose.Types.ObjectId
+}
+
+async function createCollection(collection:string){
+    if(await AsyncStorage.getItem(collection) === null) await AsyncStorage.setItem(collection, '[]')
 }
 
 const DB = {
-    createItem: async <T>(collection:string, object:T) => {
+    create: async <T>(collection:string, object:T) => {
         try {
+            await createCollection(collection)
             let list: T[] = JSON.parse(await AsyncStorage.getItem(collection) as string)
+            if(!(object as Identified)._id) (object as Identified)._id = new mongoose.Types.ObjectId()//this should give it a mongoose ObjectId if it doesn't have one
             list.push(object)
             await AsyncStorage.setItem(collection, JSON.stringify(list))
         } catch (e) {
           console.log(e);
         }
     },
-    readItem: async <T>(collection:string, id:string) =>{
+    read: async <T>(collection:string, id:string) =>{
         try{
+            await createCollection(collection)
             let list:T[] = JSON.parse(await AsyncStorage.getItem(collection) as string)
             return list.find(item => (item as Identified)._id === id)
         }catch(e){
             console.log(e);
         }
     },
-    readLocalItem: async <T>(collection:string, id:string) =>{
-        try{
-            let list:T[] = JSON.parse(await AsyncStorage.getItem(collection) as string)
-            return list.find(item => (item as Identified).id === id)
-        }catch(e){
-            console.log(e);
-        }
-    },
-    updateItem: async<T>(collection:string, object:T)=>{
+    update: async<T>(collection:string, object:T)=>{
         try {
+            await createCollection(collection)
             let list:T[] = JSON.parse(await AsyncStorage.getItem(collection) as string)
             list = list.filter( item => (item as Identified)._id === (object as Identified)._id)
             list.push(object)
@@ -67,27 +67,9 @@ const DB = {
             console.log(error);
         }
     },
-    updateLocalItem: async<T>(collection:string, object:T)=>{
+    delete: async<T>(collection:string, id:string) => {
         try {
-            let list:T[] = JSON.parse(await AsyncStorage.getItem(collection) as string)
-            list = list.filter( item => (item as Identified).id === (object as Identified).id)
-            list.push(object)
-            await AsyncStorage.setItem(collection, JSON.stringify(list))
-        } catch (error) {
-            console.log(error);
-        }
-    },
-    deleteItem: async<T>(collection:string, id:string) => {
-        try {
-            let list: T[] = JSON.parse(await AsyncStorage.getItem(collection) as string)
-            list = list.filter(item => (item as Identified).id === id)
-            await AsyncStorage.setItem(collection, JSON.stringify(list))
-        } catch (e) {
-            console.log(e);
-        }
-    },
-    deleteLocalItem: async<T>(collection:string, id:string) => {
-        try {
+            await createCollection(collection)
             let list: T[] = JSON.parse(await AsyncStorage.getItem(collection) as string)
             list = list.filter(item => (item as Identified)._id === id)
             await AsyncStorage.setItem(collection, JSON.stringify(list))
@@ -97,14 +79,13 @@ const DB = {
     },
     getCollection: async<T>(collection:string) =>{
         try {
+            await createCollection(collection)
             const list : T[] = JSON.parse(await AsyncStorage.getItem(collection) as string)
             return list
         } catch (e) {
             console.log(e)
         }
     }
-    
-
 }
 
 export default DB

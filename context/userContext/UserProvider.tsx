@@ -6,6 +6,7 @@ import { IUser } from '../../models/interfaces'
 import { useMemo } from 'react'
 
 import Token from '../../lib/token'
+import appInit from '../../lib/AppInit'
 
 const INITIAL_STATE = {
     email:'',
@@ -32,6 +33,7 @@ const UserProvider = ({children}:ProviderProps) => {
     //it logs in the user by sending a request to an endpoint that reads the access token cookie and returns the user corresponding to that access token
     async function loginUser(data:ILoginJson){      
         Token.save('access_token', data.access_token)
+        appInit() // should synchronize data with remote db
         setUser(data.user)
     }
 
