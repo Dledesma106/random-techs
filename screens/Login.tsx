@@ -32,9 +32,9 @@ const SignIn = ({navigation}:any) => {
     
     const postData = async (form:ILoginForm) => {
       try {
-        const json/* :Promise<LoginResponseJson>  */= await fetcher(apiEndpoints.authUrl, form, 'POST')
+        const data/* :Promise<LoginResponseJson>  */= await fetcher(apiEndpoints.authUrl, form, 'POST')
         
-        loginUser(json.data)
+        await loginUser(data)
         
         
         navigation.navigate('Drawer')

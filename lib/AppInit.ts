@@ -3,7 +3,7 @@
 // *Retrieving technician's assigned tasks and activities
 // *Checking db for unsynched entities
 // *sending those entities to the server and updating local entities
-
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import fetcher from "./fetcher"
 import * as api from './apiEndpoints'
 import { IActivity, IExpense, ITask } from "../models/interfaces"
@@ -14,23 +14,31 @@ import Branch from "../models/Branch"
 import Client from "../models/Client"
 
 export default async function appInit(){
+    //console.log('appInit');
+    //console.log('clearing...');
+    //await AsyncStorage.clear()
+    /* console.log(await AsyncStorage.getItem('Task'));
+    console.log(await AsyncStorage.getItem('Branch'));
+    console.log(await AsyncStorage.getItem('Client')); */
+    
     await updateTechData()
     await syncUnsynchedData()
 }
 
-/* ------------ level 1 --------------- */
+
 //retrieves all of the technician's tasks and activities and saves them to the db 
 async function updateTechData(){
-    const tasks = (await fetcher(api.tech.tasks, {}, 'GET')).tasks
-    const activities = (await fetcher(api.tech.activities, {}, 'GET')).activities
+    const tasksData = await fetcher(api.tech.tasks, {}, 'GET')
+    const tasks = tasksData.tasks
     tasks.forEach(async(task:ITask) => {
         await Task.set(task)
         await Branch.set(task.branch)
         await Client.set(task.branch.client)
     });
-    activities.forEach(async(activity:IActivity)=>{
+    //const activities = (await fetcher(api.tech.activities, {}, 'GET')).activities
+    /*activities.forEach(async(activity:IActivity)=>{
         await Activity.set(activity)
-    })
+    }) */
 }
 // checks the db for unsynched data, and either updates it or sends it to the server
 async function syncUnsynchedData(){

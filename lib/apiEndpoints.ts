@@ -7,7 +7,7 @@ export const loggedInUser = authUrl + 'user/'
 const techBase = baseApiUrl + 'tech/'
 
 export const tech:any ={
-    tasks: techBase + 'tasks/',
-    expenses: techBase + 'expenses/',
-    activities: techBase + 'activities/'
+    tasks: techBase + 'tasks',
+    expenses: techBase + 'expenses',
+    activities: techBase + 'activities'
 }

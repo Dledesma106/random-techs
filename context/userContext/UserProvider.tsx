@@ -31,9 +31,9 @@ const UserProvider = ({children}:ProviderProps) => {
     const [user, setUser] = useState<IUser>(INITIAL_STATE)
 
     //it logs in the user by sending a request to an endpoint that reads the access token cookie and returns the user corresponding to that access token
-    async function loginUser(data:ILoginJson){      
-        Token.save('access_token', data.access_token)
-        appInit() // should synchronize data with remote db
+    async function loginUser(data:ILoginJson){    
+        await Token.save('access_token', data.access_token)
+        await appInit() // should synchronize data with remote db
         setUser(data.user)
     }
 

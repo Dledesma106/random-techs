@@ -4,7 +4,7 @@ export default function RegisterTask(){
     return (
         <>
             <Text>
-                Registrate una tarea
+                Registrate una tareaaaaaaaaaaaaaaaa
             </Text>
         </>
     )

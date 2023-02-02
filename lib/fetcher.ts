@@ -4,6 +4,8 @@ export default async function fetcher(url:string, data:any, method:string){
     const contentType = 'application/json'
     const auth = await Token.get('access_token') 
 
+    console.log(url, method);
+    
     const requestInit:RequestInit = method == 'GET'? {
         method,
         mode:'no-cors',

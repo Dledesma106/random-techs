@@ -8,6 +8,8 @@ import Task from '../../models/Task'
 import Activity from '../../models/Activity'
 import Expense from '../../models/Expense'
 import fetcher from '../../lib/fetcher'
+import Client from '../../models/Client'
+import Branch from '../../models/Branch'
 
 
 export interface ILoginJson{
@@ -22,6 +24,7 @@ export interface ProviderProps{
 const DbProvider = ({children}:ProviderProps) => {
 
     async function getTasks(){
+        //console.log('getting the tasks from db')
         const synchedTasks = await Task.getAll()
         const unsynchedTasks = await Task.getAllUnsynched()
         if(synchedTasks && unsynchedTasks) return synchedTasks.concat(unsynchedTasks)
@@ -46,6 +49,24 @@ const DbProvider = ({children}:ProviderProps) => {
         if(!synchedExpenses && unsynchedExpenses) return unsynchedExpenses
         if(!unsynchedExpenses && synchedExpenses) return synchedExpenses
         return []
+    }
+
+    async function refreshTasks(){
+        const tasksData = await fetcher(apiEndpoints.tech.tasks, {}, 'GET')
+        const tasks = tasksData.tasks
+        tasks.forEach(async(task:ITask) => {
+            await Task.set(task)
+            await Branch.set(task.branch)
+            await Client.set(task.branch.client)
+        });
+    }
+
+    async function getClients(){
+        return await Client.getAll() || []
+    }
+
+    async function getBranches(){
+        return await Branch.getAll() || []
     }
 
     async function saveTask(task:ITask){
@@ -79,12 +100,9 @@ const DbProvider = ({children}:ProviderProps) => {
     }
     
 
-    const memoValue = useMemo(() => {
-        return {getTasks, getActivities, getExpenses, saveTask, saveActivity, saveExpense}
-    }, [])
 
     return(
-        <DbContext.Provider value={memoValue}>
+        <DbContext.Provider value={{getTasks, getActivities, getExpenses, getClients, getBranches, refreshTasks, saveTask, saveActivity, saveExpense}}>
             {children}
         </DbContext.Provider>
     )

@@ -6,35 +6,35 @@ const unsynched='Unsynched'+collection
 
 const Branch = {
     get: async(id:string) =>{
-        return DB.read<IBranch>(collection, id)
+        return await DB.read<IBranch>(collection, id)
     },
     set: async(branch:IBranch)=>{
-        if(!DB.read(collection, branch._id as string)) DB.create(collection, branch)
-        DB.update<IBranch>(collection, branch)
+        if(!await DB.read(collection, branch._id as string))return await DB.create(collection, branch)
+        await DB.update<IBranch>(collection, branch)
     },
     delete: async(id:string) =>{
-        DB.delete<IBranch>(collection, id)
+        await DB.delete<IBranch>(collection, id)
     },
     getAll: async() => {
-        return DB.getCollection<IBranch>(collection)
+        return await DB.getCollection<IBranch>(collection)
     },
     setUnsynched: async(branch:IBranch)=>{
-        if(!DB.read(unsynched, branch._id as string)) DB.create(unsynched, branch)
-        return DB.update<IBranch>(unsynched, branch)
+        if(!await DB.read(unsynched, branch._id as string))return await DB.create(unsynched, branch)
+        return await DB.update<IBranch>(unsynched, branch)
     },
     deleteUnsynched: async(id:string) =>{
-        return DB.delete<IBranch>(unsynched, id)
+        return await DB.delete<IBranch>(unsynched, id)
     },
     getAllUnsynched: async() => {
-        return DB.getCollection<IBranch>(unsynched)
+        return await DB.getCollection<IBranch>(unsynched)
     },
     markAsSynched: async(branch:IBranch) => {
-        DB.delete(unsynched, branch._id as string)
-        DB.create(collection, branch)
+        await DB.delete(unsynched, branch._id as string)
+        await DB.create(collection, branch)
     },
     markAsUnsynched: async(branch:IBranch) => {
-        DB.delete(collection, branch._id as string)
-        DB.create(unsynched, branch)
+        await DB.delete(collection, branch._id as string)
+        await DB.create(unsynched, branch)
     },
 
 }
