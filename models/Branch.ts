@@ -1,14 +1,21 @@
-import { IBranch } from "./interfaces";
+import { IBranch, ICity, IClient, IProvince } from "./interfaces";
 import DB from "../lib/DB";
+import Client from "./Client";
 
 const collection='Branch'
 const unsynched='Unsynched'+collection
 
 const Branch = {
     get: async(id:string) =>{
-        return await DB.read<IBranch>(collection, id)
+        const branch = await DB.read<IBranch>(collection, id)
+        if(!branch) return branch
+        branch.client = (await Client.get((branch.client as string)) as IClient)
+        return branch
     },
     set: async(branch:IBranch)=>{
+        Client.set(branch.client as IClient)
+        branch.client = (branch.client as IClient)._id
+        branch.city = `${(branch.city as ICity).name}, ${((branch.city as ICity).province as IProvince).name}`
         if(!await DB.read(collection, branch._id as string))return await DB.create(collection, branch)
         await DB.update<IBranch>(collection, branch)
     },

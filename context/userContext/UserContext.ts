@@ -8,6 +8,7 @@ interface UserContextProps{
     loginUser: (data:ILoginJson) => Promise<void>;
     logoutUser: () => void;
     isLoggedIn: () => boolean;
+    loginOffline: (email:string, password:string) => Promise<void>
 }
 
 const UserContext = createContext<UserContextProps>({} as UserContextProps)

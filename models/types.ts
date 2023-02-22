@@ -1,3 +1,5 @@
+import mongoose from "mongoose"
+
 export type Frequency =  1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
 
 export type Month = 'Enero' | 'Febrero' | 'Marzo' | 'Abril' | 'Mayo' | 'Junio' | 'Julio' | 'Agosto' | 'Septiembre' | 'Octubre' | 'Noviembre' | 'Diciembre'
@@ -16,9 +18,7 @@ export type Role = 'Tecnico' | 'Administrativo Tecnico' | 'Administrativo Contab
 
 export type PreventiveStatus = 'Pendiente' | 'Al dia'
 
-export type LocalId = string
-
-export type RemoteId = string
+export type ID = string | mongoose.Types.ObjectId
 
 export const months:Month[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 

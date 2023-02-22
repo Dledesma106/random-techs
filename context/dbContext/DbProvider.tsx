@@ -10,6 +10,7 @@ import Expense from '../../models/Expense'
 import fetcher from '../../lib/fetcher'
 import Client from '../../models/Client'
 import Branch from '../../models/Branch'
+import User from '../../models/User'
 import { TaskStatus } from '../../models/types'
 
 
@@ -30,6 +31,35 @@ const DbProvider = ({children}:ProviderProps) => {
         const unsynchedTasks = await Task.getAllUnsynched()
         return synchedTasks.concat(unsynchedTasks)
     }
+
+    async function getTaskExpenses(taskId:string){
+        const synchedExpenses = await Expense.getAll()
+        const unsynchedExpenses = await Expense.getAllUnsynched()
+        const expenses = synchedExpenses.concat(unsynchedExpenses)
+        return expenses.filter(expense => {
+            return expense.task? expense.task === taskId : false
+        })
+    }
+
+    async function getUserByEmail(email:string){
+        //console.log('getting synced users')
+        const synchedUsers = await User.getAll()
+        //console.log('getting unsynced users')
+
+        const unsynchedUsers = await User.getAllUnsynched()
+
+        //console.log('concatenating users')
+
+        const users = synchedUsers.concat(unsynchedUsers)
+        //console.log('finding user')
+
+        return users.find(user => user.email === email)
+    }
+
+    async function saveLocalUser(user:IUser, password:string){
+        await User.set(user, password)
+    }
+
     async function getTasksByStatus(status:TaskStatus){
         //console.log('getting the tasks from db')
         const synchedTasks = await Task.getAll()
@@ -78,6 +108,8 @@ const DbProvider = ({children}:ProviderProps) => {
         }
     }
 
+
+
     async function saveActivity(activity:IActivity){
         try {
             await fetcher(apiEndpoints.tech.activities, activity, 'POST')
@@ -101,7 +133,7 @@ const DbProvider = ({children}:ProviderProps) => {
 
 
     return(
-        <DbContext.Provider value={{getTasks, getTasksByStatus, getActivities, getExpenses, getClients, getBranches, refreshTasks, saveTask, saveActivity, saveExpense}}>
+        <DbContext.Provider value={{getTasks, getTasksByStatus, getActivities, getExpenses, getTaskExpenses, getClients, getBranches, getUserByEmail, refreshTasks, saveLocalUser, saveTask, saveActivity, saveExpense}}>
             {children}
         </DbContext.Provider>
     )

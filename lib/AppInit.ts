@@ -4,6 +4,7 @@
 // *Checking db for unsynched entities
 // *sending those entities to the server and updating local entities
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import * as SecureStore from 'expo-secure-store'
 import fetcher from "./fetcher"
 import * as api from './apiEndpoints'
 import { IActivity, IExpense, ITask } from "../models/interfaces"
@@ -13,10 +14,12 @@ import Expense from "../models/Expense"
 import Branch from "../models/Branch"
 import Client from "../models/Client"
 
+
 export default async function appInit(){
     //console.log('appInit');
     //console.log('clearing...');
     //await AsyncStorage.clear()
+    //await SecureStore.deleteItemAsync('User')
     /* console.log(await AsyncStorage.getItem('Task'));
     console.log(await AsyncStorage.getItem('Branch'));
     console.log(await AsyncStorage.getItem('Client')); */
@@ -29,12 +32,13 @@ export default async function appInit(){
 //retrieves all of the technician's tasks and activities and saves them to the db 
 async function updateTechData(){
     const tasksData = await fetcher(api.tech.tasks, {}, 'GET')
-    const tasks = tasksData.tasks
-    tasks.forEach(async(task:ITask) => {
+    const tasks:ITask[] = tasksData.tasks
+    //console.log(tasks)
+    for(const task of tasks){//we use a for .. of loop instead of a forEach because we need to await every set of a task before we set the next one, since forEach fires an asynchronous function for every item in the array
         await Task.set(task)
         await Branch.set(task.branch)
         await Client.set(task.branch.client)
-    });
+    }
     //const activities = (await fetcher(api.tech.activities, {}, 'GET')).activities
     /*activities.forEach(async(activity:IActivity)=>{
         await Activity.set(activity)

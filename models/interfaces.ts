@@ -44,36 +44,23 @@ export interface ICity{
 export interface IBranch{
   _id:string,
   number:number,
-  city:ICity,
-  client:IClient,
+  city:ICity | types.ID,
+  client:IClient | types.ID,
   businesses:IBusiness[],
 }
 
-export interface IPreventive {
-  _id:string,
-  assigned:IUser[],
-  business:IBusiness,
-  branch:IBranch,
-  status:types.PreventiveStatus,
-  frequency?:types.Frequency,
-  months?:types.Month[],
-  lastDoneAt?:Date,
-  batteryChangedAt?:Date
-  observations?:string
-}
 
 export interface ITask {
-  _id?:string | mongoose.Types.ObjectId,
-  branch:IBranch,
+  _id?:types.ID,
+  branch:IBranch | types.ID,
   business:IBusiness,
-  assigned?:IUser,
   openedAt:Date,
   taskType:types.TaskType,
   status:types.TaskStatus,
   description:string,
   participants?:IUser[],
   auditor?:IUser,
-  activity?:IActivity,
+  activity?:IActivity | types.ID,
   operatorName?:string,
   image?:IImage,
   workOrderNumber?:number,
@@ -81,25 +68,23 @@ export interface ITask {
 }
 
 export interface IExpense {
-  _id?:string | mongoose.Types.ObjectId,
-  doneBy:IUser,
+  _id?:types.ID,
   expenseType:types.ExpenseType,
   paySource:types.PaySource,
   status:types.ExpenseStatus,
   image:IImage,
-  amount:Number,
-  task?:ITask,
-  auditor?:IUser,
-  activity?:IActivity
+  amount:number,
+  task?:types.ID,
+  activity?:types.ID
 }
 
 export interface IActivity{
-  _id?:string | mongoose.Types.ObjectId,
+  _id?:types.ID,
   name:string,
   description:string,
   startDate:Date,
-  openedBy:IUser,
-  participants?:IUser[],
+  openedBy:types.ID,
+  participants?:types.ID[],
   finishDate?:Date,
 }
 

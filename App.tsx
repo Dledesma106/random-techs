@@ -5,16 +5,23 @@ import useCachedResources from './hooks/useCachedResources';
 import useColorScheme from './hooks/useColorScheme';
 import Navigation from './navigation';
 import UserProvider from './context/userContext/UserProvider';
-import { NativeWindStyleSheet } from "nativewind";
 import DbProvider from './context/dbContext/DbProvider';
+import { useBcryptConfig } from './hooks/useBcryptConfig';
+import { useEffect } from 'react';
 
-NativeWindStyleSheet.setOutput({
-  default: "native",
-});
+
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
   const colorScheme = useColorScheme();
+  const configureBcrypt = useBcryptConfig()
+
+  useEffect(()=>{
+    configureBcrypt()
+
+  },[])
+
+  //console.log('rendered app')
 
   if (!isLoadingComplete) {
     return null;

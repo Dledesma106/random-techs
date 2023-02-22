@@ -3,7 +3,7 @@
  * https://reactnavigation.org/docs/getting-started
  *
  */
-import { FontAwesome } from '@expo/vector-icons';
+import { Entypo, FontAwesome } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -18,6 +18,9 @@ import LinkingConfiguration from './LinkingConfiguration';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import RegisterTask from '../screens/RegisterTask';
 import RegisterExpense from '../screens/RegisterExpense';
+import * as SecureStore from 'expo-secure-store'
+import Task from '../screens/Task';
+import RegisterExpenseOnTask from '../screens/RegisterExpenseOnTask';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
@@ -42,7 +45,7 @@ function RootNavigator() {
 
   return (
     <Stack.Navigator initialRouteName='Login'>
-      <Stack.Screen name="Drawer" component={DrawerNavigator} options={{ headerShown: false, title: user.fullName }}/>
+      <Stack.Screen name="Drawer" component={DrawerNavigator} options={{ headerShown: false, headerTitle: user.fullName }}/>
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
       <Stack.Screen name='Login' component={Login} options={{title:'Login'}}/>
     </Stack.Navigator>
@@ -55,7 +58,7 @@ function DrawerNavigator(){
 
   return(
     <Drawer.Navigator initialRouteName='Home'>
-      <Drawer.Screen name="Home" component={Home} options={{title:'Inicio'}}/>
+      <Drawer.Screen name="Home" component={BottomTabNavigator} options={{title:'Random', headerTitleAlign:'center'}}/>
       <Drawer.Screen name='RegisterExpense' component={RegisterExpense} options={{title:'Registrar un gasto'}}/>
       <Drawer.Screen name='RegisterTask' component={RegisterTask} options={{title:'Registrar una tarea'}}/>
     </Drawer.Navigator>
@@ -66,45 +69,27 @@ function DrawerNavigator(){
  * A bottom tab navigator displays tab buttons on the bottom of the display to switch screens.
  * https://reactnavigation.org/docs/bottom-tab-navigator
 */
-/* const BottomTab = createBottomTabNavigator<RootTabParamList>();
+const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 function BottomTabNavigator() {
-  const colorScheme = useColorScheme();
+  //const colorScheme = useColorScheme();
 
   return (
-    <BottomTab.Navigator
-      initialRouteName="Home"
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
-      }}>
+    <BottomTab.Navigator initialRouteName="Main">
       <BottomTab.Screen
-        name="Home"
+        name="Main"
         component={Home}
-        options={({ navigation }: RootTabScreenProps<'Home'>) => ({
-          title: 'Home',
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-          headerLeft: () => (
-            <Pressable
-              onPress={() => console.log('menuu')}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.5 : 1,
-              })}>
-              <Entypo name="menu" size={24} color="black" />
-            </Pressable>
-          ),
+        options={({ navigation }: RootTabScreenProps<'Main'>) => ({
+          tabBarIcon: ()=><Entypo name="home" size={24} color="black" />,
+          headerShown:false,
+          title:'Inicio'
         })}
       />
-      <BottomTab.Screen
-        name="TabTwo"
-        component={TabTwoScreen}
-        options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
+      <BottomTab.Screen name='Task' component={Task} options={{tabBarItemStyle:{display:'none'}, headerShown:false,}}/>
+      <BottomTab.Screen name='RegisterExpenseOnTask' component={RegisterExpenseOnTask} options={{tabBarItemStyle:{display:'none'}, headerShown:false,}}/>
     </BottomTab.Navigator>
   );
-} */
+}
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/

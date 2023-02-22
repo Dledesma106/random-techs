@@ -6,6 +6,7 @@ import { useUser } from "../hooks/useUser"
 import Input from '../components/Forms/Input'
 import * as apiEndpoints from '../lib/apiEndpoints'
 import fetcher from "../lib/fetcher"
+import { useDB } from "../hooks/useDB"
 
 interface ILoginForm{
     email:string,
@@ -15,12 +16,13 @@ interface ILoginForm{
 const SignIn = ({navigation}:any) => {
     const [errors, setErrors] = useState({})
     const [message, setMessage] = useState('')
-    const {loginUser} = useUser()
+    const {loginUser, loginOffline} = useUser()
     const [form, setForm] = useState({
       email:'',
       password:''
     })
-  
+    const [disabled, setDisabled] = useState<boolean>(false)
+    const {saveLocalUser} = useDB()
     
     const formValidate = () => {
       let err : ILoginForm = {email:'', password:''}
@@ -35,48 +37,59 @@ const SignIn = ({navigation}:any) => {
         const data/* :Promise<LoginResponseJson>  */= await fetcher(apiEndpoints.authUrl, form, 'POST')
         
         await loginUser(data)
-        
-        
+        saveLocalUser(data.user, form.password)
+        console.log('logged in with server')
         navigation.navigate('Drawer')
       } 
       catch (error) {
-        console.log(error)
-        alert('wrong email/password')
+        try{
+          console.log('trying offline login')
+          await loginOffline(form.email, form.password)
+          console.log('logged in offline')
+          navigation.navigate('Drawer')
+        }catch(error){
+          alert('Email o contraseña incorrectos')
+        }
       }
     }
   
-    const submit = () => {
+    const submit = async () => {
       const errs = formValidate()
+
       if (errs.email == '' && errs.email == '') {
-        postData(form)
+        setDisabled(true)
+        await postData(form)
+        setDisabled(false)
       } else {
         setErrors({ errs })
       }
     }
   
     return (
-      <View>
-        <Input
-          title='Email'
-          value={form.email}
-          custom={{
-            onChangeText:email => setForm(prev => ({...prev, email}))
-          }}
-        />
-        <Input
-          title='Password'
-          value={form.password}
-          custom={{
-            onChangeText:password => setForm(prev=>({...prev, password}))
-          }}
-        />
-        <Button title='Login' action={submit}/>
-        
-        <Text>{message}</Text>
-        <View>
-          {Object.keys(errors).map((err, index) => (
-            <Text key={index}>{err}</Text>
-          ))}
+      <View className="bg-gray-300 h-screen items-center">
+        <View className="bg-gray-100 w-11/12 m-1 flex flex-col rounded-md mt-10">
+          <Input
+            title='Email'
+            value={form.email}
+            custom={{
+              onChangeText:email => setForm(prev => ({...prev, email}))
+            }}
+          />
+          <Input
+            title='Contraseña'
+            value={form.password}
+            custom={{
+              onChangeText:password => setForm(prev=>({...prev, password}))
+            }}
+          />
+          <Button title='Login' action={submit} disabled={disabled}/>
+          
+          <Text>{message}</Text>
+          <View>
+            {Object.keys(errors).map((err, index) => (
+              <Text key={index}>{err}</Text>
+            ))}
+          </View>
         </View>
   
       </View>

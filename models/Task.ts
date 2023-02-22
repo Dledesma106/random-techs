@@ -1,6 +1,7 @@
-import { ITask } from "./interfaces";
+import { IActivity, IBranch, ITask } from "./interfaces";
 import DB from "../lib/DB";
-
+import Branch from "./Branch";
+import Activity from "./Activity";
 const collection='Task'
 const unsynched = 'Unsynched'+collection
 
@@ -9,7 +10,20 @@ const Task = {
         return await DB.read<ITask>(collection, id)
     },
     set: async(task:ITask)=>{
-        if(await DB.read<ITask>(collection, task._id as string)) return await DB.create(collection, task)
+        Branch.set(task.branch as IBranch)
+        task.branch = (task.branch as IBranch)._id
+        if(task.activity) {
+            Activity.set(task.activity as IActivity)
+            task.activity = (task.activity as IActivity)._id
+        }
+        //search for the incoming task
+        //console.log(task)
+        const currentTask = await DB.read<ITask>(collection, task._id as string)
+        //console.log(!currentTask);
+        
+        //if no task is found, we create it
+        if(!currentTask) return await DB.create(collection, task)
+        //otherwise we update it
         await DB.update<ITask>(collection, task)
     },
     delete: async(id:string) =>{
