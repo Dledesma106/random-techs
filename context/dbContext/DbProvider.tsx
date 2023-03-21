@@ -2,7 +2,7 @@ import {useState} from 'react'
 import DbContext from './DbContext'
 import * as apiEndpoints from '../../lib/apiEndpoints'
 //import { ResponseData } from './types'
-import { IActivity, IExpense, ITask, IUser } from '../../models/interfaces'
+import { IActivity, IBranch, IClient, IExpense, ITask, IUser } from '../../models/interfaces'
 import { useMemo } from 'react'
 import Task from '../../models/Task'
 import Activity from '../../models/Activity'
@@ -12,6 +12,7 @@ import Client from '../../models/Client'
 import Branch from '../../models/Branch'
 import User from '../../models/User'
 import { TaskStatus } from '../../models/types'
+import { updateTasks } from '../../lib/AppInit'
 
 
 export interface ILoginJson{
@@ -27,8 +28,8 @@ const DbProvider = ({children}:ProviderProps) => {
 
     async function getTasks(){
         //console.log('getting the tasks from db')
-        const synchedTasks = await Task.getAll()
-        const unsynchedTasks = await Task.getAllUnsynched()
+        const synchedTasks = await Task.getAll() as ITask[]
+        const unsynchedTasks = await Task.getAllUnsynched() as ITask[]
         return synchedTasks.concat(unsynchedTasks)
     }
 
@@ -62,8 +63,8 @@ const DbProvider = ({children}:ProviderProps) => {
 
     async function getTasksByStatus(status:TaskStatus){
         //console.log('getting the tasks from db')
-        const synchedTasks = await Task.getAll()
-        const unsynchedTasks = await Task.getAllUnsynched()
+        const synchedTasks = await Task.getAll() as ITask[]
+        const unsynchedTasks = await Task.getAllUnsynched() as ITask[]
         const tasks = synchedTasks.concat(unsynchedTasks)
         return tasks.filter((task:ITask )=> task.status === status)
     }
@@ -81,13 +82,7 @@ const DbProvider = ({children}:ProviderProps) => {
     }
 
     async function refreshTasks(){
-        const tasksData = await fetcher(apiEndpoints.tech.tasks, {}, 'GET')
-        const tasks = tasksData.tasks
-        tasks.forEach(async(task:ITask) => {
-            await Task.set(task)
-            await Branch.set(task.branch)
-            await Client.set(task.branch.client)
-        });
+        await updateTasks()
     }
 
     async function getClients(){

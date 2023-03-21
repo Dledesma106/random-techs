@@ -7,22 +7,19 @@ import { dmyDateString } from "../lib/utils";
 import Input from "../components/Forms/Input";
 import { AntDesign } from '@expo/vector-icons';
 import { useDB } from "../hooks/useDB";
-import DatePicker from 'react-native-modern-datepicker';
-
-interface TaskForm{
-    closedAt:Date,
-    workOrderNumber:number,
-}
+import DatePicker from 'react-native-modern-datepicker'
+import { card, cardItem, cardTitle } from "../styles";
+import { EvilIcons } from '@expo/vector-icons';
 
 export default function Task({route, navigation}:{route:any, navigation:any}){
     const {task} = route.params
     const {getTaskExpenses} = useDB()
     const [taskExpenses, setTaskExpenses] = useState<IExpense[]>([])
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false)
-    const [form, setForm] = useState<TaskForm>({
+    const [currentTask, setCurrentTask] = useState<ITask>({
+        ...task,
         closedAt:new Date(),
         workOrderNumber: NaN,
-
     })
 
     useEffect(()=>{
@@ -30,24 +27,20 @@ export default function Task({route, navigation}:{route:any, navigation:any}){
             setTaskExpenses(await getTaskExpenses(task._id))
         }
         getExpenses()
-    })
-
-    const card = "flex flex-col w-11/12 mx-auto mt-4 bg-gray-50 rounded-3xl"
-    const cardItem = "border-t-2 text-lg p-4"
-    const cardTitle = 'text-lg p-4'
+    }, [])
 
     function pickDate(pickedDate: string){
-        setForm(prev => ({...prev, closedAt:new Date(pickedDate)}))
+        setCurrentTask(prev => ({...prev, closedAt:new Date(pickedDate)}))
         setShowDatePicker(false)
     }
 
     function workOrderNumberChange(newWorkOrderNumber:string){
         const workOrderNumber = parseInt(newWorkOrderNumber)
-        setForm(prev => ({...prev, workOrderNumber}))
+        setCurrentTask(prev => ({...prev, workOrderNumber}))
     }
 
     function registerExpense(){
-        navigation.navigate('RegisterExpenseOnTask', {taskId: task._id})
+        navigation.navigate('RegisterExpenseOnTask', {task:currentTask})
     }   
     
     function navigateExpense(expense:IExpense){
@@ -56,7 +49,7 @@ export default function Task({route, navigation}:{route:any, navigation:any}){
 
     return(
         <>
-            <ScrollView className="bg-gray-300 h-screen ">
+            <ScrollView className="bg-gray-300 h-screen pt-4">
                 <View className={`${card}`}>
                     <Text className={cardTitle}>Empresa: {task.business.name}</Text>
                     <Text className={cardItem}>Client: {task.branch.client.name}</Text>
@@ -73,7 +66,7 @@ export default function Task({route, navigation}:{route:any, navigation:any}){
                     <Text className={cardTitle}>Seleccionar fecha de cierre</Text>
                     <Pressable onPress={()=>{setShowDatePicker(true)}}>
                         <View className="flex flex-row justify-evenly border-t-2 items-center">
-                            <Text className={cardTitle}>{dmyDateString(form.closedAt)}</Text>
+                            <Text className={cardTitle}>{dmyDateString(currentTask.closedAt as Date)}</Text>
                             <Entypo name="calendar" size={24} color="black" />
                         </View>
                     </Pressable>
@@ -81,10 +74,9 @@ export default function Task({route, navigation}:{route:any, navigation:any}){
                         showDatePicker &&
                         <DatePicker
                             onSelectedChange={pickDate}
-                            minimumDate={task.openedAt}
+                            minimumDate={new Date(task.openedAt).toJSON()}
                             maximumDate={new Date().toJSON()}
                             mode='calendar'
-
                         />
                     }
 
@@ -92,7 +84,7 @@ export default function Task({route, navigation}:{route:any, navigation:any}){
                 <View className={card}>
                     <Input 
                         title="Numero de Orden de Trabajo" 
-                        value={form.workOrderNumber.toString()==='NaN'? '':form.workOrderNumber.toString()} 
+                        value={(currentTask.workOrderNumber as Number).toString()==='NaN'? '':(currentTask.workOrderNumber as Number).toString()} 
                         titleStyle={cardTitle} 
                         inputStyle={cardItem} 
                         custom={
@@ -131,6 +123,7 @@ export default function Task({route, navigation}:{route:any, navigation:any}){
                         </View>
                     </Pressable>
                 </View>
+                
 
 
             </ScrollView>

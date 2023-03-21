@@ -74,8 +74,8 @@ export interface IExpense {
   status:types.ExpenseStatus,
   image:IImage,
   amount:number,
-  task?:types.ID,
-  activity?:types.ID
+  task?:ITask | types.ID,
+  activity?:IActivity | types.ID,
 }
 
 export interface IActivity{

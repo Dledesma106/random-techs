@@ -1,15 +1,30 @@
-import { IExpense } from "./interfaces";
+import { IActivity, IExpense, ITask } from "./interfaces";
 import DB from "../lib/DB";
+import Activity from "./Activity";
+import Task from "./Task";
 
 const collection='Expense'
 const unsynched='Unsynched'+collection
 
 const Expense = {
     get: async(id:string) =>{
-        return await DB.read<IExpense>(collection, id)
+        const expense = await DB.read<IExpense>(collection, id)
+        if(!expense) return undefined
+        if(expense.activity) expense.activity = await Activity.get(expense.activity as string)
+        if(expense.task) expense.task = await Task.get(expense.task as string)
+        return expense
     },
     set: async(expense:IExpense)=>{
-        if(!await DB.read(collection, expense._id as string))return await DB.create(collection, expense)
+        if(expense.activity) {
+            await Activity.set(expense.activity as IActivity)
+            expense.activity = (expense.activity as IActivity)._id
+        }
+        if(expense.task) {
+            await Task.set(expense.task as ITask)
+            expense.task = (expense.task as ITask)._id
+        }   
+        const existingExpense = await DB.read(collection, expense._id as string)
+        if(!existingExpense)return await DB.create(collection, expense)
         await DB.update<IExpense>(collection, expense)
     },
     delete: async(id:string) =>{

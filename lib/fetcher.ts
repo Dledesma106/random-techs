@@ -42,10 +42,10 @@ export default async function fetcher(url:string, data:any, method:string){
       // Throw error with status code in case Fetch API req failed
 
     if (!res.ok) {
-        console.log(res)
+        console.log('FAILED FETCH:', res)
         throw new Error('failed fetch')
     }
     const json/* :Promise<LoginResponseJson>  */= await res.json()
-    
+    console.log(json)
     return await json.data
 }

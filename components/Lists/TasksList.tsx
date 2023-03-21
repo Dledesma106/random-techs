@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Text, View, FlatList, Pressable, Button } from "react-native";
-import { ITask } from "../../models/interfaces";
+import { IBranch, IClient, ITask } from "../../models/interfaces";
 import fetcher from "../../lib/fetcher";
 import * as apiEndpoints from '../../lib/apiEndpoints'
 import { Feather } from '@expo/vector-icons'; 
@@ -18,6 +18,7 @@ export default function TasksList({navigation}:{navigation:any}){
     }
 
     async function refresh(){
+        console.log('refreshing tasks...');
         await refreshTasks()
         await getAllTasks()
     }
@@ -57,13 +58,12 @@ function Item({task, navigation}:{task:ITask, navigation:any}){
     function navigate(){
         navigation.navigate('Task', {task})
     }
-
     return(
         <>
             <Pressable onPress={navigate}>
                 <View className='flex flex-row border-t-2 items-center justify-between p-2'>
                     <View className={`flex flex-col p-2 w-3/4`}>
-                        <Text className='text-md'>{task.branch.client.name} - {task.branch.number} - {task.business.name}</Text>
+                        <Text className='text-md'>{((task.branch as IBranch).client as IClient).name} - {(task.branch as IBranch).number} - {task.business.name}</Text>
                         <Text>{task.taskType}</Text>
                         <Text>{task.description}</Text>
                     </View>
