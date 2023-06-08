@@ -16,6 +16,7 @@ export function userWithoutPassword(user:IUser){
         firstName:user.firstName,
         lastName:user.lastName,
         fullName:user.fullName,
+        publicKey:user.publicKey,
         email:user.email,
         roles:user.roles
     }
