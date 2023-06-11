@@ -1,6 +1,6 @@
 //Interfaces for every model
-import mongoose from 'mongoose'
-import * as types from './types'
+import mongoose from "mongoose";
+import * as types from "./types";
 
 //User fields
 export interface IUser {
@@ -8,10 +8,11 @@ export interface IUser {
   email: string;
   firstName: string;
   lastName: string;
-  city?:ICity;
+  city?: ICity;
   fullName?: string;
-  roles?:types.Role[]
-  password?:string;
+  publicKey: string;
+  roles?: types.Role[];
+  password?: string;
 }
 export interface IImage{
   _id:string,
@@ -55,7 +56,6 @@ export interface IBranch{
   deleted:boolean
 }
 
-
 export interface ITask {
   _id?:types.ID,
   branch:IBranch | types.ID,
@@ -97,7 +97,7 @@ export interface IActivity{
   deleted:boolean
 }
 
-export interface IUserActivities{
-  userActivities?:IActivity[];
-  participantActivities?:IActivity[]
+export interface IUserActivities {
+  userActivities?: IActivity[];
+  participantActivities?: IActivity[];
 }
