@@ -34,7 +34,7 @@ const SignIn = ({navigation}:any) => {
     
     const postData = async (form:ILoginForm) => {
       try {
-        const data/* :Promise<LoginResponseJson>  */= await fetcher(apiEndpoints.authUrl, form, 'POST')
+        const data/* :Promise<LoginResponseJson>  */= await fetcher.post(apiEndpoints.authUrl, form)
         
         await loginUser(data)
         saveLocalUser(data.user, form.password)

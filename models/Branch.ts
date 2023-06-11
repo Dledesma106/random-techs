@@ -8,12 +8,13 @@ const unsynched='Unsynched'+collection
 const Branch = {
     get: async(id:string) =>{
         const branch = await DB.read<IBranch>(collection, id)
-        if(!branch) return branch
+        if(!branch) return {} as IBranch
         branch.client = await Client.get(branch.client as string) as IClient
         return branch
     },
     set: async(branch:IBranch)=>{
         await Client.set(branch.client as IClient)
+        if(branch.deleted) return await Branch.delete(branch._id as string)
         branch.client = (branch.client as IClient)._id
         branch.city = `${(branch.city as ICity).name}, ${((branch.city as ICity).province as IProvince).name}`
         if(!await DB.read(collection, branch._id as string))return await DB.create(collection, branch)

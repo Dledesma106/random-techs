@@ -8,17 +8,20 @@ const unsynched = 'Unsynched'+collection
 const Task = {
     get: async(id:string) =>{
         const task = await DB.read<ITask>(collection, id)
-        if (!task) return undefined
+        if (!task) return {} as ITask
         task.branch = await Branch.get(task.branch as string) as IBranch
         return task
     },
     set: async(task:ITask)=>{
         await Branch.set(task.branch as IBranch)
-        task.branch = (task.branch as IBranch)._id
-        if(task.activity) {
+        if(task.activity && !task.deleted) {
             await Activity.set(task.activity as IActivity)
             task.activity = (task.activity as IActivity)._id
         }
+        console.log(task.deleted);
+        
+        if(task.deleted) return await Task.delete(task._id as string)
+        task.branch = (task.branch as IBranch)._id
         //search for the incoming task
         //console.log(task)
         const existingTask = await DB.read<ITask>(collection, task._id as string)

@@ -95,7 +95,7 @@ const DbProvider = ({children}:ProviderProps) => {
 
     async function saveTask(task:ITask){
         try {
-            await fetcher(apiEndpoints.tech.tasks, task, 'POST')
+            await fetcher.post(apiEndpoints.tech.tasks, task)
             Task.set(task)
         } catch (error) {
             console.log(error);
@@ -107,7 +107,7 @@ const DbProvider = ({children}:ProviderProps) => {
 
     async function saveActivity(activity:IActivity){
         try {
-            await fetcher(apiEndpoints.tech.activities, activity, 'POST')
+            await fetcher.post(apiEndpoints.tech.activities, activity)
             Activity.set(activity)
         } catch (error) {
             console.log(error);
@@ -117,7 +117,7 @@ const DbProvider = ({children}:ProviderProps) => {
 
     async function saveExpense(expense:IExpense){
         try {
-            await fetcher(apiEndpoints.tech.expenses, Expense, 'POST')
+            await fetcher.post(apiEndpoints.tech.expenses, Expense)
             Expense.set(expense)
         } catch (error) {
             console.log(error);

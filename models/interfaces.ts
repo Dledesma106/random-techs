@@ -16,29 +16,34 @@ export interface IUser {
 export interface IImage{
   _id:string,
   name:string,
-  url:string
+  url:string,
+  deleted:boolean
 }
 
 export interface IClient {
   _id:string,
   name:string
+  deleted:boolean
 }
 
 
 export interface IBusiness{
   _id:string,
   name:string
+  deleted:boolean
 }
 
 export interface IProvince{
   _id:string,
   name:string
+  deleted:boolean
 }
 
 export interface ICity{
   _id:string,
   name:string,
   province:IProvince
+  deleted:boolean
 }
 
 export interface IBranch{
@@ -47,6 +52,7 @@ export interface IBranch{
   city:ICity | types.ID,
   client:IClient | types.ID,
   businesses:IBusiness[],
+  deleted:boolean
 }
 
 
@@ -65,6 +71,7 @@ export interface ITask {
   image?:IImage,
   workOrderNumber?:number,
   closedAt?:Date,
+  deleted:boolean
 }
 
 export interface IExpense {
@@ -76,6 +83,7 @@ export interface IExpense {
   amount:number,
   task?:ITask | types.ID,
   activity?:IActivity | types.ID,
+  deleted:boolean
 }
 
 export interface IActivity{
@@ -86,6 +94,7 @@ export interface IActivity{
   openedBy:types.ID,
   participants?:types.ID[],
   finishDate?:Date,
+  deleted:boolean
 }
 
 export interface IUserActivities{

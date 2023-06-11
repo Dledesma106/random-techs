@@ -29,9 +29,9 @@ export default async function appInit(){
 }
 
 export async function updateTasks(){
-    const data = await fetcher(api.tech.tasks, {}, 'GET')
+    const data = await fetcher.get(api.tech.tasks)
     const tasks:ITask[] = data.tasks
-    console.log(tasks)
+    //console.log(tasks)
     for(const task of tasks){//we use a for .. of loop instead of a forEach because we need to await the setting of a task before we set the next one, since forEach fires an asynchronous function for every item in the array
         await Task.set(task)
     }
@@ -53,7 +53,7 @@ async function syncUnsynchedData(){
     if(unsynchedTasks){
         for(const task of unsynchedTasks) {
             try {
-                await fetcher(api.tech.tasks, task, 'POST')  
+                await fetcher.post(api.tech.tasks, task)  
                 await Task.markAsSynched(task as ITask)      
             } catch (error) {
                 console.log(error)
@@ -63,7 +63,7 @@ async function syncUnsynchedData(){
     if(unsynchedActivities){
         for (const activity of unsynchedActivities){
             try {
-                await fetcher(api.tech.activities, activity, 'POST')
+                await fetcher.post(api.tech.activities, activity)
                 await Activity.markAsSynched(activity)        
             } catch (error) {
                 console.log(error);
@@ -73,7 +73,7 @@ async function syncUnsynchedData(){
     if(unsynchedExpenses){
         for(const expense of unsynchedExpenses){
             try {
-                await fetcher(api.tech.expenses, expense, 'POST')
+                await fetcher.post(api.tech.expenses, expense)
                 await Expense.markAsSynched(expense)
             } catch (error) {
                 console.log(error);
