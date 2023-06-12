@@ -22,7 +22,7 @@ const INITIAL_STATE = {
 
 export interface ILoginJson {
   user: IUser;
-  access_token: string;
+  accessToken: string;
 }
 
 export interface ProviderProps {
@@ -35,7 +35,8 @@ const UserProvider = ({ children }: ProviderProps) => {
 
   //it logs in the user by sending a request to an endpoint that reads the access token cookie and returns the user corresponding to that access token
   async function loginUser(data: ILoginJson) {
-    await Token.save("access_token", data.access_token);
+    console.log(data.accessToken)
+    await Token.save("access_token", data.accessToken);
     await appInit(); // should synchronize data with remote db
     setUser(data.user);
   }

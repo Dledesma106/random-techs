@@ -114,6 +114,7 @@ const DB = {
         }
     },
     secureCreate: async <T>(collection:string, object:T) => {
+        console.log(object)
         try {
             //console.log('creating...');
             await createSecureCollection(collection)
@@ -123,7 +124,9 @@ const DB = {
             if(!(object as Identified)._id) (object as Identified)._id = new mongoose.Types.ObjectId()//this should give it a mongoose ObjectId if it doesn't have one
         
             if(!list.find(item => (item as Identified)._id === (object as Identified)._id)) list.push(object)
-            await SecureStore.setItemAsync(collection, JSON.stringify(list))
+            const stringList = JSON.stringify(list)
+            console.log(stringList)
+            await SecureStore.setItemAsync(collection, stringList)
             //console.log('List after creating: ',JSON.parse(await SecureStore.getItemAsync(collection) as string));
             
         } catch (e) {

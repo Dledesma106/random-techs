@@ -35,13 +35,14 @@ const SignIn = ({navigation}:any) => {
     const postData = async (form:ILoginForm) => {
       try {
         const data/* :Promise<LoginResponseJson>  */= await fetcher(apiEndpoints.authUrl, form, 'POST')
-        
         await loginUser(data)
+        console.log("usuario logeado")
         saveLocalUser(data.user, form.password)
         console.log('logged in with server')
         navigation.navigate('Drawer')
       } 
       catch (error) {
+        console.log(error)
         try{
           console.log('trying offline login')
           await loginOffline(form.email, form.password)

@@ -12,7 +12,7 @@ interface DbContextProps{
     getExpenses: ()=>Promise<IExpense[]>
     getActivities: ()=>Promise<IActivity[]>
     getClients: ()=>Promise<IClient[]>
-    getBranches: ()=>Promise<IBranch[]>
+    getBranches: ()=>Promise<(IBranch| undefined)[]>
     getTaskExpenses: (taskId:string)=>Promise<IExpense[]>
     getUserByEmail:(email:string) => Promise<IUser | undefined>
     refreshTasks: ()=>Promise<void>
