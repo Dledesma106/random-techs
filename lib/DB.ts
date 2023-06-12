@@ -97,7 +97,7 @@ const DB = {
         try {
             await createCollection(collection)
             let list: T[] = JSON.parse(await AsyncStorage.getItem(collection) as string)
-            list = list.filter(item => (item as Identified)._id === id)
+            list = list.filter(item => (item as Identified)._id !== id)
             await AsyncStorage.setItem(collection, JSON.stringify(list))
         } catch (e) {
             console.log(e);

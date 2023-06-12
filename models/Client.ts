@@ -9,6 +9,7 @@ const Client = {
         return await DB.read<IClient>(collection, id)
     },
     set: async(client:IClient)=>{
+        if(client.deleted) return await Client.delete(client._id as string)
         if(!await DB.read(collection, client._id as string))return await DB.create(collection, client)
         await DB.update<IClient>(collection, client)
     },

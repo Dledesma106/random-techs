@@ -9,6 +9,7 @@ const Activity = {
         return await DB.read<IActivity>(collection, id)
     },
     set: async(activity:IActivity)=>{
+        if(activity.deleted) return await Activity.delete(activity._id as string)
         if(!await DB.read(collection, activity._id as string)) return await DB.create(collection, activity)
         await DB.update<IActivity>(collection, activity)
     },
