@@ -1,8 +1,8 @@
 import DbContext from './DbContext'
 import * as apiEndpoints from '../../lib/apiEndpoints'
 //import { ResponseData } from './types'
-import { IActivity, IExpense, ITask, IUser } from '../../models/interfaces'
-import React from 'react'
+import { IActivity, IBranch, IClient, IExpense, IImage, ITask, IUser } from '../../models/interfaces'
+import { useMemo } from 'react'
 import Task from '../../models/Task'
 import Activity from '../../models/Activity'
 import Expense from '../../models/Expense'
@@ -13,22 +13,25 @@ import User from '../../models/User'
 import { TaskStatus } from '../../models/types'
 import { updateTasks } from '../../lib/AppInit'
 
-export interface ILoginJson {
-	user: IUser
-	access_token: string
+
+export interface ILoginJson{
+    user:IUser,
+    access_token:string
 }
 
 export interface ProviderProps {
 	children: JSX.Element | JSX.Element[]
 }
 
-const DbProvider = ({ children }: ProviderProps) => {
-	async function getTasks() {
-		//console.log('getting the tasks from db')
-		const synchedTasks = (await Task.getAll())
-		const unsynchedTasks = (await Task.getAllUnsynched())
-		return synchedTasks.concat(unsynchedTasks)
-	}
+
+const DbProvider = ({children}:ProviderProps) => {
+
+    async function getTasks(){
+        //console.log('getting the tasks from db')
+        const synchedTasks = await Task.getAll() as ITask[]
+        const unsynchedTasks = await Task.getAllUnsynched() as ITask[]
+        return synchedTasks.concat(unsynchedTasks)
+    }
 
 	async function getTaskExpenses(taskId: string) {
 		const synchedExpenses = await Expense.getAll()
@@ -110,37 +113,23 @@ const DbProvider = ({ children }: ProviderProps) => {
 		}
 	}
 
-	async function saveExpense(expense: IExpense) {
-		try {
-			await fetcher.post(apiEndpoints.tech.expenses, Expense)
-			Expense.set(expense)
-		} catch (error) {
-			console.log(error)
-			Expense.setUnsynched(expense)
-		}
-	}
+    async function saveExpense(expense:IExpense){
+        try {
+            await fetcher.post(apiEndpoints.tech.expenses, Expense)
+            Expense.set(expense)
+        } catch (error) {
+            console.log(error);
+            Expense.setUnsynched(expense)
+        }
+    }
+    
 
-	return (
-		<DbContext.Provider
-			value={{
-				getTasks,
-				getTasksByStatus,
-				getActivities,
-				getExpenses,
-				getTaskExpenses,
-				getClients,
-				getBranches,
-				getUserByEmail,
-				refreshTasks,
-				saveLocalUser,
-				saveTask,
-				saveActivity,
-				saveExpense
-			}}
-		>
-			{children}
-		</DbContext.Provider>
-	)
+
+    return(
+        <DbContext.Provider value={{getTasks, getTasksByStatus, getActivities, getExpenses, getTaskExpenses, getClients, getBranches, getUserByEmail, refreshTasks, saveLocalUser, saveTask, saveActivity, saveExpense}}>
+            {children}
+        </DbContext.Provider>
+    )
 }
 
 export default DbProvider
