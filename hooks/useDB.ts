@@ -1,7 +1,7 @@
-import  DbContext from '../context/dbContext/DbContext'
-import {useContext} from 'react'
+import DbContext from '../context/dbContext/DbContext'
+import { useContext } from 'react'
 
 export const useDB = () => {
-    const context = useContext(DbContext)
-    return context
+	const context = useContext(DbContext)
+	return context
 }
