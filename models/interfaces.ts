@@ -16,7 +16,6 @@ export interface IUser {
 }
 export interface IImage{
   _id:string,
-  name:string,
   url:string,
   deleted:boolean
 }

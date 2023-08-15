@@ -1,30 +1,46 @@
-import { Pressable, Text, View, ScrollView, Alert, TouchableOpacity } from "react-native";
+import { Pressable, Text, View, ScrollView, Alert, TouchableOpacity,BackHandler } from "react-native";
 import { IExpense, ITask } from "../models/interfaces";
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useEffect, useState } from "react"
 import { Entypo } from '@expo/vector-icons';
 import { dmyDateString } from "../lib/utils";
 import Input from "../components/Forms/Input";
 import { AntDesign } from '@expo/vector-icons';
 import { useDB } from "../hooks/useDB";
-import DatePicker from 'react-native-modern-datepicker'
+import DatePicker from './DatePicker'
+import DB from "../lib/DB";
 import { card, cardItem, cardTitle } from "../styles";
 import { EvilIcons } from '@expo/vector-icons';
 import { Camera, CameraCapturedPicture } from "expo-camera";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Image from "../models/Image";
+import axios from "axios";
+
+
 
 export default function Task({route, navigation}:{route:any, navigation:any}){
     const {task} = route.params
     const {getTaskExpenses} = useDB()
     const [taskExpenses, setTaskExpenses] = useState<IExpense[]>([])
-    const [showDatePicker, setShowDatePicker] = useState<boolean>(false)
     const [showCamera, setShowCamera] = useState<boolean>(false)
     const [photo, setPhoto] = useState<CameraCapturedPicture>()
+    const [photoPath, setPhotoPath] = useState<string>();
     const [previewVisible, setPreviewVisible] = useState<boolean>(false)
     const [currentTask, setCurrentTask] = useState<ITask>({
         ...task,
         closedAt:new Date(),
         workOrderNumber: NaN,
+    
+
     })
+
+    useEffect(()=>{
+        const backAction = ()=>{
+            setShowCamera(false)
+            return true
+        }
+        const backHandler = BackHandler.addEventListener("hardwareBackPress",backAction)
+        return ()=> backHandler.remove()
+    },[])
 
     let camera: Camera
     useEffect(()=>{
@@ -48,12 +64,10 @@ export default function Task({route, navigation}:{route:any, navigation:any}){
         setPhoto(photo)
         setShowCamera(false)
         setPreviewVisible(true)
+        Image.set({ _id: "1", url: photo.uri, deleted: false })
+        setPhotoPath(photo.uri);        
     }
 
-    function pickDate(pickedDate: string){
-        setCurrentTask(prev => ({...prev, closedAt:new Date(pickedDate)}))
-        setShowDatePicker(false)
-    }
 
     function workOrderNumberChange(newWorkOrderNumber:string){
         const workOrderNumber = parseInt(newWorkOrderNumber)
@@ -67,22 +81,68 @@ export default function Task({route, navigation}:{route:any, navigation:any}){
     function navigateExpense(expense:IExpense){
         navigation.navigate('Expense', {expense})
     }
+//Enviando la data a la DB:
+
+    async function savingData(){
+        await DB.create("photoCollection", photoPath);
+        const [photo, setPhoto] = useState();
+        const foto = DB.read("photoCollection","1")
+    }
+
+   
 
     return(
         <>
             { showCamera? 
-                <Camera
-                style={{flex: 1,width:"100%"}}
-                ref={(r) => {
-                    camera = r as Camera
-                }}
+              <Camera
+              style={{ flex: 1, width: "100%" }}
+              ref={(r) => {
+                camera = r as Camera;
+              }}
+            >
+              <View style={{ flex: 1 }}>
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center",marginBottom:50 }}>
+                 <View
+                    style={{
+                      width:"90%",
+                      aspectRatio: 3/4,
+                      borderWidth: 3,
+                      borderColor: "#ffffff",
+                      borderStyle:"dashed",
+                      borderRadius: 25
+                      
+                    }}
+                  />
+                </View>
+                <View
+                  style={{
+                    position: "absolute",
+                    flexDirection: "row",
+                    width: "100%",
+                    justifyContent: "center",
+                    padding: 20,
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  }}
                 >
-                    <View className="absolute flex flex-row w-screen justify-between p-5 inset-x-32 bottom-0">
-                        <View className="flex self-center items-center">
-                            <TouchableOpacity onPress={takePicture} className=' w-16 h-16 rounded-full bg-white'/>
-                        </View>
-                    </View>
-                </Camera>
+                  <View style={{ alignSelf: "center", alignItems: "center" }}>
+                    <TouchableOpacity
+                      onPress={takePicture}
+                      style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: 32,
+                        backgroundColor: "#fff",
+                      }}
+                    />
+                  </View>
+                </View>
+              </View>
+            </Camera>
+            
+            
                 
                 :
             <ScrollView className="bg-gray-300 h-screen pt-4">
@@ -99,22 +159,8 @@ export default function Task({route, navigation}:{route:any, navigation:any}){
 
 
                 <View className={card}>
-                    <Text className={cardTitle}>Seleccionar fecha de cierre</Text>
-                    <Pressable onPress={()=>{setShowDatePicker(true)}}>
-                        <View className="flex flex-row justify-evenly border-t-2 items-center">
-                            <Text className={cardTitle}>{dmyDateString(currentTask.closedAt as Date)}</Text>
-                            <Entypo name="calendar" size={24} color="black" />
-                        </View>
-                    </Pressable>
-                    {
-                        showDatePicker &&
-                        <DatePicker
-                            onSelectedChange={pickDate}
-                            minimumDate={new Date(task.openedAt).toJSON()}
-                            maximumDate={new Date().toJSON()}
-                            mode='calendar'
-                        />
-                    }
+                    <Text className={cardTitle}>Seleccionar fecha de cierre:</Text>
+                <DatePicker />
 
                 </View>
                 <View className={card}>
@@ -160,19 +206,24 @@ export default function Task({route, navigation}:{route:any, navigation:any}){
                     </Pressable>
                 </View>
                 
+                <View className="mb-5">
                 <Pressable className={`${card} w-3/4`} onPress={startCamera}>
-                    <View className="flex flex-row justify-between items-center">
+                    <View className="flex flex-row justify-between items-center" >
                         <Text className={cardTitle}>Foto Ticket / Factura</Text>
-                        <View className='mr-4'>
+                        <View className='mr-4 '>
                             <EvilIcons name="camera" size={32} color="black" />
                         </View>
                     </View>
                 </Pressable>
-
-
+                
+                </View>
+                <View>
+     
+  {photoPath && <Text>Path de la foto: {photoPath}</Text>}
+</View>
             </ScrollView>
             }
-            
+  
         </>
     )
 }

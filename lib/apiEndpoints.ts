@@ -5,6 +5,7 @@ export const authUrl = baseApiUrl + "auth/";
 export const logoutUrl = authUrl + "logout/";
 export const registerUrl = authUrl + "register/";
 export const loggedInUser = authUrl + "user/";
+export const images = baseUrl + "images/";
 const techBase = baseApiUrl + "tech/";
 
 export const tech: any = {

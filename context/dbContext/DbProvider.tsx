@@ -2,7 +2,7 @@ import {useState} from 'react'
 import DbContext from './DbContext'
 import * as apiEndpoints from '../../lib/apiEndpoints'
 //import { ResponseData } from './types'
-import { IActivity, IBranch, IClient, IExpense, ITask, IUser } from '../../models/interfaces'
+import { IActivity, IBranch, IClient, IExpense, IImage, ITask, IUser } from '../../models/interfaces'
 import { useMemo } from 'react'
 import Task from '../../models/Task'
 import Activity from '../../models/Activity'
@@ -13,6 +13,8 @@ import Branch from '../../models/Branch'
 import User from '../../models/User'
 import { TaskStatus } from '../../models/types'
 import { updateTasks } from '../../lib/AppInit'
+import useFileUpload, { UploadItem } from 'react-native-use-file-upload';
+
 
 
 export interface ILoginJson{
@@ -24,7 +26,15 @@ export interface ProviderProps{
     children:JSX.Element | JSX.Element[]
 }
 
+
 const DbProvider = ({children}:ProviderProps) => {
+
+    const { startUpload, abortUpload } = useFileUpload({
+        url: apiEndpoints.images,
+        field: 'image',
+        method: 'POST',
+       });
+    
 
     async function getTasks(){
         //console.log('getting the tasks from db')
@@ -124,6 +134,8 @@ const DbProvider = ({children}:ProviderProps) => {
             Expense.setUnsynched(expense)
         }
     }
+
+    
     
 
 
