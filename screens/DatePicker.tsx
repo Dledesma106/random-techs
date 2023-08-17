@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { View, Button, Platform, StyleSheet } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useState } from 'react'
+import { View, Button, Platform, StyleSheet } from 'react-native'
+import DateTimePicker from '@react-native-community/datetimepicker'
 
 const DatePicker = () => {
-  const [date, setDate] = useState(new Date());
-  const [showPicker, setShowPicker] = useState(false);
+  const [date, setDate] = useState(new Date())
+  const [showPicker, setShowPicker] = useState(false)
 
   const onDateChange = (event: any, selectedDate: Date | undefined) => {
-    const currentDate = selectedDate || date;
-    setShowPicker(Platform.OS === 'ios');
-    setDate(currentDate);
-  };
+    const currentDate = selectedDate ?? date
+    setShowPicker(Platform.OS === 'ios')
+    setDate(currentDate)
+  }
 
   const showDatepicker = () => {
-    setShowPicker(true);
-  };
+    setShowPicker(true)
+  }
 
   return (
     <View style={styles.container}>
@@ -30,20 +30,20 @@ const DatePicker = () => {
         />
       )}
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     backgroundColor: '#f7f7f7',
-    borderRadius:50,
+    borderRadius: 50
   },
   datePicker: {
     backgroundColor: '#f2f2f2',
-    marginTop: 8,
-  },
-});
+    marginTop: 8
+  }
+})
 
-export default DatePicker;
+export default DatePicker
