@@ -78,12 +78,13 @@ const SignIn = ({navigation}:any) => {
             }}
           />
           <Input
-            title='Contraseña'
-            value={form.password}
-            custom={{
-              onChangeText:password => setForm(prev=>({...prev, password}))
-            }}
-          />
+                    title="Contraseña"
+                    value={form.password}
+                    custom={{
+                        secureTextEntry:true,
+                        onChangeText: (password) => setForm((prev) => ({ ...prev, password }))
+                    }}
+                />
           <Button title='Login' action={submit} disabled={disabled}/>
           
           <Text>{message}</Text>
