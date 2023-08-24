@@ -1,10 +1,22 @@
-import mongoose from "mongoose"
+import mongoose from 'mongoose'
 
-export type Frequency =  1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
+export type Frequency = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
 
-export type Month = 'Enero' | 'Febrero' | 'Marzo' | 'Abril' | 'Mayo' | 'Junio' | 'Julio' | 'Agosto' | 'Septiembre' | 'Octubre' | 'Noviembre' | 'Diciembre'
+export type Month =
+	| 'Enero'
+	| 'Febrero'
+	| 'Marzo'
+	| 'Abril'
+	| 'Mayo'
+	| 'Junio'
+	| 'Julio'
+	| 'Agosto'
+	| 'Septiembre'
+	| 'Octubre'
+	| 'Noviembre'
+	| 'Diciembre'
 
-export type ExpenseStatus = 'Enviado' | 'Aprobado' 
+export type ExpenseStatus = 'Enviado' | 'Aprobado'
 
 export type ExpenseType = 'Comida' | 'Combustible' | 'Hospedaje' | 'Insumos' | 'Herramienta'
 
@@ -20,20 +32,33 @@ export type PreventiveStatus = 'Pendiente' | 'Al dia'
 
 export type ID = string | mongoose.Types.ObjectId
 
-export const months:Month[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+export const months: Month[] = [
+	'Enero',
+	'Febrero',
+	'Marzo',
+	'Abril',
+	'Mayo',
+	'Junio',
+	'Julio',
+	'Agosto',
+	'Septiembre',
+	'Octubre',
+	'Noviembre',
+	'Diciembre'
+]
 
-export const frequencies:Frequency[] = [1,2,3,4,5,6,7,8,9,10,11,12]
+export const frequencies: Frequency[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
-export const expenseStatuses:ExpenseStatus[] = ['Enviado', 'Aprobado']
+export const expenseStatuses: ExpenseStatus[] = ['Enviado', 'Aprobado']
 
-export const expenseTypes:ExpenseType[] = ['Combustible', 'Comida', 'Herramienta', 'Hospedaje', 'Insumos']
+export const expenseTypes: ExpenseType[] = ['Combustible', 'Comida', 'Herramienta', 'Hospedaje', 'Insumos']
 
-export const paySources:PaySource[] = ['Reintegro', 'Tarjeta']
+export const paySources: PaySource[] = ['Reintegro', 'Tarjeta']
 
-export const taskStatuses:TaskStatus[] = ['Aprobado', 'Enviado', 'Pendiente', 'Sin asignar']
+export const taskStatuses: TaskStatus[] = ['Aprobado', 'Enviado', 'Pendiente', 'Sin asignar']
 
-export const taskTypes:TaskType[] = ['Preventivo', 'Correctivo', 'Actualizacion', 'Instalacion',  'Desmonte']
+export const taskTypes: TaskType[] = ['Preventivo', 'Correctivo', 'Actualizacion', 'Instalacion', 'Desmonte']
 
-export const roles:Role[] = ['Tecnico' , 'Administrativo Tecnico' , 'Administrativo Contable' , 'Auditor']
+export const roles: Role[] = ['Tecnico', 'Administrativo Tecnico', 'Administrativo Contable', 'Auditor']
 
-export const preventiveStatuses:PreventiveStatus[] = ['Pendiente', 'Al dia']
+export const preventiveStatuses: PreventiveStatus[] = ['Pendiente', 'Al dia']

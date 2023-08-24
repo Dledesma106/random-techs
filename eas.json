@@ -1,11 +1,11 @@
 {
-    "build": {
-      "development": {
-        "distribution": "internal"
-      },
-      "preview": {
-        "distribution": "internal"
-      },
-      "production": {}
-    }
+	"build": {
+		"development": {
+			"distribution": "internal"
+		},
+		"preview": {
+			"distribution": "internal"
+		},
+		"production": {}
+	}
 }
