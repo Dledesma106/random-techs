@@ -3,7 +3,7 @@
 // *Retrieving technician's assigned tasks and activities
 // *Checking db for unsynched entities
 // *sending those entities to the server and updating local entities
-//import AsyncStorage from '@react-native-async-storage/async-storage'
+import AsyncStorage from '@react-native-async-storage/async-storage'                            
 //import * as SecureStore from 'expo-secure-store'
 import fetcher from './fetcher'
 import * as api from './apiEndpoints'
@@ -17,7 +17,7 @@ import Expense from '../models/Expense'
 export default async function appInit(): Promise<void> {
 	//console.log('appInit');
 	//console.log('clearing...');
-	//await AsyncStorage.clear()
+	//  await AsyncStorage.clear()                                               //! PARA LIMPIAR EL ASYNC STORAGE
 	//await SecureStore.deleteItemAsync('User')
 	/* console.log(await AsyncStorage.getItem('Task'));
     console.log(await AsyncStorage.getItem('Branch'));

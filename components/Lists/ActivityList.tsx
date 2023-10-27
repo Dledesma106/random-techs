@@ -33,7 +33,7 @@ export default function ActivityList({ navigation }: { navigation: any }) {
   }
   useEffect(() => {
     getAllActivities()
-  }, [])
+  }, [activities])                                                                 //* Para que actualice cuando se agrega una activity
 
   const card = 'flex flex-col w-11/12 mx-auto my-4 bg-gray-50 rounded-3xl'
 

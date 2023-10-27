@@ -44,23 +44,23 @@ async function createSecureCollection(collection: string): Promise<void> {
 const DB = {
 	create: async <T>(collection: string, object: T) => {
 		try {
-			//console.log('creating...');
+			console.log('creating...');
 			await createCollection(collection)
-			//console.log('checked for null collection');
+			// console.log('checked for null collection');
 
 			const list: T[] = JSON.parse((await AsyncStorage.getItem(collection)) as string)
 			if (!(object as Identified)._id) (object as Identified)._id = new mongoose.Types.ObjectId() //this should give it a mongoose ObjectId if it doesn't have one
 
 			if (!list.find((item) => (item as Identified)._id === (object as Identified)._id)) list.push(object)
 			await AsyncStorage.setItem(collection, JSON.stringify(list))
-			//console.log('List after creating: ',JSON.parse(await AsyncStorage.getItem(collection) as string));
+			// console.log('List after creating: ',JSON.parse(await AsyncStorage.getItem(collection) as string));
 		} catch (e) {
 			console.log(e)
 		}
 	},
 	read: async <T>(collection: string, id: string) => {
 		try {
-			//console.log('reading...');
+			// console.log('reading...');
 
 			await createCollection(collection)
 			const list: T[] = JSON.parse((await AsyncStorage.getItem(collection)) as string)
@@ -73,15 +73,17 @@ const DB = {
 			return null
 		}
 	},
-	update: async <T>(collection: string, object: T) => {
+	update: async <T>(collection: string, object: T) => {                   //* Viene por aca, pero no deberia ir a create en vez de update? 
 		try {
-			//console.log('updating...');
+			console.log('updating...' + (object as Identified)._id); //<------ verifica que el object no tiene id, sale undefined  
 
 			await createCollection(collection)
 			let list: T[] = JSON.parse((await AsyncStorage.getItem(collection)) as string)
-			//console.log('list before update: ', list)
-			list = list.filter((item) => (item as Identified)._id !== (object as Identified)._id)
-			//console.log('list without the element we`re updating: ', list);
+			console.log('list before update: ', list)
+
+			// if (!(object as Identified)._id) (object as Identified)._id = new mongoose.Types.ObjectId()       //* Le asigna un id
+			list = list.filter((item) => (item as Identified)._id !== (object as Identified)._id)          //* Esta linea filtra por id para sacar el elemento que se quiere actualizar
+			 console.log('list without the element we`re updating: ', list);
 
 			list.push(object)
 			//console.log('list after update: ', list);
