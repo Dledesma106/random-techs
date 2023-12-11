@@ -81,59 +81,46 @@ export default function Task({ route, navigation }: { route: any, navigation: an
     }
 
     async function savePicture(photoPath?: string) {
-
         if (photoPath) {
-            // La foto se guarda en el dispositivo primero
-            const photoDevice = await MediaLibrary.createAssetAsync(photoPath)  //* Se guarda la img en el dispositivo (tiene albumId,id, filename, height, width, uri, etc.. )
-
-            // const asset = await MediaLibrary.getAssetInfoAsync(photoDevice);
-            // const uri = asset.uri;
-
+            console.log(photoPath);
+    
+            const photoDevice = await MediaLibrary.createAssetAsync(photoPath);
+    
+            // Crear un Blob directamente desde la imagen
+            const imageBlob = await fetch(photoDevice.uri).then(response => response.blob());
+    
             const formData = new FormData();
-            
-            // const blobImage = await fetch(photoDevice.uri).then(response => response.blob())
-            // console.log(blobImage);
-            
-            // formData.append('image' , blobImage , 'image.jpg')
-          
-
-
-            // setPhoto([...photo, { _id: photoDevice.id, name: photoDevice.filename, deleted: false, url: photoDevice.uri }]); //*  Agrega la photo al array de MAX 3 fotos
-
-            // se guarda el url de esa foto en la base de datos local de la aplicacion
-            // await Image.set({ _id: photoDevice.id, name: photoDevice.filename, deleted: false, url: photoDevice.uri })    //* crea una nueva collection si es que no la hay, si la hay tiene que updatear y agregar la foto 
-
-            const type = "image/" + photoDevice.uri.split('.').pop()
-            formData.append('image', JSON.stringify({
-                uri: photoDevice.uri,
-                type: type,
-                name: "image",
-            }))
-
+    
+            const type = "image/" + photoDevice.uri.split('.').pop();
+    
+            // Agregar el Blob al FormData
+            formData.append('image', imageBlob ,JSON.stringify({
+                uri:photoDevice.uri,
+                type:type,
+                name:"image",
+            }));
+    
             console.log("formData:  ", formData);
-
-
-            // Realiza la solicitud HTTP utilizando Axios
+            console.log("photoDevice: ", photoDevice);
+            console.log("photoDevice_uri: ", photoDevice.uri);
+    
+            // Realizar la solicitud HTTP utilizando Axios
             try {
-                const photoId = await axios.post(`${apiEndpoints.baseApiUrl}/images`, formData, {
+                const response = await axios.post(`${apiEndpoints.baseApiUrl}/images`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
-
                     },
-                })
-                console.log("112 Task=> photoId:", photoId.data);
+                });
+    
+                console.log("Task => photoId:", response.data);
             } catch (error) {
                 console.log(error);
-
             }
-
-
-
-            setPreviewVisible(false)
-            setShowCamera(false)
+    
+            setPreviewVisible(false);
+            setShowCamera(false);
         }
     }
-
 
     function workOrderNumberChange(newWorkOrderNumber: string) {
         const workOrderNumber = parseInt(newWorkOrderNumber)

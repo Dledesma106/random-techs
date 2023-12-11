@@ -1,4 +1,4 @@
-export const baseUrl = 'http://192.168.1.99:3000/'
+export const baseUrl = 'https://ransys-test.vercel.app/'
 //   process.env.BASE_URL ?? 'https://ransys-test.vercel.app/'
 export const baseApiUrl = baseUrl + 'api/'
 export const authUrl = baseApiUrl + 'auth/'
