@@ -66,7 +66,7 @@ export interface ITask {
 	auditor?: IUser
 	activity?: IActivity | types.ID
 	operatorName?: string
-	image?: IImage
+	image: { url: string; _id: string }[]
 	workOrderNumber?: number
 	closedAt?: Date
 	deleted: boolean
