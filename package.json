@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "expo start",
+    "start": "NODE_OPTIONS=--openssl-legacy-provider expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web",
+    "web": "NODE_OPTIONS=--openssl-legacy-provider expo start --web",
     "test": "jest --watchAll"
   },
   "jest": {
@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
+    "@expo/webpack-config": "^0.17.2",
     "@react-native-async-storage/async-storage": "~1.17.3",
     "@react-native-community/datetimepicker": "6.5.2",
     "@react-navigation/bottom-tabs": "^6.0.5",
@@ -24,6 +25,7 @@
     "@types/react-native-modern-datepicker": "^1.0.1",
     "axios": "^1.5.0",
     "bcryptjs": "^2.4.3",
+    "dotenv": "^16.3.1",
     "eslint": "^8.47.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-config-universe": "^12.0.0",
@@ -34,6 +36,7 @@
     "expo-constants": "~14.0.2",
     "expo-dev-client": "~2.0.1",
     "expo-font": "~11.0.1",
+    "expo-image": "^1.5.1",
     "expo-linking": "~3.3.1",
     "expo-media-library": "~15.0.0",
     "expo-secure-store": "~12.0.0",

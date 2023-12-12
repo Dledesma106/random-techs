@@ -1,5 +1,6 @@
-export const baseUrl = 'https://ransys-test.vercel.app/'
-//   process.env.BASE_URL ?? 'https://ransys-test.vercel.app/'
+import Constants from 'expo-constants'
+
+export const baseUrl = Constants.expoConfig?.extra?.API_BASE_URL ?? 'https://ransys-test.vercel.app/'
 export const baseApiUrl = baseUrl + 'api/'
 export const authUrl = baseApiUrl + 'auth/'
 export const logoutUrl = authUrl + 'logout/'
