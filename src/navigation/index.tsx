@@ -9,13 +9,13 @@ import LinkingConfiguration from './LinkingConfiguration';
 import { RootStackParamList, RootTabParamList } from './types';
 
 import FullScreenCameraScreen from '@/screens/FullScreenCamera';
+import RegisterExpenseOnTask from '@/screens/RegisterExpenseOnTask';
 
 import { useUser } from '../hooks/useUser';
 import Home from '../screens/Home';
 import Login from '../screens/Login';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import RegisterExpense from '../screens/RegisterExpense';
-import RegisterExpenseOnTask from '../screens/RegisterExpenseOnTask/RegisterExpenseOnTask';
 import RegisterTask from '../screens/RegisterTask';
 import Task from '../screens/Task';
 
