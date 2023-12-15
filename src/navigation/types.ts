@@ -20,6 +20,7 @@ export type RootStackParamList = {
     Expense: {
         expense: IExpense;
     };
+    FullScreenCamera: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> = StackScreenProps<
@@ -31,6 +32,8 @@ export type HomeTabScreenProp = CompositeScreenProps<
     BottomTabScreenProps<RootTabParamList, 'Main'>,
     RootStackScreenProps<'Home'>
 >;
+
+export type FullScreenCameraProps = RootStackScreenProps<'FullScreenCamera'>;
 
 export type TaskScreenRouteProp = NativeStackScreenProps<RootStackParamList, 'Task'>;
 export type RegisterExpenseOnTaskScreenRouteProp = NativeStackScreenProps<

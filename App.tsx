@@ -11,9 +11,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import DbProvider from './src/context/dbContext/DbProvider';
 import UserProvider from './src/context/userContext/UserProvider';
 import { useBcryptConfig } from './src/hooks/useBcryptConfig';
-import useCachedResources from './src/hooks/useCachedResources';
 import useColorScheme from './src/hooks/useColorScheme';
 import Navigation from './src/navigation';
+
+import useCachedResources from '@/hooks/useCachedResources';
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -28,7 +29,8 @@ const asyncStoragePersister = createAsyncStoragePersister({
 });
 
 export default function App() {
-    const isLoadingComplete = useCachedResources();
+    const appIsReady = useCachedResources();
+
     const colorScheme = useColorScheme();
     const configureBcrypt = useBcryptConfig();
 
@@ -42,28 +44,28 @@ export default function App() {
         });
     });
 
-    if (!isLoadingComplete) {
+    if (!appIsReady) {
         return null;
-    } else {
-        return (
-            <PersistQueryClientProvider
-                client={queryClient}
-                persistOptions={{ persister: asyncStoragePersister }}
-                onSuccess={() =>
-                    queryClient
-                        .resumePausedMutations()
-                        .then(() => queryClient.invalidateQueries())
-                }
-            >
-                <SafeAreaProvider>
-                    <DbProvider>
-                        <UserProvider>
-                            <Navigation colorScheme={colorScheme} />
-                            <StatusBar />
-                        </UserProvider>
-                    </DbProvider>
-                </SafeAreaProvider>
-            </PersistQueryClientProvider>
-        );
     }
+
+    return (
+        <PersistQueryClientProvider
+            client={queryClient}
+            persistOptions={{ persister: asyncStoragePersister }}
+            onSuccess={() =>
+                queryClient
+                    .resumePausedMutations()
+                    .then(() => queryClient.invalidateQueries())
+            }
+        >
+            <SafeAreaProvider>
+                <DbProvider>
+                    <UserProvider>
+                        <Navigation colorScheme={colorScheme} />
+                        <StatusBar />
+                    </UserProvider>
+                </DbProvider>
+            </SafeAreaProvider>
+        </PersistQueryClientProvider>
+    );
 }
