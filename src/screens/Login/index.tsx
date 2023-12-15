@@ -25,6 +25,13 @@ const LoginScreen = ({ navigation }: Props) => {
         formState: { errors },
     } = useForm<LoginForm>({
         reValidateMode: 'onSubmit',
+        defaultValues:
+            process.env.NODE_ENV === 'development'
+                ? {
+                      email: 'acosta.enzo@hotmail.com',
+                      password: '123qweasd',
+                  }
+                : undefined,
     });
 
     const onSubmit: SubmitHandler<LoginForm> = (data) => {
@@ -39,7 +46,7 @@ const LoginScreen = ({ navigation }: Props) => {
 
     return (
         <View className="flex-1 justify-center items-center px-4 bg-gray-100">
-            <Text className="text-2xl font-bold mb-4 text-gray-800">Login</Text>
+            <Text className="text-2xl font-bold mb-4 text-gray-800">Random Tech</Text>
 
             <View className="w-full mb-4">
                 <Text className="mb-2 text-gray-800">Email</Text>
