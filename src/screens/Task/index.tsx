@@ -1,7 +1,6 @@
 import { EvilIcons, AntDesign } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { Pressable, Text, View, ScrollView, Image, Dimensions } from 'react-native';
-import { DeviceEventEmitter } from 'react-native';
 
 import { useUploadImageToTaskMutation } from './mutations';
 
@@ -14,6 +13,7 @@ import { useDb } from '../../hooks/useDB';
 import { dmyDateString } from '../../lib/utils';
 import { IClient, IExpense, ITask } from '../../models/interfaces';
 import DatePicker from '../DatePicker';
+import { addFullScreenCameraListener } from '../FullScreenCamera';
 
 const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     const { task } = route.params;
@@ -51,10 +51,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     };
 
     const goToCameraScreen = () => {
-        DeviceEventEmitter.addListener('event.testEvent', (uri: string) => {
-            addPictureToTask(uri);
-        });
-
+        addFullScreenCameraListener(addPictureToTask);
         navigation.navigate('FullScreenCamera');
     };
 

@@ -14,6 +14,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import useCamera from '@/hooks/useCamera';
 import { FullScreenCameraProps } from '@/navigation/types';
 
+const EVENT_NAME = 'fullscreen-camera-photo-taken-event';
+
+export const addFullScreenCameraListener = (callback: (uri: string) => void) => {
+    DeviceEventEmitter.addListener(EVENT_NAME, callback);
+};
+
+const removeFullScreenCameraListener = () => {
+    DeviceEventEmitter.removeAllListeners(EVENT_NAME);
+};
+
+const emitFullScreenCameraEvent = (uri: string) => {
+    DeviceEventEmitter.emit(EVENT_NAME, uri);
+};
+
 const FullScreenCameraScreen = ({ navigation }: FullScreenCameraProps) => {
     const useCameraResult = useCamera();
     const [photoURI, setPhotoURI] = useState<string | null>(null);
@@ -25,7 +39,7 @@ const FullScreenCameraScreen = ({ navigation }: FullScreenCameraProps) => {
 
     useEffect(() => {
         return () => {
-            DeviceEventEmitter.removeAllListeners('event. testEvent');
+            removeFullScreenCameraListener();
         };
     }, []);
 
@@ -39,7 +53,7 @@ const FullScreenCameraScreen = ({ navigation }: FullScreenCameraProps) => {
     };
 
     const onPhotoTaken = (uri: string) => {
-        DeviceEventEmitter.emit('event.testEvent', uri);
+        emitFullScreenCameraEvent(uri);
         navigation.goBack();
     };
 
