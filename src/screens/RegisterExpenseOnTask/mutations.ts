@@ -3,14 +3,16 @@ import { AxiosError } from 'axios';
 
 import { appAxios } from '@/api/axios';
 
-type UseUploadImageToTaskMutation = unknown;
-type UseUploadImageToTaskMutationVariables = {
-    taskId: string;
+type UseUploadImageToExpenseMutation = unknown;
+type UseUploadImageToExpenseMutationVariables = {
+    expenseId: string;
     localURI: string;
 };
 
-export const postImageToTask = async (data: UseUploadImageToTaskMutationVariables) => {
-    const { localURI, taskId } = data;
+export const postImageToExpense = async (
+    data: UseUploadImageToExpenseMutationVariables,
+) => {
+    const { localURI, expenseId } = data;
 
     const photoName = localURI.split('/').pop();
     if (!photoName) {
@@ -24,8 +26,8 @@ export const postImageToTask = async (data: UseUploadImageToTaskMutationVariable
         type: 'image/jpeg',
     });
 
-    const response = await appAxios.post<UseUploadImageToTaskMutation>(
-        `/images?taskId=${taskId}`,
+    const response = await appAxios.post<UseUploadImageToExpenseMutation>(
+        `/images?expenseId=${expenseId}`,
         data.localURI,
         {
             headers: {
@@ -37,14 +39,14 @@ export const postImageToTask = async (data: UseUploadImageToTaskMutationVariable
     return response.data;
 };
 
-export const useUploadImageToTaskMutation = () => {
+export const useUploadImageToExpenseMutation = () => {
     const client = useQueryClient();
 
     return useMutation<
-        UseUploadImageToTaskMutation,
+        UseUploadImageToExpenseMutation,
         AxiosError,
-        UseUploadImageToTaskMutationVariables
+        UseUploadImageToExpenseMutationVariables
     >({
-        mutationFn: postImageToTask,
+        mutationFn: postImageToExpense,
     });
 };

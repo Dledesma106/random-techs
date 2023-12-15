@@ -4,7 +4,6 @@ import { Pressable, Text, View, ScrollView, Image, Dimensions } from 'react-nati
 
 import { useUploadImageToTaskMutation } from './mutations';
 
-import useCamera from '@/hooks/useCamera';
 import { TaskScreenRouteProp } from '@/navigation/types';
 
 import { card, cardItem, cardTitle } from '../../../styles';
@@ -18,8 +17,6 @@ import { addFullScreenCameraListener } from '../FullScreenCamera';
 const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     const { task } = route.params;
     const { getTaskExpenses } = useDb();
-
-    const cameraResult = useCamera();
     const uploadImageMutation = useUploadImageToTaskMutation();
 
     const [taskExpenses, setTaskExpenses] = useState<IExpense[]>([]);
@@ -37,17 +34,10 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     }, []);
 
     const addPictureToTask = (uri: string) => {
-        uploadImageMutation.mutate(
-            {
-                taskId: task._id,
-                localURI: uri,
-            },
-            {
-                onSuccess: () => {
-                    cameraResult.deactivate();
-                },
-            },
-        );
+        uploadImageMutation.mutate({
+            taskId: task._id,
+            localURI: uri,
+        });
     };
 
     const goToCameraScreen = () => {
@@ -178,16 +168,18 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                 </View>
             )}
 
-            <View className="mb-5">
-                <Pressable className={`${card} w-3/4`} onPress={goToCameraScreen}>
-                    <View className="flex flex-row justify-between items-center">
-                        <Text className={cardTitle}>Foto Ticket / Factura</Text>
-                        <View className="mr-4 ">
-                            <EvilIcons name="camera" size={32} color="black" />
+            {task.image.length >= 3 && (
+                <View className="mb-5">
+                    <Pressable className={`${card} w-3/4`} onPress={goToCameraScreen}>
+                        <View className="flex flex-row justify-between items-center">
+                            <Text className={cardTitle}>Foto Ticket / Factura</Text>
+                            <View className="mr-4 ">
+                                <EvilIcons name="camera" size={32} color="black" />
+                            </View>
                         </View>
-                    </View>
-                </Pressable>
-            </View>
+                    </Pressable>
+                </View>
+            )}
         </ScrollView>
     );
 };

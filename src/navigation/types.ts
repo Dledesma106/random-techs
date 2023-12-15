@@ -16,6 +16,7 @@ export type RootStackParamList = {
     };
     RegisterExpenseOnTask: {
         task: ITask;
+        expense: IExpense;
     };
     Expense: {
         expense: IExpense;

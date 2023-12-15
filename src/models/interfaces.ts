@@ -73,7 +73,7 @@ export interface ITask {
 }
 
 export interface IExpense {
-    _id?: types.ID;
+    _id: types.ID;
     expenseType: types.ExpenseType;
     paySource: types.PaySource;
     status: types.ExpenseStatus;
