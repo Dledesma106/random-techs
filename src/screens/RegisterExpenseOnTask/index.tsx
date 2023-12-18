@@ -1,138 +1,229 @@
-import { EvilIcons, AntDesign } from '@expo/vector-icons';
-import { useState } from 'react';
-import { Text, View, ScrollView, Pressable } from 'react-native';
+import { AntDesign, EvilIcons } from '@expo/vector-icons';
+import clsx from 'clsx';
+import { useEffect } from 'react';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import {
+    Text,
+    View,
+    ScrollView,
+    Pressable,
+    TouchableOpacity,
+    TextInput,
+    Image,
+    ActivityIndicator,
+} from 'react-native';
+import Toast from 'react-native-root-toast';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useUploadImageToExpenseMutation } from './mutations';
+import RHFDropdown from './Dropdown';
+import { useCreateTaskExpenseMutation } from './mutations';
 
+import { ExpenseType, PaySource, expenseTypes, paySources } from '@/models/types';
 import { RegisterExpenseOnTaskScreenRouteProp } from '@/navigation/types';
 import { addFullScreenCameraListener } from '@/screens/FullScreenCamera';
 
-import { card, cardItem, cardTitle } from '../../../styles';
-import { dmyDateString } from '../../lib/utils';
-import { ExpenseType, expenseTypes, PaySource, paySources } from '../../models/types';
+type FormValues = {
+    amount: string;
+    paySource: PaySource;
+    expenseType: ExpenseType;
+    imageURI?: string;
+};
 
 const RegisterExpenseOnTask = ({
     route,
     navigation,
 }: RegisterExpenseOnTaskScreenRouteProp) => {
-    const { task, expense } = route.params;
-    const [showTypes, setShowTypes] = useState<boolean>(false);
-    const [expenseType, setExpenseType] = useState<ExpenseType>(expenseTypes[0]);
-    const [showSources, setShowSources] = useState<boolean>(false);
-    const [paySource, setPaySource] = useState<PaySource>(paySources[0]);
-    const uploadImageToExpense = useUploadImageToExpenseMutation();
-    function selectType(type: ExpenseType) {
-        setExpenseType(type);
-        setShowTypes(false);
-    }
+    const { taskId } = route.params;
 
-    function selectSource(source: PaySource) {
-        setPaySource(source);
-        setShowSources(false);
-    }
+    const {
+        control,
+        setValue,
+        watch,
+        handleSubmit,
+        formState: { errors },
+        reset,
+    } = useForm<FormValues>();
 
-    const addPictureToTask = (uri: string) => {
-        uploadImageToExpense.mutate({
-            expenseId: expense._id,
-            localURI: uri,
-        });
+    useEffect(() => {
+        return () => {
+            reset();
+        };
+    }, [taskId]);
+
+    const createExpenseMutation = useCreateTaskExpenseMutation();
+
+    const createExpense: SubmitHandler<FormValues> = (data) => {
+        if (!data.imageURI) {
+            Toast.show('La imagen es requerida', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+            });
+
+            return;
+        }
+
+        createExpenseMutation.mutate(
+            {
+                taskId,
+                amount: parseFloat(data.amount),
+                paySource: data.paySource,
+                expenseType: data.expenseType,
+                imageURI: data.imageURI,
+            },
+            {
+                onSuccess: () => {
+                    Toast.show('Gasto registrado', {
+                        duration: Toast.durations.LONG,
+                        position: Toast.positions.BOTTOM,
+                    });
+
+                    navigation.goBack();
+                },
+                onError: () => {
+                    Toast.show('Ocurrió un error', {
+                        duration: Toast.durations.LONG,
+                        position: Toast.positions.BOTTOM,
+                    });
+                },
+            },
+        );
     };
 
     const goToCameraScreen = () => {
-        addFullScreenCameraListener(addPictureToTask);
+        addFullScreenCameraListener((uri) => {
+            setValue('imageURI', uri);
+        });
         navigation.navigate('FullScreenCamera');
     };
 
+    const imageURI = watch('imageURI');
+
     return (
-        <ScrollView className="bg-gray-300 h-screen py-4">
-            <Pressable
-                className="rounded-full bg-gray-50 p-4 ml-4 mb-4 w-14"
-                onPress={navigation.goBack}
-            >
-                <AntDesign name="arrowleft" size={24} color="black" />
-            </Pressable>
+        <SafeAreaView className="flex-1">
+            <View className="flex-1 bg-white">
+                <View className="flex flex-row items-center justify-between px-4 py-2 border-b border-gray-200">
+                    <TouchableOpacity
+                        className={clsx(createExpenseMutation.isPending && 'opacity-30')}
+                        disabled={createExpenseMutation.isPending}
+                        onPress={() => navigation.goBack()}
+                    >
+                        <AntDesign name="arrowleft" size={24} color="black" />
+                    </TouchableOpacity>
 
-            <View className={card}>
-                <Text className={cardTitle}>Fecha de gasto</Text>
-                <Text className={cardItem}>{`${
-                    task.closedAt
-                        ? dmyDateString(task.closedAt)
-                        : 'Aun no hay fecha de cierre seleccionada'
-                }`}</Text>
-            </View>
+                    <TouchableOpacity
+                        onPress={handleSubmit(createExpense)}
+                        className="font-bold"
+                    >
+                        <View className="rounded bg-black relative flex">
+                            <Text
+                                className={clsx(
+                                    'font-bold text-white text-xs p-2',
+                                    createExpenseMutation.isPending && 'opacity-0',
+                                )}
+                            >
+                                Registrar gasto
+                            </Text>
 
-            <View className={`${card} `}>
-                <Pressable
-                    className="flex flex-row justify-between items-center"
-                    onPress={() => setShowTypes(true)}
-                >
-                    <Text className={cardTitle}>Tipo de gasto</Text>
-                    <View className="pr-4">
-                        <AntDesign name="down" size={24} color="black" />
-                    </View>
-                </Pressable>
-                {!showTypes && <Text className={cardItem}>{expenseType}</Text>}
-                {showTypes &&
-                    expenseTypes.map((type, index) => {
-                        return (
-                            <Pressable key={index} onPress={() => selectType(type)}>
-                                <Text className={cardItem}>{type}</Text>
-                            </Pressable>
-                        );
-                    })}
-            </View>
-
-            <View className={`${card} `}>
-                <Pressable
-                    className="flex flex-row justify-between items-center"
-                    onPress={() => setShowSources(true)}
-                >
-                    <Text className={cardTitle}>Fuente de pago</Text>
-                    <View className="pr-4">
-                        <AntDesign name="down" size={24} color="black" />
-                    </View>
-                </Pressable>
-                {!showSources && <Text className={cardItem}>{paySource}</Text>}
-                {showSources &&
-                    paySources.map((source, index) => {
-                        return (
-                            <Pressable key={index} onPress={() => selectSource(source)}>
-                                <Text className={cardItem}>{source}</Text>
-                            </Pressable>
-                        );
-                    })}
-            </View>
-
-            <Pressable className={`${card} w-3/4`} onPress={goToCameraScreen}>
-                <View className="flex flex-row justify-between items-center">
-                    <Text className={cardTitle}>Foto Ticket / Factura</Text>
-                    <View className="mr-4">
-                        <EvilIcons name="camera" size={32} color="black" />
-                    </View>
+                            {createExpenseMutation.isPending && (
+                                <View className="absolute inset-0 w-full h-full flex items-center justify-center flex-1">
+                                    <ActivityIndicator size="small" color="#FFF" />
+                                </View>
+                            )}
+                        </View>
+                    </TouchableOpacity>
                 </View>
-            </Pressable>
-        </ScrollView>
+
+                <ScrollView className="py-4 flex-1">
+                    <View className="w-full mb-4 px-4">
+                        <Text className="mb-2 text-gray-800 font-bold">Monto</Text>
+                        <Controller
+                            control={control}
+                            rules={{
+                                required: 'El monto es requerido',
+                                pattern: {
+                                    value: /^[0-9]+$/,
+                                    message: 'El monto no es válido',
+                                },
+                            }}
+                            render={({ field: { onChange, onBlur, value } }) => (
+                                <TextInput
+                                    onBlur={onBlur}
+                                    onChangeText={onChange}
+                                    value={value}
+                                    keyboardType="number-pad"
+                                    placeholder="Monto"
+                                    className="bg-white rounded-lg px-4 py-3 border border-gray-300"
+                                />
+                            )}
+                            name="amount"
+                        />
+                        {errors.amount && (
+                            <Text className="text-red-500 mt-1">
+                                {errors.amount.message}
+                            </Text>
+                        )}
+                    </View>
+
+                    <View className="px-4">
+                        <RHFDropdown
+                            control={control}
+                            name="expenseType"
+                            items={expenseTypes.map((type) => ({
+                                label: type,
+                                value: type,
+                            }))}
+                            label="Tipo de gasto"
+                        />
+
+                        <RHFDropdown
+                            control={control}
+                            name="paySource"
+                            items={paySources.map((type) => ({
+                                label: type,
+                                value: type,
+                            }))}
+                            label="Tipo de pago"
+                        />
+                    </View>
+
+                    {imageURI && (
+                        <View className="px-4 pt-4">
+                            <Pressable
+                                onPress={() => setValue('imageURI', undefined)}
+                                className="flex flex-row items-center justify-between py-1"
+                            >
+                                <Text className="text-gray-600">Imagen</Text>
+                                <AntDesign name="close" size={14} color="gray" />
+                            </Pressable>
+
+                            <View className="flex-1">
+                                <Image
+                                    source={{ uri: imageURI }}
+                                    style={{
+                                        borderRadius: 6,
+                                        aspectRatio: 9 / 16,
+                                    }}
+                                />
+                            </View>
+                        </View>
+                    )}
+
+                    <View className="pt-8 px-4">
+                        <TouchableOpacity
+                            onPress={goToCameraScreen}
+                            className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
+                        >
+                            <Text className="font-semibold text-white">
+                                Añadir Imagen
+                            </Text>
+
+                            <EvilIcons name="camera" size={22} color="white" />
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </View>
+        </SafeAreaView>
     );
 };
-
-/* function TypeItem({
-	expenseType,
-	setExpenseType
-}: {
-	expenseType: ExpenseType
-	setExpenseType: (expenseType: ExpenseType) => void
-}) {
-	function navigate() {
-		setExpenseType(expenseType)
-	}
-
-	return (
-		<>
-			<Pressable onPress={navigate}>
-				<Text className={cardItem}>{expenseType}</Text>
-			</Pressable>
-		</>
-	)
-}*/
 
 export default RegisterExpenseOnTask;

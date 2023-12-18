@@ -1,9 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
+import { TASK_BY_ID_QUERY_KEY, TaskByIdQueryData } from './queries';
+
 import { appAxios } from '@/api/axios';
 
-type UseUploadImageToTaskMutation = unknown;
+type UseUploadImageToTaskMutation = string;
 type UseUploadImageToTaskMutationVariables = {
     taskId: string;
     localURI: string;
@@ -46,5 +48,31 @@ export const useUploadImageToTaskMutation = () => {
         UseUploadImageToTaskMutationVariables
     >({
         mutationFn: postImageToTask,
+        onSuccess: (data, variables) => {
+            if (!data) {
+                return;
+            }
+
+            client.setQueryData<TaskByIdQueryData>(
+                TASK_BY_ID_QUERY_KEY(variables.taskId),
+                (oldData) => {
+                    if (!oldData) {
+                        return oldData;
+                    }
+
+                    const newData: TaskByIdQueryData = {
+                        ...oldData,
+                        images: [
+                            ...oldData.images,
+                            {
+                                url: variables.localURI,
+                            },
+                        ],
+                    };
+
+                    return newData;
+                },
+            );
+        },
     });
 };

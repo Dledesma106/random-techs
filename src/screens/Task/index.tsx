@@ -1,186 +1,207 @@
-import { EvilIcons, AntDesign } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
-import { Pressable, Text, View, ScrollView, Image, Dimensions } from 'react-native';
+import { AntDesign, EvilIcons } from '@expo/vector-icons';
+import {
+    Text,
+    View,
+    ScrollView,
+    Image,
+    TextInput,
+    RefreshControl,
+    ActivityIndicator,
+} from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import { useUploadImageToTaskMutation } from './mutations';
+import { useTaskByIdQuery } from './queries';
 
 import { TaskScreenRouteProp } from '@/navigation/types';
 
-import { card, cardItem, cardTitle } from '../../../styles';
-import Input from '../../components/Forms/Input';
-import { useDb } from '../../hooks/useDB';
 import { dmyDateString } from '../../lib/utils';
-import { IClient, IExpense, ITask } from '../../models/interfaces';
-import DatePicker from '../DatePicker';
 import { addFullScreenCameraListener } from '../FullScreenCamera';
 
 const Task = ({ route, navigation }: TaskScreenRouteProp) => {
-    const { task } = route.params;
-    const { getTaskExpenses } = useDb();
+    const { id } = route.params;
+    const taskQueryResult = useTaskByIdQuery(id);
+
     const uploadImageMutation = useUploadImageToTaskMutation();
-
-    const [taskExpenses, setTaskExpenses] = useState<IExpense[]>([]);
-    const [currentTask, setCurrentTask] = useState<ITask>({
-        ...task,
-        closedAt: new Date(),
-        workOrderNumber: NaN,
-    });
-
-    useEffect(() => {
-        async function getExpenses() {
-            setTaskExpenses(await getTaskExpenses(task._id));
-        }
-        getExpenses();
-    }, []);
 
     const addPictureToTask = (uri: string) => {
         uploadImageMutation.mutate({
-            taskId: task._id,
+            taskId: id,
             localURI: uri,
         });
     };
 
-    const goToCameraScreen = () => {
+    const navigateToCameraScreen = () => {
         addFullScreenCameraListener(addPictureToTask);
         navigation.navigate('FullScreenCamera');
     };
 
-    function workOrderNumberChange(newWorkOrderNumber: string) {
-        const workOrderNumber = parseInt(newWorkOrderNumber);
-        setCurrentTask((prev) => ({ ...prev, workOrderNumber }));
+    function navigateToRegisterExpense() {
+        navigation.navigate('RegisterExpenseOnTask', { taskId: id });
     }
 
-    function registerExpense() {
-        navigation.navigate('RegisterExpenseOnTask', { task: currentTask });
+    function navigateToExpense(id: string) {
+        navigation.navigate('ExpenseOnTask', { expenseId: id });
     }
 
-    function navigateExpense(expense: IExpense) {
-        navigation.navigate('Expense', { expense });
+    if (taskQueryResult.data && !Array.isArray(taskQueryResult.data)) {
+        const task = taskQueryResult.data;
+
+        return (
+            <ScrollView
+                refreshControl={
+                    <RefreshControl
+                        refreshing={taskQueryResult.isPending}
+                        onRefresh={taskQueryResult.refetch}
+                    />
+                }
+                className="bg-white h-screen"
+            >
+                {taskQueryResult.isPending ? <ActivityIndicator /> : null}
+
+                <View>
+                    <View className="px-4 pt-4">
+                        <Text className="text-gray-600">{task.business.name}</Text>
+
+                        <Text className="text-xl font-bold">
+                            {task.branch.client.name}
+                        </Text>
+
+                        <Text className="text-gray-600">
+                            Sucursal: {task.branch.number} - Asignado:{' '}
+                            {dmyDateString(new Date(task.openedAt))}
+                        </Text>
+
+                        <View className="pt-4">
+                            <Text className="font-semibold mb-1.5">Descripción</Text>
+                            <Text className="text-gray-600">
+                                {task.taskType} | {task.description}
+                            </Text>
+                        </View>
+
+                        <View className="pt-4">
+                            <Text className="font-semibold mb-1.5">Fecha de cierre</Text>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    // TODO
+                                }}
+                            >
+                                <TextInput
+                                    editable={false}
+                                    // value={date.toLocaleDateString()}
+                                    placeholder="Seleccionar fecha"
+                                    className="p-4 rounded border border-gray-200"
+                                />
+                            </TouchableOpacity>
+
+                            {/* <DateTimePicker
+                                accentColor="black"
+                                textColor="black"
+                                value={date}
+                                mode="date"
+                                display="default"
+                                onChange={() => {
+                                    // TODO
+                                }}
+                            /> */}
+                        </View>
+
+                        <View className="pt-4">
+                            <Text className="font-semibold mb-1.5">Orden de Trabajo</Text>
+                            <TextInput
+                                className="p-4 rounded border border-gray-200"
+                                onChangeText={() => {
+                                    // TODO
+                                }}
+                                value={task.workOrderNumber?.toString() || ''}
+                                placeholder="N° de orden..."
+                                keyboardType="numeric"
+                            />
+                        </View>
+
+                        <View className="pt-4">
+                            <Text className="font-semibold mb-1.5">Gastos</Text>
+
+                            <View className="space-y-2">
+                                {task.expenses.map((expense, index) => (
+                                    <TouchableOpacity
+                                        key={expense._id}
+                                        onPress={() => navigateToExpense(expense._id)}
+                                        className="flex flex-row items-center justify-between py-4 border px-4 rounded-lg border-gray-200"
+                                    >
+                                        <Text className="text-gray-600">
+                                            Gasto {index + 1}
+                                        </Text>
+
+                                        <AntDesign name="right" size={14} color="gray" />
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+
+                            <TouchableOpacity
+                                onPress={navigateToRegisterExpense}
+                                className="flex flex-row items-center justify-between py-1 bg-black rounded p-4 mt-2"
+                            >
+                                <Text className="text-white font-bold">
+                                    Agregar gasto
+                                </Text>
+                                <AntDesign name="plus" size={14} color="gray" />
+                            </TouchableOpacity>
+                        </View>
+
+                        {task.images.length > 0 && (
+                            <View className="pt-4 pb-4">
+                                <Text className="font-semibold mb-1.5">Imágenes</Text>
+
+                                <View className="flex flex-row space-x-4">
+                                    {task.images.map((image, index) => (
+                                        <View key={index} className="flex-1">
+                                            <Image
+                                                className="bg-gray-200"
+                                                source={{ uri: image.url }}
+                                                style={{
+                                                    borderRadius: 6,
+                                                    aspectRatio: 9 / 16,
+                                                }}
+                                            />
+                                        </View>
+                                    ))}
+                                </View>
+                            </View>
+                        )}
+
+                        {task.images.length < 3 && (
+                            <View className="pt-4 pb-4">
+                                <TouchableOpacity
+                                    onPress={navigateToCameraScreen}
+                                    className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
+                                >
+                                    <Text className="font-semibold text-white">
+                                        Añadir Imagen
+                                    </Text>
+
+                                    <EvilIcons name="camera" size={22} color="white" />
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
+                </View>
+            </ScrollView>
+        );
     }
 
-    const { width, height } = Dimensions.get('screen');
-    const fullScreenImageStyle = {
-        width: width / 2,
-        height: height / 2,
-    };
+    if (taskQueryResult.error) {
+        return (
+            <View>
+                <Text>Error</Text>
+            </View>
+        );
+    }
 
     return (
-        <ScrollView className="bg-gray-300 h-screen pt-4">
-            <View className={`${card}`}>
-                <Text className={cardTitle}>Empresa: {task.business.name}</Text>
-                <Text className={cardItem}>
-                    Client: {(task.branch.client as IClient).name}
-                </Text>
-                <Text className={cardItem}>Sucursal: {task.branch.number}</Text>
-                <Text className={cardItem}>
-                    Asignado el dia: {dmyDateString(new Date(task.openedAt))}
-                </Text>
-            </View>
-            <View className={`${card}`}>
-                <Text className={cardTitle}>Descripcion</Text>
-                <Text className={cardItem}>
-                    {task.taskType} - {task.description}
-                </Text>
-            </View>
-
-            <View className={card}>
-                <Text className={cardTitle}>Seleccionar fecha de cierre:</Text>
-                <DatePicker />
-            </View>
-            <View className={card}>
-                <Input
-                    title="Numero de Orden de Trabajo"
-                    value={
-                        (currentTask.workOrderNumber as number).toString() === 'NaN'
-                            ? ''
-                            : (currentTask.workOrderNumber as number).toString()
-                    }
-                    titleStyle={cardTitle}
-                    inputStyle={cardItem}
-                    custom={{
-                        onChangeText: workOrderNumberChange,
-                        keyboardType: 'numeric',
-                        placeholder: 'Numero de orden de trabajo...',
-                    }}
-                />
-            </View>
-
-            <View className={card}>
-                {taskExpenses.length > 0 && (
-                    <>
-                        <Text className={cardTitle}>Gastos registrados</Text>
-                        {taskExpenses.map((expense) => (
-                            <Pressable
-                                onPress={() => {
-                                    navigateExpense(expense);
-                                }}
-                            >
-                                <View
-                                    className={`${cardItem} flex flex-row items-center justify-between`}
-                                >
-                                    <Text className="text-lg">un gasto</Text>
-                                    <View className="text-lg">
-                                        <AntDesign name="right" size={24} color="black" />
-                                    </View>
-                                </View>
-                            </Pressable>
-                        ))}
-                    </>
-                )}
-                <Pressable onPress={registerExpense}>
-                    <View
-                        className={`${
-                            taskExpenses.length > 0 ? cardItem : 'p-4'
-                        } flex flex-row items-center justify-between`}
-                    >
-                        <Text className="text-lg">Registrar un gasto</Text>
-                        <View className="text-lg">
-                            <AntDesign name="right" size={24} color="black" />
-                        </View>
-                    </View>
-                </Pressable>
-            </View>
-
-            {currentTask.image.length > 0 && (
-                <View className="mb-5">
-                    <Text className={cardTitle}>Foto Ticket / Factura</Text>
-                    <View className="flex flex-col space-y-4 justify-between items-center">
-                        {currentTask.image.map((e) => (
-                            <View
-                                style={{
-                                    borderWidth: 1,
-                                    borderColor: 'black',
-                                    padding: 10,
-                                }}
-                                key={e._id}
-                            >
-                                <Image
-                                    source={{
-                                        uri: e.url,
-                                        width: 1080,
-                                        height: 1920,
-                                    }}
-                                    style={fullScreenImageStyle}
-                                />
-                            </View>
-                        ))}
-                    </View>
-                </View>
-            )}
-
-            {task.image.length >= 3 && (
-                <View className="mb-5">
-                    <Pressable className={`${card} w-3/4`} onPress={goToCameraScreen}>
-                        <View className="flex flex-row justify-between items-center">
-                            <Text className={cardTitle}>Foto Ticket / Factura</Text>
-                            <View className="mr-4 ">
-                                <EvilIcons name="camera" size={32} color="black" />
-                            </View>
-                        </View>
-                    </Pressable>
-                </View>
-            )}
-        </ScrollView>
+        <View>
+            <Text>Cargando...</Text>
+        </View>
     );
 };
 

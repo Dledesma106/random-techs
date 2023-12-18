@@ -6,7 +6,7 @@ const DatePicker = () => {
     const [date, setDate] = useState(new Date());
     const [showPicker, setShowPicker] = useState(false);
 
-    const onDateChange = (event: any, selectedDate: Date | undefined) => {
+    const onDateChange = (event: unknown, selectedDate: Date | undefined) => {
         const currentDate = selectedDate ?? date;
         setShowPicker(Platform.OS === 'ios');
         setDate(currentDate);

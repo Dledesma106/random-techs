@@ -14,25 +14,38 @@ export type Month =
     | 'Noviembre'
     | 'Diciembre';
 
-export type ExpenseStatus = 'Enviado' | 'Aprobado';
+export enum ExpenseStatus {
+    Enviado = 'Enviado',
+    Aprobado = 'Aprobado',
+}
 
-export type ExpenseType =
-    | 'Comida'
-    | 'Combustible'
-    | 'Hospedaje'
-    | 'Insumos'
-    | 'Herramienta';
+export enum ExpenseType {
+    Comida = 'Comida',
+    Combustible = 'Combustible',
+    Hospedaje = 'Hospedaje',
+    Insumos = 'Insumos',
+    Herramienta = 'Herramienta',
+}
 
-export type PaySource = 'Reintegro' | 'Tarjeta';
+export enum PaySource {
+    Reintegro = 'Reintegro',
+    Tarjeta = 'Tarjeta',
+}
 
-export type TaskStatus = 'Sin asignar' | 'Pendiente' | 'Enviado' | 'Aprobado';
+export enum TaskStatus {
+    SinAsignar = 'Sin asignar',
+    Pendiente = 'Pendiente',
+    Enviado = 'Enviado',
+    Aprobado = 'Aprobado',
+}
 
-export type TaskType =
-    | 'Preventivo'
-    | 'Correctivo'
-    | 'Instalacion'
-    | 'Desmonte'
-    | 'Actualizacion';
+export enum TaskType {
+    Preventivo = 'Preventivo',
+    Correctivo = 'Correctivo',
+    Instalacion = 'Instalacion',
+    Desmonte = 'Desmonte',
+    Actualizacion = 'Actualizacion',
+}
 
 export type Role =
     | 'Tecnico'
@@ -61,32 +74,15 @@ export const months: Month[] = [
 
 export const frequencies: Frequency[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-export const expenseStatuses: ExpenseStatus[] = ['Enviado', 'Aprobado'];
-
 export const expenseTypes: ExpenseType[] = [
-    'Combustible',
-    'Comida',
-    'Herramienta',
-    'Hospedaje',
-    'Insumos',
+    ExpenseType.Comida,
+    ExpenseType.Combustible,
+    ExpenseType.Herramienta,
+    ExpenseType.Hospedaje,
+    ExpenseType.Insumos,
 ];
 
-export const paySources: PaySource[] = ['Reintegro', 'Tarjeta'];
-
-export const taskStatuses: TaskStatus[] = [
-    'Aprobado',
-    'Enviado',
-    'Pendiente',
-    'Sin asignar',
-];
-
-export const taskTypes: TaskType[] = [
-    'Preventivo',
-    'Correctivo',
-    'Actualizacion',
-    'Instalacion',
-    'Desmonte',
-];
+export const paySources: PaySource[] = [PaySource.Reintegro, PaySource.Tarjeta];
 
 export const roles: Role[] = [
     'Tecnico',

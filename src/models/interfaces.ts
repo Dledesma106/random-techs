@@ -11,7 +11,7 @@ export interface IUser {
     fullName?: string;
     publicKey: string;
     roles?: types.Role[];
-    password?: string;
+    password: string;
 }
 export interface IImage {
     _id: string;
@@ -45,10 +45,10 @@ export interface ICity {
     deleted: boolean;
 }
 
-export interface IBranch<Populated = false> {
+export interface IBranch {
     _id: string;
     number: number;
-    city: Populated extends true ? ICity : types.ID;
+    city: ICity | types.ID;
     client: IClient | types.ID;
     businesses: IBusiness[];
     deleted: boolean;
@@ -56,7 +56,7 @@ export interface IBranch<Populated = false> {
 
 export interface ITask {
     _id: types.ID;
-    branch: IBranch;
+    branch: IBranch | types.ID;
     business: IBusiness;
     openedAt: Date;
     taskType: types.TaskType;
@@ -64,7 +64,7 @@ export interface ITask {
     description: string;
     participants?: IUser[];
     auditor?: IUser;
-    activity?: IActivity;
+    activity?: IActivity | types.ID;
     operatorName?: string;
     image: { url: string; _id: string }[];
     workOrderNumber?: number;

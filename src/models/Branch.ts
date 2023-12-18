@@ -13,7 +13,7 @@ const Branch = {
         branch.client = (await Client.get(branch.client as string)) as IClient;
         return branch;
     },
-    set: async (branch: IBranch<true>) => {
+    set: async (branch: IBranch) => {
         await Client.set(branch.client as IClient);
         if (branch.deleted) return await Branch.delete(branch._id);
         branch.client = (branch.client as IClient)._id;

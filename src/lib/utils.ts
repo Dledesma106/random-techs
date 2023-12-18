@@ -1,7 +1,7 @@
 import { IUser } from '../models/interfaces';
 //import * as api from './apiEndpoints'
 
-export const formatIds = (doc: any): any => {
+export const formatIds = <T>(doc: T): T => {
     return JSON.parse(JSON.stringify(doc));
 };
 

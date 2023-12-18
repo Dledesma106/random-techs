@@ -2,9 +2,10 @@ import { Feather, AntDesign } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { Text, View, Pressable, TouchableOpacity } from 'react-native';
 
-import FormActivities from '../../components/Forms/FormActivities';
-import { useDb } from '../../hooks/useDB';
-import { IActivity } from '../../models/interfaces';
+import FormActivities from '@/components/Forms/FormActivities';
+import { useDb } from '@/hooks/useDB';
+import { IActivity } from '@/models/interfaces';
+
 //import fetcher from '../../lib/fetcher';
 //import * as apiEndpoints from "../../lib/apiEndpoints";
 //import Activity from "../../models/Activity";

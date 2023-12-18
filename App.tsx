@@ -2,10 +2,12 @@ import 'react-native-get-random-values';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import { onlineManager, QueryClient } from '@tanstack/react-query';
+import { onlineManager, QueryCache, QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { RootSiblingParent } from 'react-native-root-siblings';
+import Toast from 'react-native-root-toast';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import DbProvider from './src/context/dbContext/DbProvider';
@@ -22,6 +24,13 @@ const queryClient = new QueryClient({
             gcTime: 1000 * 60 * 60 * 24,
         },
     },
+    queryCache: new QueryCache({
+        onError: () => {
+            return Toast.show('Ocurrió un error al realizar la operación', {
+                duration: Toast.durations.LONG,
+            });
+        },
+    }),
 });
 
 const asyncStoragePersister = createAsyncStoragePersister({
@@ -58,14 +67,16 @@ export default function App() {
                     .then(() => queryClient.invalidateQueries())
             }
         >
-            <SafeAreaProvider>
-                <DbProvider>
-                    <UserProvider>
-                        <Navigation colorScheme={colorScheme} />
-                        <StatusBar />
-                    </UserProvider>
-                </DbProvider>
-            </SafeAreaProvider>
+            <RootSiblingParent>
+                <SafeAreaProvider>
+                    <DbProvider>
+                        <UserProvider>
+                            <Navigation colorScheme={colorScheme} />
+                            <StatusBar />
+                        </UserProvider>
+                    </DbProvider>
+                </SafeAreaProvider>
+            </RootSiblingParent>
         </PersistQueryClientProvider>
     );
 }

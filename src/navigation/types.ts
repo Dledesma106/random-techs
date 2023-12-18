@@ -3,8 +3,6 @@ import { CompositeScreenProps } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { StackScreenProps } from '@react-navigation/stack';
 
-import { IExpense, ITask } from '@/models/interfaces';
-
 export type RootStackParamList = {
     Root: undefined;
     Drawer: undefined;
@@ -12,14 +10,13 @@ export type RootStackParamList = {
     Home: undefined;
     Login: undefined;
     Task: {
-        task: ITask;
+        id: string;
     };
     RegisterExpenseOnTask: {
-        task: ITask;
-        expense: IExpense;
+        taskId: string;
     };
-    Expense: {
-        expense: IExpense;
+    ExpenseOnTask: {
+        expenseId: string;
     };
     FullScreenCamera: undefined;
 };
@@ -42,9 +39,9 @@ export type RegisterExpenseOnTaskScreenRouteProp = NativeStackScreenProps<
     'RegisterExpenseOnTask'
 >;
 
-export type ExpenseScreenRouteProp = NativeStackScreenProps<
+export type ExpenseOnTaskScreenRouteProp = NativeStackScreenProps<
     RootStackParamList,
-    'Expense'
+    'ExpenseOnTask'
 >;
 
 export type HomeScreenRouteProp = NativeStackScreenProps<RootStackParamList, 'Home'>;
