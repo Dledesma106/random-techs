@@ -14,6 +14,9 @@ const JWTTokenService = {
             return null;
         }
     },
+    delete: async () => {
+        await SecureStore.deleteItemAsync(KEY);
+    },
 };
 
 export default JWTTokenService;

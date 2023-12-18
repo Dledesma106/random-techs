@@ -22,12 +22,8 @@ interface DbContextProps {
     getBranches: () => Promise<(IBranch | undefined)[]>;
     getTaskExpenses: (taskId: string) => Promise<IExpense[]>;
     getUserByEmail: (email: string) => Promise<IUser | undefined>;
-    refreshTasks: () => Promise<void>;
-    saveTask: (task: ITask) => Promise<void>;
     saveLocalUser: (user: IUser, password: string) => Promise<void>;
     //saveExpenseOnTask:(task:ITask, expense:IExpense)=>Promise<void>
-    saveExpense: (expense: IExpense) => Promise<void>;
-    saveActivity: (activity: IActivity) => Promise<void>;
 }
 
 const DbContext = createContext<DbContextProps>({} as DbContextProps);

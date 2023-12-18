@@ -33,7 +33,6 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
         favicon: './assets/images/favicon.png',
     },
     extra: {
-        API_BASE_URL: 'http://192.168.1.37:3000/',
         // eas: {
         //     projectId: '27b396d4-0e33-4573-ab58-f18a85482277',
         // },

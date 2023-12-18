@@ -2,16 +2,33 @@ import { useQuery } from '@tanstack/react-query';
 
 import { appAxios } from '@/api/axios';
 import JWTTokenService from '@/lib/JWTTokenService';
-import { ITask } from '@/models/interfaces';
+import { TaskStatus, TaskType } from '@/models/types';
 
-type FetchTasks = {
-    data: {
-        tasks: ITask[];
+export type TasksListQueryDataIem = {
+    _id: string;
+    branch: {
+        number: number;
+        client: {
+            name: string;
+        };
     };
+    business: {
+        name: string;
+    };
+    openedAt: string;
+    taskType: TaskType;
+    status: TaskStatus;
+    description: string;
+    closedAt?: Date;
 };
 
-const fetchTasks = async () => {
-    const response = await appAxios.get<FetchTasks>('/tech/tasks', {
+type FetchTasks = {
+    data: TasksListQueryDataIem[];
+};
+
+const fetchTasks = (filter: TasksListQueryFilters) => async () => {
+    const urlWithFilters = new URLSearchParams(filter).toString();
+    const response = await appAxios.get<FetchTasks>(`/tech/tasks?${urlWithFilters}`, {
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
@@ -19,19 +36,16 @@ const fetchTasks = async () => {
         },
     });
 
-    return response.data.data.tasks;
+    return response.data.data;
 };
 
-export const useTasksListQuery = () => {
-    const { data, isPending, error, refetch } = useQuery<FetchTasks['data']['tasks']>({
-        queryKey: ['tasks'],
-        queryFn: fetchTasks,
-    });
+type TasksListQueryFilters = {
+    status?: TaskStatus;
+};
 
-    return {
-        data,
-        isPending,
-        error,
-        refetch,
-    };
+export const useTasksListQuery = (query: TasksListQueryFilters) => {
+    return useQuery<FetchTasks['data']>({
+        queryKey: ['tasks'],
+        queryFn: fetchTasks(query),
+    });
 };

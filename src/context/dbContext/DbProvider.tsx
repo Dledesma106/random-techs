@@ -1,14 +1,11 @@
 import DbContext from './DbContext';
 
-import * as apiEndpoints from '../../lib/apiEndpoints';
 //import { ResponseData } from './types'
-import { updateTasks } from '../../lib/AppInit';
-import fetcher from '../../lib/fetcher';
 import Activity from '../../models/Activity';
 import Branch from '../../models/Branch';
 import Client from '../../models/Client';
 import Expense from '../../models/Expense';
-import { IActivity, IExpense, ITask, IUser } from '../../models/interfaces';
+import { ITask, IUser } from '../../models/interfaces';
 //import { useMemo } from 'react'
 import Task from '../../models/Task';
 import { TaskStatus } from '../../models/types';
@@ -70,43 +67,12 @@ const DbProvider = ({ children }: ProviderProps) => {
         return synchedExpenses.concat(unsynchedExpenses);
     }
 
-    async function refreshTasks() {
-        await updateTasks();
-    }
-
     async function getClients() {
         return (await Client.getAll()) || [];
     }
 
     async function getBranches() {
         return (await Branch.getAll()) || [];
-    }
-
-    async function saveTask(task: ITask) {
-        try {
-            await fetcher.post(apiEndpoints.tech.tasks, task);
-            Task.set(task);
-        } catch (error) {
-            Task.setUnsynched(task);
-        }
-    }
-
-    async function saveActivity(activity: IActivity) {
-        try {
-            await fetcher.post(apiEndpoints.tech.activities, activity);
-            Activity.set(activity);
-        } catch (error) {
-            Activity.setUnsynched(activity);
-        }
-    }
-
-    async function saveExpense(expense: IExpense) {
-        try {
-            await fetcher.post(apiEndpoints.tech.expenses, Expense);
-            Expense.set(expense);
-        } catch (error) {
-            Expense.setUnsynched(expense);
-        }
     }
 
     return (
@@ -120,11 +86,7 @@ const DbProvider = ({ children }: ProviderProps) => {
                 getClients,
                 getBranches,
                 getUserByEmail,
-                refreshTasks,
                 saveLocalUser,
-                saveTask,
-                saveActivity,
-                saveExpense,
             }}
         >
             {children}

@@ -1,75 +1,86 @@
-import bcryptjs from 'bcryptjs';
-import { useState, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import * as Crypto from 'expo-crypto';
+import { deleteItemAsync, getItemAsync, setItemAsync } from 'expo-secure-store';
+import { useState, PropsWithChildren, useEffect } from 'react';
 
 import UserContext from './UserContext';
 
-import { useDb } from '@/hooks/useDB';
 import JWTTokenService from '@/lib/JWTTokenService';
 
-import appInit from '../../lib/AppInit';
-import { userWithoutPassword } from '../../lib/utils';
 import { IUser } from '../../models/interfaces';
-
-const INITIAL_STATE = {
-    email: '',
-    firstName: '',
-    lastName: '',
-    fullname: '',
-    _id: '',
-    publicKey: '',
-    roles: [],
-};
 
 export interface ILoginJson {
     user: IUser;
     accessToken: string;
 }
 
-export interface ProviderProps {
-    children: JSX.Element | JSX.Element[];
+async function hashPassword(password: string) {
+    return await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, password);
 }
 
-const UserProvider = ({ children }: ProviderProps) => {
-    const { getUserByEmail } = useDb();
-    const [user, setUser] = useState<IUser>(INITIAL_STATE);
+const saveUserOnSecureStorage = async (user: IUser) => {
+    const hashedUser = {
+        email: user.email,
+        password: hashPassword(user.password),
+    };
 
-    //it logs in the user by sending a request to an endpoint that reads the access token cookie and returns the user corresponding to that access token
-    async function loginUser(data: ILoginJson) {
-        await JWTTokenService.save(data.accessToken);
-        await appInit(); // should synchronize data with remote db
-        setUser(data.user);
-    }
+    await setItemAsync('user', JSON.stringify(hashedUser));
+};
+
+const getUserFromSecureStorage = async () => {
+    const user = await getItemAsync('user');
+    return user ? JSON.parse(user) : null;
+};
+
+const deleteUserDataFromSecureStorage = async () => {
+    deleteItemAsync('user');
+};
+
+const UserProvider = ({ children }: PropsWithChildren) => {
+    const [user, setUser] = useState<IUser | null>(null);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const queryClient = useQueryClient();
+
+    useEffect(() => {
+        getUserFromSecureStorage()
+            .then((user) => {
+                if (user) {
+                    setUser(user);
+                }
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
+    }, []);
+
+    const loginUser = async (user: IUser) => {
+        saveUserOnSecureStorage(user);
+        setUser(user);
+    };
 
     function isLoggedIn() {
-        return user.email !== '';
+        return user !== null;
     }
 
     function logoutUser() {
-        setUser(INITIAL_STATE);
+        setUser(null);
+        queryClient.clear();
+        deleteUserDataFromSecureStorage();
+        JWTTokenService.delete();
     }
 
-    async function loginOffline(email: string, password: string) {
-        //console.log('searching user')
-        const user = await getUserByEmail(email);
-        if (!user) throw new Error('wrong email or password');
-        console.log('user found by email in local db');
-        console.log('comparing passwords');
-        const startTime = performance.now();
-        if (!bcryptjs.compareSync(password, user.password as string))
-            throw new Error('wrong email or password');
-        const endTime = performance.now();
-        console.log(`compareSync took ${endTime - startTime} milliseconds`);
-
-        console.log('correct password, logging in');
-        //await appInit()
-        setUser(userWithoutPassword(user));
-    }
-
-    const memoValue = useMemo(() => {
-        return { user, loginUser, logoutUser, isLoggedIn, loginOffline, setUser };
-    }, [user]);
-
-    return <UserContext.Provider value={memoValue}>{children}</UserContext.Provider>;
+    return (
+        <UserContext.Provider
+            value={{
+                user,
+                logoutUser,
+                isLoggedIn,
+                setUser: loginUser,
+            }}
+        >
+            {isLoading ? null : children}
+        </UserContext.Provider>
+    );
 };
 
 export default UserProvider;

@@ -8,14 +8,15 @@ import { ColorSchemeName } from 'react-native';
 import LinkingConfiguration from './LinkingConfiguration';
 import { RootStackParamList, RootTabParamList } from './types';
 
+import ExpenseOnTask from '@/screens/ExpenseOnTask';
 import FullScreenCameraScreen from '@/screens/FullScreenCamera';
+import RegisterExpenseOnTask from '@/screens/RegisterExpenseOnTask';
 
-import { useUser } from '../hooks/useUser';
+import { useUserContext } from '../context/userContext/useUser';
 import Home from '../screens/Home';
 import Login from '../screens/Login';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import RegisterExpense from '../screens/RegisterExpense';
-import RegisterExpenseOnTask from '../screens/RegisterExpenseOnTask/RegisterExpenseOnTask';
 import RegisterTask from '../screens/RegisterTask';
 import Task from '../screens/Task';
 
@@ -33,10 +34,10 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
-    const { user } = useUser();
+    const { user } = useUserContext();
 
     return (
-        <Stack.Navigator initialRouteName="Login">
+        <Stack.Navigator initialRouteName={user ? 'Drawer' : 'Login'}>
             <Stack.Screen
                 name="FullScreenCamera"
                 component={FullScreenCameraScreen}
@@ -46,7 +47,7 @@ function RootNavigator() {
             <Stack.Screen
                 name="Drawer"
                 component={DrawerNavigator}
-                options={{ headerShown: false, headerTitle: user.fullName }}
+                options={{ headerShown: false, headerTitle: user?.fullName || 'Random' }}
             />
 
             <Stack.Screen
@@ -59,6 +60,18 @@ function RootNavigator() {
                 name="Login"
                 component={Login}
                 options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="RegisterExpenseOnTask"
+                component={RegisterExpenseOnTask}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+                name="ExpenseOnTask"
+                component={ExpenseOnTask}
+                options={{ title: 'Gasto' }}
             />
         </Stack.Navigator>
     );
@@ -110,12 +123,6 @@ export const BottomTabNavigator = () => (
                 headerShown: false,
                 title: 'Inicio',
             })}
-        />
-
-        <BottomTab.Screen
-            name="RegisterExpenseOnTask"
-            component={RegisterExpenseOnTask}
-            options={{ tabBarItemStyle: { display: 'none' }, headerShown: false }}
         />
 
         <BottomTab.Screen

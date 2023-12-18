@@ -1,9 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/quotes
 import moment from 'moment';
-import React, { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, Button, TextInput } from 'react-native';
 
-import DbContext from '../../context/dbContext/DbContext';
 import { IActivity } from '../../models/interfaces';
 
 function validate(input: IActivity): { [key: string]: string } {
@@ -18,7 +17,6 @@ function validate(input: IActivity): { [key: string]: string } {
 }
 
 export default function FormActivities() {
-    const dbContext = useContext(DbContext);
     const [error, setError] = useState<{ [key: string]: string }>({
         name: 'Se requiere nombre de Actividad',
         description: 'Se requiere una descripción',
@@ -67,7 +65,8 @@ export default function FormActivities() {
                 deleted: false,
             });
             setIsCreating(false);
-            await dbContext.saveActivity(input);
+
+            throw new Error('No implementado');
         } catch (error) {
             console.error('Error al guardar la actividad:', error);
         }

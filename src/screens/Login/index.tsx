@@ -4,7 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'reac
 
 import { useLoginMutation } from './mutations';
 
-import { useUser } from '@/hooks/useUser';
+import { useUserContext } from '@/context/userContext/useUser';
 import JWTTokenService from '@/lib/JWTTokenService';
 import { RootStackParamList } from '@/navigation/types';
 
@@ -17,7 +17,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 const LoginScreen = ({ navigation }: Props) => {
     const { mutate, error, isPending } = useLoginMutation();
-    const { setUser } = useUser();
+    const { setUser } = useUserContext();
 
     const {
         control,
@@ -39,7 +39,7 @@ const LoginScreen = ({ navigation }: Props) => {
             onSuccess: async (data) => {
                 await JWTTokenService.save(data.accessToken);
                 setUser(data.user);
-                navigation.navigate('Drawer');
+                navigation.replace('Drawer');
             },
         });
     };
