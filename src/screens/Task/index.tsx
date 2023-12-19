@@ -1,4 +1,7 @@
 import { AntDesign, EvilIcons } from '@expo/vector-icons';
+import clsx from 'clsx';
+import { useEffect } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import {
     Text,
     View,
@@ -10,19 +13,43 @@ import {
 } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
-import { useUploadImageToTaskMutation } from './mutations';
+import { useTaskUpdateMutation, useUploadImageToTaskMutation } from './mutations';
 import { useTaskByIdQuery } from './queries';
 
+import { TaskStatus } from '@/models/types';
 import { TaskScreenRouteProp } from '@/navigation/types';
 
 import { dmyDateString } from '../../lib/utils';
 import { addFullScreenCameraListener } from '../FullScreenCamera';
 
+type FormValues = {
+    isClosed?: boolean;
+    workOrderNumber?: string;
+    imagesIdToDelete?: string;
+};
+
 const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     const { id } = route.params;
     const taskQueryResult = useTaskByIdQuery(id);
+    const formMethods = useForm<FormValues>();
 
     const uploadImageMutation = useUploadImageToTaskMutation();
+    const taskUpdateMutation = useTaskUpdateMutation();
+
+    useEffect(() => {
+        const subscription = formMethods.watch((values) => {
+            if (values.isClosed !== undefined) {
+                taskUpdateMutation.mutate({
+                    taskId: id,
+                    isClosed: values.isClosed,
+                });
+            }
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [formMethods.watch]);
 
     const addPictureToTask = (uri: string) => {
         uploadImageMutation.mutate({
@@ -79,6 +106,35 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                             </Text>
                         </View>
 
+                        {task.status === TaskStatus.Pendiente ? (
+                            <TouchableOpacity
+                                className={clsx(
+                                    'bg-black rounded-lg p-4 mt-4',
+                                    taskUpdateMutation.isPending ? 'opacity-50' : '',
+                                )}
+                                onPress={() => {
+                                    taskUpdateMutation.mutate({
+                                        taskId: task._id,
+                                        isClosed: true,
+                                    });
+                                }}
+                                disabled={taskUpdateMutation.isPending}
+                            >
+                                {taskUpdateMutation.isPending ? (
+                                    <ActivityIndicator />
+                                ) : (
+                                    <Text className="text-white text-center font-bold">
+                                        Finalizar tarea
+                                    </Text>
+                                )}
+                            </TouchableOpacity>
+                        ) : (
+                            <View className="mt-4">
+                                <Text className="font-bold">Tarea finalizada</Text>
+                            </View>
+                        )}
+
+                        {/* TODO: PREGUNTAR ESTO */}
                         <View className="pt-4">
                             <Text className="font-semibold mb-1.5">Fecha de cierre</Text>
                             <TouchableOpacity
@@ -106,16 +162,23 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                             /> */}
                         </View>
 
+                        {/* TODO: PREGUNTAR ESTO */}
                         <View className="pt-4">
                             <Text className="font-semibold mb-1.5">Orden de Trabajo</Text>
-                            <TextInput
-                                className="p-4 rounded border border-gray-200"
-                                onChangeText={() => {
-                                    // TODO
-                                }}
-                                value={task.workOrderNumber?.toString() || ''}
-                                placeholder="N° de orden..."
-                                keyboardType="numeric"
+                            <Controller
+                                control={formMethods.control}
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <TextInput
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={value}
+                                        placeholder="Orden de Trabajo"
+                                        className="p-4 rounded border border-gray-200"
+                                        keyboardType="numeric"
+                                    />
+                                )}
+                                name="workOrderNumber"
+                                defaultValue={task.workOrderNumber?.toString()}
                             />
                         </View>
 
@@ -154,16 +217,33 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                 <Text className="font-semibold mb-1.5">Imágenes</Text>
 
                                 <View className="flex flex-row space-x-4">
-                                    {task.images.map((image, index) => (
-                                        <View key={index} className="flex-1">
+                                    {task.images.map((image) => (
+                                        <View key={image._id} className="flex-1 relative">
                                             <Image
-                                                className="bg-gray-200"
+                                                className="bg-gray-200 relative z-0"
                                                 source={{ uri: image.url }}
                                                 style={{
                                                     borderRadius: 6,
                                                     aspectRatio: 9 / 16,
                                                 }}
                                             />
+
+                                            <View className="absolute top-2 right-2 bg-black flex items-center justify-center rounded-full z-50 w-6 h-6">
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        taskUpdateMutation.mutate({
+                                                            taskId: task._id,
+                                                            imageIdToDelete: image._id,
+                                                        });
+                                                    }}
+                                                >
+                                                    <AntDesign
+                                                        name="close"
+                                                        size={14}
+                                                        color="white"
+                                                    />
+                                                </TouchableOpacity>
+                                            </View>
                                         </View>
                                     ))}
                                 </View>
