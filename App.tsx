@@ -5,14 +5,12 @@ import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persi
 import { onlineManager, QueryCache, QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
 import { RootSiblingParent } from 'react-native-root-siblings';
 import Toast from 'react-native-root-toast';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import DbProvider from './src/context/dbContext/DbProvider';
 import UserProvider from './src/context/userContext/UserProvider';
-import { useBcryptConfig } from './src/hooks/useBcryptConfig';
 import useColorScheme from './src/hooks/useColorScheme';
 import Navigation from './src/navigation';
 
@@ -41,11 +39,6 @@ export default function App() {
     const appIsReady = useCachedResources();
 
     const colorScheme = useColorScheme();
-    const configureBcrypt = useBcryptConfig();
-
-    useEffect(() => {
-        configureBcrypt();
-    }, []);
 
     onlineManager.setEventListener((setOnline) => {
         return NetInfo.addEventListener((state) => {
