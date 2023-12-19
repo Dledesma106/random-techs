@@ -35,7 +35,7 @@ export enum PaySource {
 export enum TaskStatus {
     SinAsignar = 'Sin asignar',
     Pendiente = 'Pendiente',
-    Enviado = 'Enviado',
+    Finalizada = 'Finalizada',
     Aprobado = 'Aprobado',
 }
 

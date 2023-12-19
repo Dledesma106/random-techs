@@ -42,6 +42,7 @@ const UserProvider = ({ children }: PropsWithChildren) => {
     const queryClient = useQueryClient();
 
     useEffect(() => {
+        queryClient.clear();
         getUserFromSecureStorage()
             .then((user) => {
                 if (user) {
@@ -54,7 +55,7 @@ const UserProvider = ({ children }: PropsWithChildren) => {
     }, []);
 
     const loginUser = async (user: IUser) => {
-        saveUserOnSecureStorage(user);
+        // saveUserOnSecureStorage(user);
         setUser(user);
     };
 
