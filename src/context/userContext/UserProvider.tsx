@@ -63,11 +63,15 @@ const UserProvider = ({ children }: PropsWithChildren) => {
         return user !== null;
     }
 
-    function logoutUser() {
+    function logoutUser(navigation: any) {
         setUser(null);
         queryClient.clear();
         deleteUserDataFromSecureStorage();
         JWTTokenService.delete();
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'Login' }],
+        });
     }
 
     return (

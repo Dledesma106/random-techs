@@ -1,10 +1,12 @@
 import { createContext } from 'react';
 
+import { ProfileScreenRouteProp } from '@/navigation/types';
+
 import { IUser } from '../../models/interfaces';
 
 interface UserContextProps {
     user: IUser | null;
-    logoutUser: () => void;
+    logoutUser: (navigation: ProfileScreenRouteProp['navigation']) => void;
     isLoggedIn: () => boolean;
     setUser: (user: IUser) => void;
 }

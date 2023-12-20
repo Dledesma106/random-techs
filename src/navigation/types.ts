@@ -46,9 +46,12 @@ export type ExpenseOnTaskScreenRouteProp = NativeStackScreenProps<
 
 export type HomeScreenRouteProp = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
+export type ProfileScreenRouteProp = NativeStackScreenProps<RootTabParamList, 'Profile'>;
+
 export type RootTabParamList = {
     Main: RootStackParamList['Home'];
     Task: RootStackParamList['Task'];
+    Profile: undefined;
     RegisterExpenseOnTask: RootStackParamList['RegisterExpenseOnTask'];
 };
 

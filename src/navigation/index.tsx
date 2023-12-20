@@ -10,6 +10,7 @@ import { RootStackParamList, RootTabParamList } from './types';
 
 import ExpenseOnTask from '@/screens/ExpenseOnTask';
 import FullScreenCameraScreen from '@/screens/FullScreenCamera';
+import ProfileScreen from '@/screens/Profile';
 import RegisterExpenseOnTask from '@/screens/RegisterExpenseOnTask';
 
 import { useUserContext } from '../context/userContext/useUser';
@@ -129,6 +130,12 @@ export const BottomTabNavigator = () => (
             name="Task"
             component={Task}
             options={{ tabBarItemStyle: { display: 'none' }, headerShown: false }}
+        />
+
+        <BottomTab.Screen
+            name="Profile"
+            component={ProfileScreen}
+            options={{ headerShown: false }}
         />
     </BottomTab.Navigator>
 );
