@@ -25,6 +25,7 @@ export type RootStackParamList = {
     RegisterTaskBranchFieldScreen: {
         value?: FetchBranchesBranchItem['_id'];
     };
+    AccountSettings: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> = StackScreenProps<
@@ -63,6 +64,7 @@ export type RootTabParamList = {
     Task: RootStackParamList['Task'];
     Profile: undefined;
     RegisterExpenseOnTask: RootStackParamList['RegisterExpenseOnTask'];
+    AccountSettings: undefined;
 };
 
 declare global {

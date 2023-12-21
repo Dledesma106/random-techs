@@ -8,7 +8,14 @@ function ProfileScreen({ navigation }: ProfileScreenRouteProp) {
 
     return (
         <View>
-            <Text className="text-white font-bold">{user?.fullName}</Text>
+            <TouchableOpacity
+                onPress={() => {
+                    navigation.navigate('AccountSettings');
+                }}
+            >
+                <Text className="text-white font-bold">{user?.fullName}</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity
                 onPress={() => {
                     logoutUser(navigation);
