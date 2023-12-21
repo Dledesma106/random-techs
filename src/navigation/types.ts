@@ -3,6 +3,8 @@ import { CompositeScreenProps } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { StackScreenProps } from '@react-navigation/stack';
 
+import { FetchBranchesBranchItem } from '@/screens/RegisterTask/RegisterTaskBranchFieldScreen/queries';
+
 export type RootStackParamList = {
     Root: undefined;
     Drawer: undefined;
@@ -19,6 +21,10 @@ export type RootStackParamList = {
         expenseId: string;
     };
     FullScreenCamera: undefined;
+    RegisterTask: undefined;
+    RegisterTaskBranchFieldScreen: {
+        value?: FetchBranchesBranchItem['_id'];
+    };
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> = StackScreenProps<
@@ -31,6 +37,7 @@ export type HomeTabScreenProp = CompositeScreenProps<
     RootStackScreenProps<'Home'>
 >;
 
+export type RegisterTaskScreenProp = RootStackScreenProps<'RegisterTask'>;
 export type FullScreenCameraProps = RootStackScreenProps<'FullScreenCamera'>;
 
 export type TaskScreenRouteProp = NativeStackScreenProps<RootStackParamList, 'Task'>;
@@ -45,8 +52,11 @@ export type ExpenseOnTaskScreenRouteProp = NativeStackScreenProps<
 >;
 
 export type HomeScreenRouteProp = NativeStackScreenProps<RootStackParamList, 'Home'>;
-
 export type ProfileScreenRouteProp = NativeStackScreenProps<RootTabParamList, 'Profile'>;
+export type RegisterTaskBranchFieldScreenRouteProp = NativeStackScreenProps<
+    RootStackParamList,
+    'RegisterTaskBranchFieldScreen'
+>;
 
 export type RootTabParamList = {
     Main: RootStackParamList['Home'];

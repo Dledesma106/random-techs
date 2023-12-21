@@ -9,7 +9,7 @@ import { HomeTabScreenProp } from '@/navigation/types';
 
 const Home = ({ navigation }: HomeTabScreenProp) => {
     const tasksQuery = useTasksListQuery({
-        status: TaskStatus.Pendiente,
+        status: [TaskStatus.Pendiente, TaskStatus.Finalizada],
     });
 
     return (

@@ -22,13 +22,26 @@ export type TasksListQueryDataIem = {
     closedAt?: Date;
 };
 
+export type TasksListQuery = FetchTasks['data'];
+
 type FetchTasks = {
     data: TasksListQueryDataIem[];
 };
 
 const fetchTasks = (filter: TasksListQueryFilters) => async () => {
-    const urlWithFilters = new URLSearchParams(filter).toString();
-    const response = await appAxios.get<FetchTasks>(`/tech/tasks?${urlWithFilters}`, {
+    const searchParams = new URLSearchParams();
+
+    if (filter.status) {
+        if (Array.isArray(filter.status)) {
+            filter.status.forEach((status) => {
+                searchParams.append('status', status.toString());
+            });
+        } else {
+            searchParams.append('status', filter.status.toString());
+        }
+    }
+
+    const response = await appAxios.get<FetchTasks>(`/tech/tasks?${searchParams}`, {
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
@@ -40,12 +53,14 @@ const fetchTasks = (filter: TasksListQueryFilters) => async () => {
 };
 
 type TasksListQueryFilters = {
-    status?: TaskStatus;
+    status?: TaskStatus | TaskStatus[];
 };
 
+export const TASKS_LIST_QUERY_KEY = ['tasks'];
+
 export const useTasksListQuery = (query: TasksListQueryFilters) => {
-    return useQuery<FetchTasks['data']>({
-        queryKey: ['tasks'],
+    return useQuery<TasksListQuery>({
+        queryKey: TASKS_LIST_QUERY_KEY,
         queryFn: fetchTasks(query),
     });
 };

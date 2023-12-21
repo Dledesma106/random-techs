@@ -1,5 +1,11 @@
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
 import { IUser } from '../models/interfaces';
-//import * as api from './apiEndpoints'
+
+export function cn(...inputs: ClassValue[]) {
+    return twMerge(clsx(inputs));
+}
 
 export const formatIds = <T>(doc: T): T => {
     return JSON.parse(JSON.stringify(doc));

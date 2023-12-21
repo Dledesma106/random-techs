@@ -12,13 +12,13 @@ import ExpenseOnTask from '@/screens/ExpenseOnTask';
 import FullScreenCameraScreen from '@/screens/FullScreenCamera';
 import ProfileScreen from '@/screens/Profile';
 import RegisterExpenseOnTask from '@/screens/RegisterExpenseOnTask';
+import RegisterTask from '@/screens/RegisterTask';
+import RegisterTaskBranchFieldScreen from '@/screens/RegisterTask/RegisterTaskBranchFieldScreen';
 
 import { useUserContext } from '../context/userContext/useUser';
 import Home from '../screens/Home';
 import Login from '../screens/Login';
 import NotFoundScreen from '../screens/NotFoundScreen';
-import RegisterExpense from '../screens/RegisterExpense';
-import RegisterTask from '../screens/RegisterTask';
 import Task from '../screens/Task';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
@@ -74,11 +74,19 @@ function RootNavigator() {
                 component={ExpenseOnTask}
                 options={{ title: 'Gasto' }}
             />
+
+            <Stack.Screen
+                name="RegisterTaskBranchFieldScreen"
+                component={RegisterTaskBranchFieldScreen}
+                options={{
+                    title: 'Sucursales',
+                }}
+            />
         </Stack.Navigator>
     );
 }
 
-const Drawer = createDrawerNavigator();
+const Drawer = createDrawerNavigator<RootStackParamList>();
 
 function DrawerNavigator() {
     return (
@@ -95,12 +103,6 @@ function DrawerNavigator() {
                 name="Home"
                 component={BottomTabNavigator}
                 options={{ title: 'Random', headerTitleAlign: 'center' }}
-            />
-
-            <Drawer.Screen
-                name="RegisterExpense"
-                component={RegisterExpense}
-                options={{ title: 'Registrar un gasto' }}
             />
 
             <Drawer.Screen

@@ -81,6 +81,7 @@
         "react-native-skeleton-placeholder": "^5.2.4",
         "react-native-use-file-upload": "^0.2.0",
         "react-native-web": "^0.19.9",
+        "tailwind-merge": "^2.1.0",
         "yarn-upgrade-all": "^0.7.2"
     },
     "devDependencies": {
