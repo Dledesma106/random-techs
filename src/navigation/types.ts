@@ -19,6 +19,7 @@ export type RootStackParamList = {
         expenseId: string;
     };
     FullScreenCamera: undefined;
+    AccountSettings: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> = StackScreenProps<
@@ -53,6 +54,7 @@ export type RootTabParamList = {
     Task: RootStackParamList['Task'];
     Profile: undefined;
     RegisterExpenseOnTask: RootStackParamList['RegisterExpenseOnTask'];
+    AccountSettings: undefined;
 };
 
 declare global {

@@ -8,6 +8,7 @@ import { ColorSchemeName } from 'react-native';
 import LinkingConfiguration from './LinkingConfiguration';
 import { RootStackParamList, RootTabParamList } from './types';
 
+import AccountSettings from '@/screens/AccountSettings';
 import ExpenseOnTask from '@/screens/ExpenseOnTask';
 import FullScreenCameraScreen from '@/screens/FullScreenCamera';
 import ProfileScreen from '@/screens/Profile';
@@ -73,6 +74,12 @@ function RootNavigator() {
                 name="ExpenseOnTask"
                 component={ExpenseOnTask}
                 options={{ title: 'Gasto' }}
+            />
+
+            <Stack.Screen
+                name="AccountSettings"
+                component={AccountSettings}
+                options={{ title: 'Cuenta' }}
             />
         </Stack.Navigator>
     );

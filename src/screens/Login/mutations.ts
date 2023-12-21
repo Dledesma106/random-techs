@@ -4,32 +4,32 @@ import { AxiosError } from 'axios';
 import { appAxios } from '@/api/axios';
 import { IUser } from '@/models/interfaces';
 
-type LoginMutationVariables = {
+type UserMutationVariables = {
     email: string;
     password: string;
 };
 
-type LoginMutationData = {
+type UserMutationData = {
     data: {
         accessToken: string;
         user: IUser;
     };
 };
 
-const loginOnline = async (data: LoginMutationVariables) => {
-    const response = await appAxios.post<LoginMutationData>('/auth', {
+const loginOnline = async (data: UserMutationVariables) => {
+    const response = await appAxios.post<UserMutationData>('/auth', {
         ...data,
         appRequest: true,
     });
     return response.data.data;
 };
 
-const login = async (data: LoginMutationVariables) => {
+const login = async (data: UserMutationVariables) => {
     return await loginOnline(data);
 };
 
 export const useLoginMutation = () => {
-    return useMutation<LoginMutationData['data'], AxiosError, LoginMutationVariables>({
+    return useMutation<UserMutationData['data'], AxiosError, UserMutationVariables>({
         mutationFn: login,
     });
 };
