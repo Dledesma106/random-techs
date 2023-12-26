@@ -15,6 +15,7 @@ import ProfileScreen from '@/screens/Profile';
 import RegisterExpenseOnTask from '@/screens/RegisterExpenseOnTask';
 import RegisterTask from '@/screens/RegisterTask';
 import RegisterTaskBranchFieldScreen from '@/screens/RegisterTask/RegisterTaskBranchFieldScreen';
+import RegisterTaskBusinessFieldScreen from '@/screens/RegisterTask/RegisterTaskBusinessFieldScreen';
 
 import { useUserContext } from '../context/userContext/useUser';
 import Home from '../screens/Home';
@@ -88,6 +89,14 @@ function RootNavigator() {
                 name="AccountSettings"
                 component={AccountSettings}
                 options={{ title: 'Cuenta' }}
+            />
+
+            <Stack.Screen
+                name="RegisterTaskBusinessFieldScreen"
+                component={RegisterTaskBusinessFieldScreen}
+                options={{
+                    title: 'Empresas',
+                }}
             />
         </Stack.Navigator>
     );

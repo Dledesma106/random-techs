@@ -1,8 +1,9 @@
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 
 import { usePasswordChange } from './mutations';
 
+import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useUserContext } from '@/context/userContext/useUser';
 
 interface UserForm {
@@ -14,7 +15,7 @@ interface UserForm {
 function AccountSettings() {
     const { user } = useUserContext();
 
-    const { control, handleSubmit } = useForm<UserForm>({
+    const form = useForm<UserForm>({
         reValidateMode: 'onSubmit',
     });
 
@@ -38,74 +39,66 @@ function AccountSettings() {
     const { mutate } = usePasswordChange();
 
     return (
-        <>
-            <View className="flex-1 justify-center items-center px-4 bg-gray-100">
-                <View className="w-full mb-4">
-                    <Text className="mb-2 text-gray-800">Contraseña Actual</Text>
-                    <Controller
-                        control={control}
-                        rules={{
-                            required: 'El nombre es requerido',
-                        }}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <TextInput
-                                onBlur={onBlur}
-                                onChangeText={onChange}
-                                value={value}
-                                placeholder="Contraseña"
-                                className="bg-white rounded-lg px-4 py-3 border border-gray-300"
-                            />
-                        )}
+        <View className="flex-1 justify-center items-center px-4 bg-gray-100">
+            <Form {...form}>
+                <View className="space-y-4 mb-6">
+                    <FormField
+                        control={form.control}
                         name="currentPass"
+                        rules={{
+                            required: 'Este campo es requerido',
+                        }}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Contraseña Actual</FormLabel>
+                                <TextInput {...field} placeholder="Contraseña actual" />
+                                <FormMessage />
+                            </FormItem>
+                        )}
                     />
-                </View>
 
-                <View className="w-full mb-6">
-                    <Text className="mb-2 text-gray-800">Nueva contraseña</Text>
-                    <Controller
-                        control={control}
-                        rules={{ required: 'La contraseña es requerida' }}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <TextInput
-                                onBlur={onBlur}
-                                onChangeText={onChange}
-                                value={value}
-                                placeholder="Contraseña"
-                                secureTextEntry
-                                className="bg-white rounded-lg px-4 py-3 border border-gray-300"
-                            />
-                        )}
+                    <FormField
+                        control={form.control}
                         name="newPassword"
-                    />
-                </View>
-                <View className="w-full mb-6">
-                    <Text className="mb-2 text-gray-800">Confirmar contraseña</Text>
-                    <Controller
-                        control={control}
-                        rules={{ required: 'La contraseña es requerida' }}
-                        render={({ field: { onChange, onBlur, value } }) => (
-                            <TextInput
-                                onBlur={onBlur}
-                                onChangeText={onChange}
-                                value={value}
-                                placeholder="Contraseña"
-                                secureTextEntry
-                                className="bg-white rounded-lg px-4 py-3 border border-gray-300"
-                            />
+                        rules={{
+                            required: 'Este campo es requerido',
+                        }}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Nueva contraseña</FormLabel>
+                                <TextInput {...field} placeholder="Nueva contraseña" />
+                                <FormMessage />
+                            </FormItem>
                         )}
+                    />
+
+                    <FormField
+                        control={form.control}
                         name="repeatNewPassword"
+                        rules={{
+                            required: 'Este campo es requerido',
+                        }}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Confirmar nueva contraseña</FormLabel>
+                                <TextInput
+                                    {...field}
+                                    placeholder="Confirmar nueva contraseña"
+                                />
+                                <FormMessage />
+                            </FormItem>
+                        )}
                     />
                 </View>
-                <TouchableOpacity
-                    onPress={handleSubmit(onSubmit, (e) => {
-                        console.log(e);
-                    })}
-                    className="bg-blue-600 py-3 rounded-lg w-full items-center"
-                >
-                    <Text className="text-white font-bold">Guardar</Text>
-                </TouchableOpacity>
-            </View>
-        </>
+            </Form>
+
+            <TouchableOpacity
+                onPress={form.handleSubmit(onSubmit)}
+                className="bg-blue-600 py-3 rounded-lg w-full items-center"
+            >
+                <Text className="text-white font-bold">Guardar</Text>
+            </TouchableOpacity>
+        </View>
     );
 }
 

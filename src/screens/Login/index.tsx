@@ -1,9 +1,11 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useForm, Controller, SubmitHandler } from 'react-hook-form';
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 
 import { useLoginMutation } from './mutations';
 
+import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { TextInput } from '@/components/ui/Input';
 import { useUserContext } from '@/context/userContext/useUser';
 import JWTTokenService from '@/lib/JWTTokenService';
 import { RootStackParamList } from '@/navigation/types';
@@ -19,11 +21,7 @@ const LoginScreen = ({ navigation }: Props) => {
     const { mutate, error, isPending } = useLoginMutation();
     const { setUser } = useUserContext();
 
-    const {
-        control,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<LoginForm>({
+    const form = useForm<LoginForm>({
         reValidateMode: 'onSubmit',
         defaultValues:
             process.env.NODE_ENV === 'development'
@@ -48,57 +46,48 @@ const LoginScreen = ({ navigation }: Props) => {
         <View className="flex-1 justify-center items-center px-4 bg-gray-100">
             <Text className="text-2xl font-bold mb-4 text-gray-800">Random Tech</Text>
 
-            <View className="w-full mb-4">
-                <Text className="mb-2 text-gray-800">Email</Text>
-                <Controller
-                    control={control}
-                    rules={{
-                        required: 'El correo es requerido',
-                        pattern: {
-                            value: /^\S+@\S+\.\S+$/,
-                            message: 'El correo no es válido',
-                        },
-                    }}
-                    render={({ field: { onChange, onBlur, value } }) => (
-                        <TextInput
-                            onBlur={onBlur}
-                            onChangeText={onChange}
-                            value={value}
-                            placeholder="Correo"
-                            className="bg-white rounded-lg px-4 py-3 border border-gray-300"
-                        />
-                    )}
-                    name="email"
-                />
-                {errors.email && (
-                    <Text className="text-red-500 mt-1">{errors.email.message}</Text>
-                )}
-            </View>
+            <Form {...form}>
+                <View className="space-y-4 mb-6 w-full">
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        rules={{
+                            required: 'El correo es requerido',
+                            pattern: {
+                                value: /^\S+@\S+\.\S+$/,
+                                message: 'El correo no es válido',
+                            },
+                        }}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <TextInput {...field} placeholder="Email" />
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-            <View className="w-full mb-6">
-                <Text className="mb-2 text-gray-800">Contraseña</Text>
-                <Controller
-                    control={control}
-                    rules={{ required: 'La contraseña es requerida' }}
-                    render={({ field: { onChange, onBlur, value } }) => (
-                        <TextInput
-                            onBlur={onBlur}
-                            onChangeText={onChange}
-                            value={value}
-                            placeholder="Contraseña"
-                            secureTextEntry
-                            className="bg-white rounded-lg px-4 py-3 border border-gray-300"
-                        />
-                    )}
-                    name="password"
-                />
-                {errors.password && (
-                    <Text className="text-red-500 mt-1">{errors.password.message}</Text>
-                )}
-            </View>
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        rules={{ required: 'La contraseña es requerida' }}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Contraseña</FormLabel>
+                                <TextInput
+                                    {...field}
+                                    placeholder="Contraseña"
+                                    secureTextEntry
+                                />
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </View>
+            </Form>
 
             <TouchableOpacity
-                onPress={handleSubmit(onSubmit)}
+                onPress={form.handleSubmit(onSubmit)}
                 className="bg-blue-600 py-3 rounded-lg w-full items-center"
                 disabled={isPending}
             >

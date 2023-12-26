@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { StackScreenProps } from '@react-navigation/stack';
 
 import { FetchBranchesBranchItem } from '@/screens/RegisterTask/RegisterTaskBranchFieldScreen/queries';
+import { FetchBusinessesDataItem } from '@/screens/RegisterTask/RegisterTaskBusinessFieldScreen/queries';
 
 export type RootStackParamList = {
     Root: undefined;
@@ -23,7 +24,11 @@ export type RootStackParamList = {
     FullScreenCamera: undefined;
     RegisterTask: undefined;
     RegisterTaskBranchFieldScreen: {
-        value?: FetchBranchesBranchItem['_id'];
+        value: FetchBranchesBranchItem['_id'] | null;
+    };
+    RegisterTaskBusinessFieldScreen: {
+        branchId: FetchBranchesBranchItem['_id'];
+        value: FetchBusinessesDataItem['_id'] | null;
     };
     AccountSettings: undefined;
 };
@@ -57,6 +62,10 @@ export type ProfileScreenRouteProp = NativeStackScreenProps<RootTabParamList, 'P
 export type RegisterTaskBranchFieldScreenRouteProp = NativeStackScreenProps<
     RootStackParamList,
     'RegisterTaskBranchFieldScreen'
+>;
+export type RegisterTaskBusinessFieldScreenRouteProps = NativeStackScreenProps<
+    RootStackParamList,
+    'RegisterTaskBusinessFieldScreen'
 >;
 
 export type RootTabParamList = {

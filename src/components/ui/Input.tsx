@@ -77,58 +77,65 @@ type InputFromOuterScreenProps<
     addScreenListener: (setValue: (value: TValue, label: string) => void) => void;
 };
 
-export const InputFromOuterScreen = forwardRef<View, InputFromOuterScreenProps>(
-    (props: InputFromOuterScreenProps, ref) => {
-        const {
-            className,
-            value,
-            style,
-            onChange,
-            onNavigate,
-            addScreenListener,
-            placeholder,
-            ...rest
-        } = props;
+interface WithForwardRefType extends React.FC<InputFromOuterScreenProps<unknown>> {
+    <TValue extends Record<string, any> | number | string | boolean | unknown = unknown>(
+        props: InputFromOuterScreenProps<TValue>,
+    ): ReturnType<React.FC<InputFromOuterScreenProps<TValue>>>;
+}
 
-        const [innerValue, setInnerValue] = useState(value);
+export const InputFromOuterScreen: WithForwardRefType = forwardRef<
+    View,
+    InputFromOuterScreenProps
+>((props: InputFromOuterScreenProps, ref) => {
+    const {
+        className,
+        value,
+        style,
+        onChange,
+        onNavigate,
+        addScreenListener,
+        placeholder,
+        ...rest
+    } = props;
 
-        const handlePress = () => {
-            addScreenListener((value, label) => {
-                setInnerValue({
-                    value,
-                    label,
-                });
+    const [innerValue, setInnerValue] = useState(value);
+
+    const handlePress = () => {
+        addScreenListener((value, label) => {
+            setInnerValue({
+                value,
+                label,
             });
+        });
 
-            onNavigate();
-        };
+        onNavigate();
+    };
 
-        useEffect(() => {
-            if (innerValue) {
-                onChange(innerValue);
-            } else {
-                onChange(null);
-            }
-        }, [innerValue, onChange]);
+    useEffect(() => {
+        if (innerValue) {
+            onChange(innerValue);
+        } else {
+            onChange(null);
+        }
+    }, [innerValue, onChange]);
 
-        return (
-            <Pressable style={style} onPress={handlePress}>
-                <View
-                    ref={ref}
-                    className={cn(
-                        'flex w-full rounded-md border border-input bg-background px-3 h-12 text-sm justify-center',
-                        className,
-                    )}
-                >
-                    {innerValue ? (
-                        <Text {...rest}>{innerValue.label}</Text>
-                    ) : (
-                        <Text className="text-muted-foreground" {...rest}>
-                            {placeholder}
-                        </Text>
-                    )}
-                </View>
-            </Pressable>
-        );
-    },
-);
+    return (
+        <Pressable style={style} onPress={handlePress}>
+            <View
+                ref={ref}
+                className={cn(
+                    'flex w-full rounded-md border border-input bg-background px-3 h-12 text-sm justify-center',
+                    className,
+                )}
+            >
+                {innerValue ? (
+                    <Text {...rest}>{innerValue.label}</Text>
+                ) : (
+                    <Text className="text-muted-foreground" {...rest}>
+                        {placeholder}
+                    </Text>
+                )}
+            </View>
+        </Pressable>
+    );
+});
