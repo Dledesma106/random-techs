@@ -4,20 +4,35 @@ module.exports = {
     theme: {
         extend: {
             colors: {
+                ring: 'rgb(1, 8, 22)',
+                background: 'rgb(255, 255, 255)',
+                foreground: 'rgb(1, 8, 22)',
+                border: 'rgb(229, 231, 235)',
+                input: 'rgb(226, 232, 240)',
+                primary: {
+                    DEFAULT: 'rgb(15, 23, 42)',
+                    foreground: 'rgb(247, 249, 251)',
+                },
+                secondary: {
+                    DEFAULT: 'rgb(241, 245, 249)',
+                    foreground: 'rgb(15, 23, 42)',
+                },
                 destructive: {
-                    DEFAULT: 'hsl(0 84.2% 60.2%)',
-                    foreground: 'hsl(210 40% 98%)',
+                    DEFAULT: 'rgb(238, 68, 68)',
+                    foreground: 'rgb(247, 249, 251)',
                 },
                 muted: {
-                    DEFAULT: 'hsl(0 0% 90%)',
-                    foreground: 'hsl(215.4 16.3% 46.9%)',
+                    DEFAULT: 'rgb(241, 245, 249)',
+                    foreground: 'rgb(100, 116, 139)',
                 },
-                ring: 'hsl(222.2 84% 4.9%)',
-                background: 'hsl(0 0% 100%)',
-                foreground: 'hsl(222.2 84% 4.9%)',
-                border: 'hsl(214.3 31.8% 91.4%)',
-                input: '#e2e8f0',
-                ring: 'hsl(222.2 84% 4.9%)',
+                accent: {
+                    DEFAULT: 'rgb(241, 245, 249)',
+                    foreground: 'rgb(15, 23, 42)',
+                },
+                card: {
+                    DEFAULT: 'rgb(255, 255, 255)',
+                    foreground: 'rgb(1, 8, 22)',
+                },
             },
         },
     },

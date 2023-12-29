@@ -1,168 +1,53 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
-import { TASK_BY_ID_QUERY_KEY, TaskByIdQueryData } from './queries';
-
 import { appAxios } from '@/api/axios';
-import JWTTokenService from '@/lib/JWTTokenService';
+import { TaskType } from '@/models/types';
 
-import { TASKS_LIST_QUERY_KEY, TasksListQuery } from '../Home/TasksList/queries';
+import { TASKS_LIST_QUERY_KEY } from '../Home/TasksList/queries';
 
-type UseUploadImageToTaskMutation = { data: string };
-type UseUploadImageToTaskMutationVariables = {
-    taskId: string;
-    localURI: string;
+type CreateTaskRequestData = { data: string };
+type CreateTaskMutationVariables = {
+    branch: string;
+    business: string;
+    taskType: TaskType;
+    description: string;
+    workOrderNumber: number;
 };
 
-const createImageFormData = (localURI: string) => {
-    const photoName = localURI.split('/').pop();
-    if (!photoName) {
-        throw new Error('La imagen no tiene un nombre válido');
-    }
+type UseTaskUpdateMutation = string;
 
-    return {
-        uri: localURI,
-        name: photoName,
-        type: 'image/jpeg',
-    };
+const postTask = async (data: CreateTaskMutationVariables) => {
+    const response = await appAxios.post<CreateTaskRequestData>('/tech/tasks', data, {
+        timeout: 8000,
+    });
+    return response.data.data;
 };
 
-export const postImageToTask = async (data: UseUploadImageToTaskMutationVariables) => {
-    const { localURI, taskId } = data;
+type Options = UseMutationOptions<
+    UseTaskUpdateMutation,
+    AxiosError,
+    CreateTaskMutationVariables
+>;
 
-    const photoName = localURI.split('/').pop();
-    if (!photoName) {
-        throw new Error('La imagen no tiene un nombre válido');
-    }
-
-    const formData = new FormData();
-    const imageData = createImageFormData(localURI);
-    formData.append('image', imageData);
-
-    const response = await appAxios.post<UseUploadImageToTaskMutation>(
-        `/images?taskId=${taskId}`,
-        formData,
-        {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        },
-    );
-
-    return response.data;
-};
-
-export const useUploadImageToTaskMutation = () => {
+export const useCreateTaskMutation = ({ onSuccess, ...options }: Options) => {
     const client = useQueryClient();
-
-    return useMutation<
-        UseUploadImageToTaskMutation,
-        AxiosError,
-        UseUploadImageToTaskMutationVariables
-    >({
-        mutationFn: postImageToTask,
-        onSuccess: (data, variables) => {
+    return useMutation<UseTaskUpdateMutation, AxiosError, CreateTaskMutationVariables>({
+        mutationFn: postTask,
+        onSuccess: (data, variables, context) => {
             if (!data) {
                 return;
             }
 
-            client.setQueryData<TaskByIdQueryData>(
-                TASK_BY_ID_QUERY_KEY(variables.taskId),
-                (oldData) => {
-                    if (!oldData) {
-                        return oldData;
-                    }
+            client.invalidateQueries({
+                queryKey: TASKS_LIST_QUERY_KEY,
+            });
 
-                    const newData: TaskByIdQueryData = {
-                        ...oldData,
-                        images: [
-                            ...oldData.images,
-                            {
-                                _id: data.data,
-                                url: variables.localURI,
-                            },
-                        ],
-                    };
-
-                    return newData;
-                },
-            );
+            if (onSuccess) {
+                onSuccess(data, variables, context);
+            }
         },
+        retry: false,
+        ...options,
     });
-};
-
-type UseTaskUpdateMutation = {
-    data: TaskByIdQueryData;
-};
-type UseTaskUpdateMutationVariables = {
-    taskId: string;
-    isClosed?: boolean;
-    workOrder?: string;
-    imageIdToDelete?: string;
-};
-
-export const putTaskUpdate = async (data: UseTaskUpdateMutationVariables) => {
-    const response = await appAxios.put<UseTaskUpdateMutation>(
-        `/tech/tasks/${data.taskId}`,
-        {
-            isClosed: data.isClosed,
-            workOrder: data.workOrder,
-            imageIdToDelete: data.imageIdToDelete,
-        },
-        {
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: (await JWTTokenService.get()) || '',
-            },
-        },
-    );
-
-    return response.data;
-};
-
-export const useTaskUpdateMutation = () => {
-    const client = useQueryClient();
-    return useMutation<UseTaskUpdateMutation, AxiosError, UseTaskUpdateMutationVariables>(
-        {
-            mutationFn: putTaskUpdate,
-            onSuccess: (data, variables) => {
-                if (!data) {
-                    return;
-                }
-
-                client.setQueryData<TasksListQuery>(TASKS_LIST_QUERY_KEY, (oldData) => {
-                    if (!oldData) {
-                        return oldData;
-                    }
-
-                    const newData: TasksListQuery = oldData.map((task) => {
-                        if (task._id !== variables.taskId) {
-                            return task;
-                        }
-
-                        return {
-                            ...task,
-                            status: data.data.status,
-                        };
-                    });
-
-                    return newData;
-                });
-
-                client.setQueryData<TaskByIdQueryData>(
-                    TASK_BY_ID_QUERY_KEY(variables.taskId),
-                    (oldData) => {
-                        if (!oldData) {
-                            return oldData;
-                        }
-
-                        const newData: TaskByIdQueryData = data.data;
-
-                        return newData;
-                    },
-                );
-            },
-        },
-    );
 };

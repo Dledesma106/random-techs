@@ -22,7 +22,7 @@ export type FetchBranchesBranchItem = {
     businesses: {
         _id: string;
         name: string;
-    };
+    }[];
 };
 
 type FetchBranchesResponse = {

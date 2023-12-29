@@ -1,49 +1,44 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect } from 'react';
-import { DeviceEventEmitter, FlatList, Text, TouchableOpacity, View } from 'react-native';
+import {
+    FlatList,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 
 import useBusinessesQuery, { FetchBusinessesDataItem } from './queries';
 
 import { RegisterTaskBusinessFieldScreenRouteProps } from '@/navigation/types';
 
-const EVENT_NAME = 'RegisterTaskBusinessFieldScreen';
-
-export const addRRegisterTaskBusinessFieldScreenListener = (
-    callback: (branch: FetchBusinessesDataItem) => void,
-) => {
-    DeviceEventEmitter.addListener(EVENT_NAME, callback);
-};
-
-const removeRegisterTaskBusinessFieldScreenListener = () => {
-    DeviceEventEmitter.removeAllListeners(EVENT_NAME);
-};
-
-const emitRegisterTaskBusinessFieldScreenEvent = (data: FetchBusinessesDataItem) => {
-    DeviceEventEmitter.emit(EVENT_NAME, data);
-};
-
 const RegisterTaskBusinessFieldScreen = ({
     navigation,
     route,
 }: RegisterTaskBusinessFieldScreenRouteProps) => {
-    const queryResult = useBusinessesQuery();
-    const { value } = route.params;
-
-    useEffect(() => {
-        return () => {
-            removeRegisterTaskBusinessFieldScreenListener();
-        };
-    }, []);
+    const { value, branchId } = route.params;
+    const queryResult = useBusinessesQuery(branchId);
 
     const handlePress = (branch: FetchBusinessesDataItem) => {
-        emitRegisterTaskBusinessFieldScreenEvent(branch);
-        navigation.goBack();
+        navigation.navigate({
+            name: 'RegisterTask',
+            params: {
+                business: branch,
+            },
+            merge: true,
+        });
     };
 
     if (queryResult.data) {
         return (
             <View className="flex-1 bg-white">
                 <FlatList
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={queryResult.fetchStatus === 'fetching'}
+                            onRefresh={queryResult.refetch}
+                        />
+                    }
                     data={queryResult.data}
                     renderItem={({ item }) => {
                         return (
@@ -75,16 +70,30 @@ const RegisterTaskBusinessFieldScreen = ({
 
     if (queryResult.isError) {
         return (
-            <View>
+            <ScrollView
+                refreshControl={
+                    <RefreshControl
+                        refreshing={queryResult.fetchStatus === 'fetching'}
+                        onRefresh={queryResult.refetch}
+                    />
+                }
+            >
                 <Text>Error...</Text>
-            </View>
+            </ScrollView>
         );
     }
 
     return (
-        <View>
+        <ScrollView
+            refreshControl={
+                <RefreshControl
+                    refreshing={queryResult.fetchStatus === 'fetching'}
+                    onRefresh={queryResult.refetch}
+                />
+            }
+        >
             <Text>Loading...</Text>
-        </View>
+        </ScrollView>
     );
 };
 

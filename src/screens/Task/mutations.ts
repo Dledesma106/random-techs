@@ -61,6 +61,38 @@ export const useUploadImageToTaskMutation = () => {
         UseUploadImageToTaskMutationVariables
     >({
         mutationFn: postImageToTask,
+        onMutate: async (variables) => {
+            const previousData = client.getQueryData<TaskByIdQueryData>(
+                TASK_BY_ID_QUERY_KEY(variables.taskId),
+            );
+
+            if (previousData) {
+                client.setQueryData<TaskByIdQueryData>(
+                    TASK_BY_ID_QUERY_KEY(variables.taskId),
+                    (oldData) => {
+                        if (!oldData) {
+                            return oldData;
+                        }
+
+                        const newData: TaskByIdQueryData = {
+                            ...oldData,
+                            images: [
+                                ...oldData.images,
+                                {
+                                    _id: variables.localURI,
+                                    url: variables.localURI,
+                                    unsaved: true,
+                                },
+                            ],
+                        };
+
+                        return newData;
+                    },
+                );
+            }
+
+            return { previousData };
+        },
         onSuccess: (data, variables) => {
             if (!data) {
                 return;
@@ -75,13 +107,18 @@ export const useUploadImageToTaskMutation = () => {
 
                     const newData: TaskByIdQueryData = {
                         ...oldData,
-                        images: [
-                            ...oldData.images,
-                            {
-                                _id: data.data,
+                        images: oldData.images.map((image) => {
+                            if (image._id !== variables.localURI) {
+                                return image;
+                            }
+
+                            return {
+                                ...image,
+                                _id: variables.localURI,
                                 url: variables.localURI,
-                            },
-                        ],
+                                unsaved: false,
+                            };
+                        }),
                     };
 
                     return newData;

@@ -1,25 +1,31 @@
 import { AntDesign, EvilIcons } from '@expo/vector-icons';
-import clsx from 'clsx';
+import dateFns from 'date-fns';
 import { useEffect } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import ContentLoader, { Rect } from 'react-content-loader/native';
+import { useForm } from 'react-hook-form';
 import {
     Text,
     View,
     ScrollView,
     Image,
-    TextInput,
     RefreshControl,
     ActivityIndicator,
+    Pressable,
 } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import { useTaskUpdateMutation, useUploadImageToTaskMutation } from './mutations';
 import { useTaskByIdQuery } from './queries';
 
+import { Badge, BadgeText } from '@/components/ui/badge';
+import { Button, ButtonText } from '@/components/ui/button';
+import { Form, FormField } from '@/components/ui/form';
+import { TextInput } from '@/components/ui/Input';
+import { Label } from '@/components/ui/label';
 import { TaskStatus } from '@/models/types';
 import { TaskScreenRouteProp } from '@/navigation/types';
 
-import { dmyDateString } from '../../lib/utils';
+import { cn } from '../../lib/utils';
 import { addFullScreenCameraListener } from '../FullScreenCamera';
 
 type FormValues = {
@@ -37,8 +43,12 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     const taskUpdateMutation = useTaskUpdateMutation();
 
     useEffect(() => {
-        const subscription = formMethods.watch((values) => {
-            if (values.isClosed !== undefined) {
+        const subscription = formMethods.watch((values, { name, type }) => {
+            if (name === 'isClosed' && type === 'change') {
+                if (values.isClosed === undefined) {
+                    return;
+                }
+
                 taskUpdateMutation.mutate({
                     taskId: id,
                     isClosed: values.isClosed,
@@ -75,212 +85,274 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
         const task = taskQueryResult.data;
 
         return (
-            <ScrollView
-                refreshControl={
-                    <RefreshControl
-                        refreshing={taskQueryResult.isPending}
-                        onRefresh={taskQueryResult.refetch}
-                    />
-                }
-                className="bg-white h-screen"
-            >
-                {taskQueryResult.isPending ? <ActivityIndicator /> : null}
+            <View className="flex-1 bg-white">
+                <ScrollView
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={taskQueryResult.isPending}
+                            onRefresh={taskQueryResult.refetch}
+                        />
+                    }
+                    className="flex-1"
+                >
+                    <View className="px-4 pt-4 pb-24 space-y-4">
+                        <View className="items-start">
+                            <Badge className="mb-4">
+                                <BadgeText>{task.taskType}</BadgeText>
+                            </Badge>
 
-                <View>
-                    <View className="px-4 pt-4">
-                        <Text className="text-gray-600">{task.business.name}</Text>
+                            <Text className="text-muted-foreground">
+                                {task.business.name}
+                            </Text>
 
-                        <Text className="text-xl font-bold">
-                            {task.branch.client.name}
-                        </Text>
-
-                        <Text className="text-gray-600">
-                            Sucursal: {task.branch.number} - Asignado:{' '}
-                            {dmyDateString(new Date(task.openedAt))}
-                        </Text>
-
-                        <View className="pt-4">
-                            <Text className="font-semibold mb-1.5">Descripción</Text>
-                            <Text className="text-gray-600">
-                                {task.taskType} | {task.description}
+                            <Text className="text-xl font-bold">
+                                {task.branch.client.name}
                             </Text>
                         </View>
 
-                        {task.status === TaskStatus.Pendiente ? (
-                            <TouchableOpacity
-                                className={clsx(
-                                    'bg-black rounded-lg p-4 mt-4',
-                                    taskUpdateMutation.isPending ? 'opacity-50' : '',
-                                )}
-                                onPress={() => {
-                                    taskUpdateMutation.mutate({
-                                        taskId: task._id,
-                                        isClosed: true,
-                                    });
-                                }}
-                                disabled={taskUpdateMutation.isPending}
-                            >
-                                {taskUpdateMutation.isPending ? (
-                                    <ActivityIndicator />
+                        <View>
+                            <Label>Sucursal</Label>
+                            <Text className="text-muted-foreground">
+                                {task.branch.number}
+                            </Text>
+                        </View>
+
+                        <View>
+                            <Label className="mb-1.5">Fecha de asignación</Label>
+                            <Text className="text-muted-foreground">
+                                {dateFns.format(new Date(task.openedAt), 'dd/MM/yyyy')}
+                            </Text>
+                        </View>
+
+                        <View>
+                            <Label className="mb-1.5">Descripción</Label>
+                            <Text className="text-muted-foreground">
+                                {task.description}
+                            </Text>
+                        </View>
+
+                        <View>
+                            <Label className="mb-1.5">Fecha de cierre</Label>
+                            <Text className="text-muted-foreground">
+                                {task.closedAt ? (
+                                    dateFns.format(new Date(task.closedAt), 'dd/MM/yyyy')
                                 ) : (
-                                    <Text className="text-white text-center font-bold">
-                                        Finalizar tarea
-                                    </Text>
+                                    <Text className="text-primary">Pendiente</Text>
                                 )}
-                            </TouchableOpacity>
-                        ) : (
-                            <View className="mt-4">
-                                <Text className="font-bold">Tarea finalizada</Text>
-                            </View>
-                        )}
+                            </Text>
+                        </View>
 
-                        {/* TODO: PREGUNTAR ESTO */}
-                        <View className="pt-4">
-                            <Text className="font-semibold mb-1.5">Fecha de cierre</Text>
-                            <TouchableOpacity
-                                onPress={() => {
-                                    // TODO
-                                }}
-                            >
-                                <TextInput
-                                    editable={false}
-                                    // value={date.toLocaleDateString()}
-                                    placeholder="Seleccionar fecha"
-                                    className="p-4 rounded border border-gray-200"
+                        <View>
+                            <Label className="mb-1.5">Auditor</Label>
+                            <Text className="text-muted-foreground">
+                                {task.auditor ? task.auditor.fullName : 'Pendiente'}
+                            </Text>
+                        </View>
+
+                        <View>
+                            <Label className="mb-1.5">Orden de Trabajo</Label>
+                            <Form {...formMethods}>
+                                <FormField
+                                    name="workOrderNumber"
+                                    control={formMethods.control}
+                                    defaultValue={task.workOrderNumber?.toString()}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                        <TextInput
+                                            onBlur={onBlur}
+                                            onChangeText={onChange}
+                                            value={value}
+                                            placeholder="Orden de Trabajo"
+                                            keyboardType="numeric"
+                                        />
+                                    )}
                                 />
-                            </TouchableOpacity>
-
-                            {/* <DateTimePicker
-                                accentColor="black"
-                                textColor="black"
-                                value={date}
-                                mode="date"
-                                display="default"
-                                onChange={() => {
-                                    // TODO
-                                }}
-                            /> */}
+                            </Form>
                         </View>
 
-                        {/* TODO: PREGUNTAR ESTO */}
-                        <View className="pt-4">
-                            <Text className="font-semibold mb-1.5">Orden de Trabajo</Text>
-                            <Controller
-                                control={formMethods.control}
-                                render={({ field: { onChange, onBlur, value } }) => (
-                                    <TextInput
-                                        onBlur={onBlur}
-                                        onChangeText={onChange}
-                                        value={value}
-                                        placeholder="Orden de Trabajo"
-                                        className="p-4 rounded border border-gray-200"
-                                        keyboardType="numeric"
-                                    />
-                                )}
-                                name="workOrderNumber"
-                                defaultValue={task.workOrderNumber?.toString()}
-                            />
-                        </View>
-
-                        <View className="pt-4">
-                            <Text className="font-semibold mb-1.5">Gastos</Text>
+                        <View>
+                            <Label className="mb-1.5">Gastos</Label>
 
                             <View className="space-y-2">
                                 {task.expenses.map((expense, index) => (
-                                    <TouchableOpacity
+                                    <Button
                                         key={expense._id}
                                         onPress={() => navigateToExpense(expense._id)}
-                                        className="flex flex-row items-center justify-between py-4 border px-4 rounded-lg border-gray-200"
+                                        className="flex flex-row items-center justify-between"
+                                        variant="outline"
                                     >
-                                        <Text className="text-gray-600">
-                                            Gasto {index + 1}
-                                        </Text>
+                                        <ButtonText>Gasto {index + 1}</ButtonText>
 
                                         <AntDesign name="right" size={14} color="gray" />
-                                    </TouchableOpacity>
+                                    </Button>
                                 ))}
                             </View>
 
-                            <TouchableOpacity
-                                onPress={navigateToRegisterExpense}
-                                className="flex flex-row items-center justify-between py-1 bg-black rounded p-4 mt-2"
-                            >
-                                <Text className="text-white font-bold">
-                                    Agregar gasto
-                                </Text>
-                                <AntDesign name="plus" size={14} color="gray" />
-                            </TouchableOpacity>
+                            <View className="flex flex-row justify-start">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-2"
+                                    onPress={navigateToRegisterExpense}
+                                >
+                                    <ButtonText>Agregar gasto</ButtonText>
+                                </Button>
+                            </View>
                         </View>
 
-                        {task.images.length > 0 && (
-                            <View className="pt-4 pb-4">
-                                <Text className="font-semibold mb-1.5">Imágenes</Text>
+                        <View>
+                            <Label className="mb-1.5">
+                                Imágenes ({task.images.length} de 3)
+                            </Label>
 
-                                <View className="flex flex-row space-x-4">
-                                    {task.images.map((image) => (
-                                        <View key={image._id} className="flex-1 relative">
-                                            <Image
-                                                className="bg-gray-200 relative z-0"
-                                                source={{ uri: image.url }}
-                                                style={{
-                                                    borderRadius: 6,
-                                                    aspectRatio: 9 / 16,
-                                                }}
-                                            />
+                            <View className="flex flex-row space-x-4">
+                                {task.images.map((image) => (
+                                    <View
+                                        key={image._id}
+                                        className="flex-[0.33] relative"
+                                    >
+                                        <Image
+                                            className="bg-gray-200 relative z-0"
+                                            source={{ uri: image.url }}
+                                            style={{
+                                                borderRadius: 6,
+                                                aspectRatio: 9 / 16,
+                                            }}
+                                        />
 
-                                            <View className="absolute top-2 right-2 bg-black flex items-center justify-center rounded-full z-50 w-6 h-6">
-                                                <TouchableOpacity
-                                                    onPress={() => {
-                                                        taskUpdateMutation.mutate({
-                                                            taskId: task._id,
-                                                            imageIdToDelete: image._id,
-                                                        });
-                                                    }}
-                                                >
-                                                    <AntDesign
-                                                        name="close"
-                                                        size={14}
-                                                        color="white"
-                                                    />
-                                                </TouchableOpacity>
+                                        {image.unsaved && (
+                                            <View className="absolute inset-x-0 inset-y-0 flex items-center justify-center bg-white/70">
+                                                <ActivityIndicator
+                                                    className="mb-1"
+                                                    size="small"
+                                                    color="black"
+                                                />
+
+                                                <Text className="text-xs text-black">
+                                                    Subiendo...
+                                                </Text>
                                             </View>
+                                        )}
+
+                                        <View className="absolute top-2 right-2 bg-black flex items-center justify-center rounded-full z-50 w-6 h-6">
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    taskUpdateMutation.mutate({
+                                                        taskId: task._id,
+                                                        imageIdToDelete: image._id,
+                                                    });
+                                                }}
+                                            >
+                                                <AntDesign
+                                                    name="close"
+                                                    size={14}
+                                                    color="white"
+                                                />
+                                            </TouchableOpacity>
                                         </View>
-                                    ))}
-                                </View>
-                            </View>
-                        )}
+                                    </View>
+                                ))}
 
-                        {task.images.length < 3 && (
-                            <View className="pt-4 pb-4">
-                                <TouchableOpacity
-                                    onPress={navigateToCameraScreen}
-                                    className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
-                                >
-                                    <Text className="font-semibold text-white">
-                                        Añadir Imagen
-                                    </Text>
+                                {task.images.length < 3 && (
+                                    <View className="flex-[0.33] relative border border-border">
+                                        <TouchableOpacity
+                                            onPress={navigateToCameraScreen}
+                                            className="bg-muted flex items-center justify-center"
+                                            style={{
+                                                aspectRatio: 9 / 16,
+                                            }}
+                                        >
+                                            <View className="items-center">
+                                                <EvilIcons
+                                                    name="camera"
+                                                    size={32}
+                                                    color="#4B5563"
+                                                />
 
-                                    <EvilIcons name="camera" size={22} color="white" />
-                                </TouchableOpacity>
+                                                <Text className="text-[#4B5563] text-xs">
+                                                    Agregar
+                                                </Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
                             </View>
-                        )}
+                        </View>
                     </View>
+                </ScrollView>
+
+                <View className="absolute bottom-4 inset-x-0 px-4 bg-transparent">
+                    {task.status === TaskStatus.Pendiente ? (
+                        <Pressable
+                            onPress={() => {
+                                taskUpdateMutation.mutate({
+                                    taskId: task._id,
+                                    isClosed: true,
+                                });
+                            }}
+                            className="border border-border p-4 rounded-full bg-black justify-center items-center flex flex-row space-x-1 relative"
+                        >
+                            <Text
+                                className={cn(
+                                    'font-bold text-white',
+                                    taskUpdateMutation.isPending && 'opacity-0',
+                                )}
+                            >
+                                Finalizar tarea
+                            </Text>
+
+                            {taskUpdateMutation.isPending && (
+                                <View className="absolute inset-x-0 inset-y-0 flex items-center justify-center">
+                                    <ActivityIndicator size="small" color="black" />
+                                </View>
+                            )}
+                        </Pressable>
+                    ) : (
+                        <View className="border border-border p-4 rounded-full bg-white justify-center items-center flex flex-row space-x-1">
+                            <Text className="font-bold">Tarea finalizada</Text>
+
+                            <AntDesign name="checkcircleo" size={16} color="black" />
+                        </View>
+                    )}
                 </View>
-            </ScrollView>
+            </View>
         );
     }
 
     if (taskQueryResult.error) {
         return (
-            <View>
-                <Text>Error</Text>
+            <View className="flex-1 bg-white">
+                <ScrollView
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={taskQueryResult.isPending}
+                            onRefresh={taskQueryResult.refetch}
+                        />
+                    }
+                    className="flex-1 bg-white"
+                    contentContainerStyle={{ flex: 1 }}
+                >
+                    <View className="flex-1 flex items-center justify-center">
+                        <Text className="text-center text-muted-foreground">
+                            No se pudo cargar la tarea
+                        </Text>
+                        <Text className="text-center text-muted-foreground">
+                            Por favor, intente nuevamente
+                        </Text>
+                    </View>
+                </ScrollView>
             </View>
         );
     }
 
     return (
-        <View>
-            <Text>Cargando...</Text>
+        <View className="bg-white flex-1 px-4 py-4">
+            <ContentLoader>
+                <Rect x="0" y="0" rx="10" ry="10" width="100" height="18" />
+                <Rect x="0" y="24" rx="10" ry="10" width="388" height="32" />
+                <Rect x="0" y="80" rx="10" ry="10" width="388" height="32" />
+                <Rect x="0" y="120" rx="10" ry="10" width="388" height="32" />
+                <Rect x="0" y="160" rx="10" ry="10" width="388" height="32" />
+            </ContentLoader>
         </View>
     );
 };

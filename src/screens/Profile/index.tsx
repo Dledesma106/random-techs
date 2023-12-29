@@ -1,5 +1,6 @@
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, View } from 'react-native';
 
+import { Button, ButtonText } from '@/components/ui/button';
 import { useUserContext } from '@/context/userContext/useUser';
 import { ProfileScreenRouteProp } from '@/navigation/types';
 
@@ -7,23 +8,30 @@ function ProfileScreen({ navigation }: ProfileScreenRouteProp) {
     const { user, logoutUser } = useUserContext();
 
     return (
-        <View>
-            <TouchableOpacity
-                onPress={() => {
-                    navigation.navigate('AccountSettings');
-                }}
-            >
-                <Text className="text-white font-bold">{user?.fullName}</Text>
-            </TouchableOpacity>
+        <View className="bg-white flex-1 px-4 py-4">
+            <View className="mb-4">
+                <Text className="font-bold text-lg mb-1">Hola, {user?.fullName}</Text>
+                <Text className="text-gray-500">¿Que quieres hacer hoy?</Text>
+            </View>
 
-            <TouchableOpacity
-                onPress={() => {
-                    logoutUser(navigation);
-                }}
-                className="flex flex-row items-center justify-between py-1 bg-black rounded p-4 mt-2"
-            >
-                <Text className="text-white font-bold">Logout</Text>
-            </TouchableOpacity>
+            <View className="space-y-4">
+                <Button
+                    variant="secondary"
+                    onPress={() => {
+                        navigation.navigate('AccountSettings');
+                    }}
+                >
+                    <ButtonText>Cambiar contraseña</ButtonText>
+                </Button>
+
+                <Button
+                    onPress={() => {
+                        logoutUser(navigation);
+                    }}
+                >
+                    <ButtonText>Cerrar sesión</ButtonText>
+                </Button>
+            </View>
         </View>
     );
 }

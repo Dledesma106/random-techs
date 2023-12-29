@@ -16,6 +16,7 @@ import RegisterExpenseOnTask from '@/screens/RegisterExpenseOnTask';
 import RegisterTask from '@/screens/RegisterTask';
 import RegisterTaskBranchFieldScreen from '@/screens/RegisterTask/RegisterTaskBranchFieldScreen';
 import RegisterTaskBusinessFieldScreen from '@/screens/RegisterTask/RegisterTaskBusinessFieldScreen';
+import RegisterTaskTypeFieldScreen from '@/screens/RegisterTask/RegisterTaskTypeFieldScreen';
 
 import { useUserContext } from '../context/userContext/useUser';
 import Home from '../screens/Home';
@@ -96,6 +97,14 @@ function RootNavigator() {
                 component={RegisterTaskBusinessFieldScreen}
                 options={{
                     title: 'Empresas',
+                }}
+            />
+
+            <Stack.Screen
+                name="RegisterTaskTypeFieldScreen"
+                component={RegisterTaskTypeFieldScreen}
+                options={{
+                    title: 'Tipo de tarea',
                 }}
             />
         </Stack.Navigator>

@@ -41,6 +41,12 @@ const fetchTasks = (filter: TasksListQueryFilters) => async () => {
         }
     }
 
+    const url = searchParams.size ? `/tech/tasks?${searchParams}` : '/tech/tasks';
+
+    console.log(url);
+    // console.log(typeof );
+    console.log(searchParams.size);
+
     const response = await appAxios.get<FetchTasks>(`/tech/tasks?${searchParams}`, {
         headers: {
             Accept: 'application/json',

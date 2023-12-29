@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, useState } from 'react';
 import {
     TextInput as NativeTextInput,
     Pressable,
@@ -26,7 +26,7 @@ export const TextInput = forwardRef<NativeTextInput, InputProps>(
         };
 
         return (
-            <View className="rounded-md h-12" style={style}>
+            <View className="rounded-md" style={style}>
                 <View
                     className="rounded-md"
                     style={[
@@ -46,12 +46,16 @@ export const TextInput = forwardRef<NativeTextInput, InputProps>(
                 >
                     <NativeTextInput
                         className={cn(
-                            'flex w-full rounded-md border border-input bg-background px-3 h-12 text-sm ring-offset-background placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+                            'rounded-md border bg-background border-input py-3 px-3 ring-offset-background disabled:opacity-50',
                             className,
                         )}
+                        style={{
+                            fontSize: 14,
+                            lineHeight: 17,
+                        }}
                         ref={ref}
-                        onFocus={handleFocus}
                         onBlur={handleBlur}
+                        onFocus={handleFocus}
                         placeholderTextColor="hsl(215.4 16.3% 46.9%)"
                         {...props}
                     />
@@ -72,9 +76,7 @@ type InputFromOuterScreenProps<
         value: TValue;
         label: string;
     } | null;
-    onChange: (value: TValue | null) => void;
     onNavigate: () => void;
-    addScreenListener: (setValue: (value: TValue, label: string) => void) => void;
 };
 
 interface WithForwardRefType extends React.FC<InputFromOuterScreenProps<unknown>> {
@@ -87,49 +89,23 @@ export const InputFromOuterScreen: WithForwardRefType = forwardRef<
     View,
     InputFromOuterScreenProps
 >((props: InputFromOuterScreenProps, ref) => {
-    const {
-        className,
-        value,
-        style,
-        onChange,
-        onNavigate,
-        addScreenListener,
-        placeholder,
-        ...rest
-    } = props;
-
-    const [innerValue, setInnerValue] = useState(value);
+    const { className, value, style, onNavigate, placeholder, ...rest } = props;
 
     const handlePress = () => {
-        addScreenListener((value, label) => {
-            setInnerValue({
-                value,
-                label,
-            });
-        });
-
         onNavigate();
     };
-
-    useEffect(() => {
-        if (innerValue) {
-            onChange(innerValue);
-        } else {
-            onChange(null);
-        }
-    }, [innerValue, onChange]);
 
     return (
         <Pressable style={style} onPress={handlePress}>
             <View
                 ref={ref}
                 className={cn(
-                    'flex w-full rounded-md border border-input bg-background px-3 h-12 text-sm justify-center',
+                    'flex w-full rounded-md border border-input bg-background py-3 px-3 min-h-12 text-sm justify-center',
                     className,
                 )}
             >
-                {innerValue ? (
-                    <Text {...rest}>{innerValue.label}</Text>
+                {value ? (
+                    <Text {...rest}>{value.label}</Text>
                 ) : (
                     <Text className="text-muted-foreground" {...rest}>
                         {placeholder}

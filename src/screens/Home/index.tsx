@@ -4,13 +4,10 @@ import { RefreshControl, ScrollView } from 'react-native';
 import TasksList from './TasksList';
 import { useTasksListQuery } from './TasksList/queries';
 
-import { TaskStatus } from '@/models/types';
 import { HomeTabScreenProp } from '@/navigation/types';
 
 const Home = ({ navigation }: HomeTabScreenProp) => {
-    const tasksQuery = useTasksListQuery({
-        status: [TaskStatus.Pendiente, TaskStatus.Finalizada],
-    });
+    const tasksQuery = useTasksListQuery({});
 
     return (
         <ScrollView
@@ -20,15 +17,9 @@ const Home = ({ navigation }: HomeTabScreenProp) => {
                     onRefresh={tasksQuery.refetch}
                 />
             }
-            className="bg-slate-100 h-screen"
+            className="bg-white flex-1"
         >
             <TasksList navigation={navigation} tasksQuery={tasksQuery} />
-            {/* <ActivityList navigation={navigation} /> */}
-
-            {/* <Text className="text-lg">
-            despues un historial de las ultimas cosas que se hicieron (va a tener que ser
-            un listado en la db)
-        </Text> */}
         </ScrollView>
     );
 };

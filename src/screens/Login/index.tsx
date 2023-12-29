@@ -1,9 +1,18 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+    View,
+    Text,
+    KeyboardAvoidingView,
+    SafeAreaView,
+    Platform,
+    TouchableWithoutFeedback,
+    Keyboard,
+} from 'react-native';
 
 import { useLoginMutation } from './mutations';
 
+import { ButtonWithSpinner } from '@/components/ButtonWithSpinner';
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { TextInput } from '@/components/ui/Input';
 import { useUserContext } from '@/context/userContext/useUser';
@@ -43,69 +52,84 @@ const LoginScreen = ({ navigation }: Props) => {
     };
 
     return (
-        <View className="flex-1 justify-center items-center px-4 bg-gray-100">
-            <Text className="text-2xl font-bold mb-4 text-gray-800">Random Tech</Text>
+        <SafeAreaView className="flex-1">
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    className="flex-1 bg-white flex justify-center"
+                >
+                    <View className="px-4 w-full">
+                        <Text className="text-2xl font-bold mb-4 text-gray-800 text-center">
+                            Random Tech
+                        </Text>
 
-            <Form {...form}>
-                <View className="space-y-4 mb-6 w-full">
-                    <FormField
-                        control={form.control}
-                        name="email"
-                        rules={{
-                            required: 'El correo es requerido',
-                            pattern: {
-                                value: /^\S+@\S+\.\S+$/,
-                                message: 'El correo no es válido',
-                            },
-                        }}
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Email</FormLabel>
-                                <TextInput {...field} placeholder="Email" />
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="password"
-                        rules={{ required: 'La contraseña es requerida' }}
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Contraseña</FormLabel>
-                                <TextInput
-                                    {...field}
-                                    placeholder="Contraseña"
-                                    secureTextEntry
+                        <Form {...form}>
+                            <View className="space-y-4 mb-6 w-full">
+                                <FormField
+                                    control={form.control}
+                                    name="email"
+                                    rules={{
+                                        required: 'El correo es requerido',
+                                        pattern: {
+                                            value: /^\S+@\S+\.\S+$/,
+                                            message: 'El correo no es válido',
+                                        },
+                                    }}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Email</FormLabel>
+                                            <TextInput
+                                                value={field.value}
+                                                onChangeText={field.onChange}
+                                                onBlur={field.onBlur}
+                                                ref={field.ref}
+                                                placeholder="Email"
+                                            />
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
                                 />
-                                <FormMessage />
-                            </FormItem>
+
+                                <FormField
+                                    control={form.control}
+                                    name="password"
+                                    rules={{ required: 'La contraseña es requerida' }}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Contraseña</FormLabel>
+                                            <TextInput
+                                                value={field.value}
+                                                onChangeText={field.onChange}
+                                                onBlur={field.onBlur}
+                                                ref={field.ref}
+                                                placeholder="Contraseña"
+                                                secureTextEntry
+                                            />
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </View>
+                        </Form>
+
+                        <ButtonWithSpinner
+                            onPress={form.handleSubmit(onSubmit)}
+                            showSpinner={isPending}
+                        >
+                            Iniciar Sesión
+                        </ButtonWithSpinner>
+
+                        {error && !isPending && (
+                            <Text className="text-red-500 mt-4">
+                                {error.response?.status === 403
+                                    ? 'Credenciales incorrectas'
+                                    : 'Error al iniciar sesión'}
+                            </Text>
                         )}
-                    />
-                </View>
-            </Form>
-
-            <TouchableOpacity
-                onPress={form.handleSubmit(onSubmit)}
-                className="bg-blue-600 py-3 rounded-lg w-full items-center"
-                disabled={isPending}
-            >
-                {isPending ? (
-                    <ActivityIndicator size="small" color="#FFF" />
-                ) : (
-                    <Text className="text-white font-bold">Iniciar Sesión</Text>
-                )}
-            </TouchableOpacity>
-
-            {error && !isPending && (
-                <Text className="text-red-500 mt-4">
-                    {error.response?.status === 403
-                        ? 'Credenciales incorrectas'
-                        : 'Error al iniciar sesión'}
-                </Text>
-            )}
-        </View>
+                    </View>
+                </KeyboardAvoidingView>
+            </TouchableWithoutFeedback>
+        </SafeAreaView>
     );
 };
 

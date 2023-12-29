@@ -38,6 +38,7 @@ export type TaskByIdQueryData = {
     images: {
         _id: string;
         url: string;
+        unsaved?: boolean;
     }[];
     openedAt: string;
     taskType: TaskType;
@@ -46,6 +47,9 @@ export type TaskByIdQueryData = {
     closedAt?: Date;
     workOrderNumber: number | undefined;
     expenses: Expense[];
+    auditor?: {
+        fullName: string;
+    };
 };
 
 type FetchTaskById = {
