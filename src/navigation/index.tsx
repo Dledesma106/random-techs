@@ -27,7 +27,7 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
     return (
         <NavigationContainer
             linking={LinkingConfiguration}
-            theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+            theme={colorScheme === 'light' ? DarkTheme : DefaultTheme}
         >
             <RootNavigator />
         </NavigationContainer>
@@ -153,7 +153,10 @@ export const BottomTabNavigator = () => (
         <BottomTab.Screen
             name="Profile"
             component={ProfileScreen}
-            options={{ headerShown: false }}
+            options={() => ({
+                tabBarIcon: () => <Entypo name="user" size={24} color="black" />,
+                headerShown: false,
+            })}
         />
     </BottomTab.Navigator>
 );
