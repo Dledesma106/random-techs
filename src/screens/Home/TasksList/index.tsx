@@ -66,14 +66,14 @@ const TasksList = ({ navigation, tasksQuery }: Props) => {
 
                     <Button
                         onPress={() => {
-                            setTaskStatus(TaskStatus.Aprobado);
+                            setTaskStatus(TaskStatus.Aprobada);
                         }}
                         className="flex-1"
                         variant="secondary"
                     >
                         <ButtonText
                             className={cn(
-                                taskStatus === TaskStatus.Aprobado && 'font-bold',
+                                taskStatus === TaskStatus.Aprobada && 'font-bold',
                             )}
                         >
                             Aprobadas

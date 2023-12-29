@@ -33,6 +33,11 @@ const RegisterTask = ({ navigation, route }: RegisterTaskScreenProp) => {
     const form = useForm<CreateTaskFormValues>();
     const createTaskMutation = useCreateTaskMutation({
         onSuccess: () => {
+            navigation.setParams({
+                branch: null,
+                business: null,
+                type: null,
+            });
             Toast.show('Tarea creada', {
                 duration: Toast.durations.LONG,
                 position: Toast.positions.BOTTOM,
@@ -92,7 +97,7 @@ const RegisterTask = ({ navigation, route }: RegisterTaskScreenProp) => {
             },
             {
                 onSuccess: () => {
-                    navigation.navigate('Home');
+                    navigation.replace('Drawer');
                 },
                 onError: () => {
                     Toast.show('No se pudo crear la tarea', {
@@ -107,9 +112,6 @@ const RegisterTask = ({ navigation, route }: RegisterTaskScreenProp) => {
             },
         );
     };
-
-    console.log('createTaskMutation', createTaskMutation.data);
-    console.log('createTaskMutation', typeof createTaskMutation.data);
 
     return (
         <SafeAreaView className="flex-1 bg-background">
@@ -157,7 +159,9 @@ const RegisterTask = ({ navigation, route }: RegisterTaskScreenProp) => {
                                     disabled={!branch}
                                     render={({ field }) => {
                                         return (
-                                            <FormItem>
+                                            <FormItem
+                                                className={cn(!branch && 'opacity-50')}
+                                            >
                                                 <FormLabel>Empresa</FormLabel>
                                                 <InputFromOuterScreen
                                                     value={field.value}

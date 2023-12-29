@@ -78,21 +78,27 @@ const FormItemContext = React.createContext<FormItemContextValue>(
     {} as FormItemContextValue,
 );
 
-const FormItem = React.forwardRef<View, ViewProps>(({ className, ...props }, ref) => {
-    const id = React.useId();
-    const fieldContext = React.useContext(FormFieldContext);
+const FormItem = React.forwardRef<View, ViewProps>(
+    ({ className, style, ...props }, ref) => {
+        const id = React.useId();
+        const fieldContext = React.useContext(FormFieldContext);
 
-    return (
-        <FormItemContext.Provider value={{ id: id }}>
-            <View
-                ref={ref}
-                style={fieldContext.style}
-                className={cn('space-y-2', className)}
-                {...props}
-            />
-        </FormItemContext.Provider>
-    );
-});
+        if (!fieldContext) {
+            throw new Error('FormItem should be used within <FormField>');
+        }
+
+        return (
+            <FormItemContext.Provider value={{ id: id }}>
+                <View
+                    ref={ref}
+                    className={cn('space-y-2', className)}
+                    style={[style, fieldContext.style]}
+                    {...props}
+                />
+            </FormItemContext.Provider>
+        );
+    },
+);
 FormItem.displayName = 'FormItem';
 
 const FormLabel = React.forwardRef<Text, LabelProps>(({ className, ...props }, ref) => {

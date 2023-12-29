@@ -134,11 +134,12 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                         <View>
                             <Label className="mb-1.5">Fecha de cierre</Label>
                             <Text className="text-muted-foreground">
-                                {task.closedAt ? (
-                                    dateFns.format(new Date(task.closedAt), 'dd/MM/yyyy')
-                                ) : (
-                                    <Text className="text-primary">Pendiente</Text>
-                                )}
+                                {task.closedAt
+                                    ? dateFns.format(
+                                          new Date(task.closedAt),
+                                          'dd/MM/yyyy',
+                                      )
+                                    : 'Pendiente'}
                             </Text>
                         </View>
 
@@ -151,28 +152,36 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
 
                         <View>
                             <Label className="mb-1.5">Orden de Trabajo</Label>
-                            <Form {...formMethods}>
-                                <FormField
-                                    name="workOrderNumber"
-                                    control={formMethods.control}
-                                    defaultValue={task.workOrderNumber?.toString()}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                        <TextInput
-                                            onBlur={onBlur}
-                                            onChangeText={onChange}
-                                            value={value}
-                                            placeholder="Orden de Trabajo"
-                                            keyboardType="numeric"
-                                        />
-                                    )}
-                                />
-                            </Form>
+                            {task.status === TaskStatus.Pendiente ? (
+                                <Form {...formMethods}>
+                                    <FormField
+                                        name="workOrderNumber"
+                                        control={formMethods.control}
+                                        defaultValue={task.workOrderNumber?.toString()}
+                                        render={({
+                                            field: { onChange, onBlur, value },
+                                        }) => (
+                                            <TextInput
+                                                onBlur={onBlur}
+                                                onChangeText={onChange}
+                                                value={value}
+                                                placeholder="Orden de Trabajo"
+                                                keyboardType="numeric"
+                                            />
+                                        )}
+                                    />
+                                </Form>
+                            ) : (
+                                <Text className="text-muted-foreground">
+                                    {task.workOrderNumber || 'No especificado'}
+                                </Text>
+                            )}
                         </View>
 
-                        <View>
+                        <View className="items-start">
                             <Label className="mb-1.5">Gastos</Label>
 
-                            <View className="space-y-2">
+                            <View className="space-y-2 w-full">
                                 {task.expenses.map((expense, index) => (
                                     <Button
                                         key={expense._id}
@@ -185,9 +194,16 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                         <AntDesign name="right" size={14} color="gray" />
                                     </Button>
                                 ))}
+
+                                {task.expenses.length === 0 &&
+                                    task.status !== TaskStatus.Pendiente && (
+                                        <Text className="text-muted-foreground">
+                                            No hay gastos registrados
+                                        </Text>
+                                    )}
                             </View>
 
-                            <View className="flex flex-row justify-start">
+                            {task.status === TaskStatus.Pendiente && (
                                 <Button
                                     variant="outline"
                                     size="sm"
@@ -196,7 +212,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                 >
                                     <ButtonText>Agregar gasto</ButtonText>
                                 </Button>
-                            </View>
+                            )}
                         </View>
 
                         <View>
@@ -233,55 +249,67 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                             </View>
                                         )}
 
-                                        <View className="absolute top-2 right-2 bg-black flex items-center justify-center rounded-full z-50 w-6 h-6">
-                                            <TouchableOpacity
-                                                onPress={() => {
-                                                    taskUpdateMutation.mutate({
-                                                        taskId: task._id,
-                                                        imageIdToDelete: image._id,
-                                                    });
-                                                }}
-                                            >
-                                                <AntDesign
-                                                    name="close"
-                                                    size={14}
-                                                    color="white"
-                                                />
-                                            </TouchableOpacity>
-                                        </View>
+                                        {task.status === TaskStatus.Pendiente &&
+                                            image.unsaved && (
+                                                <View className="absolute top-2 right-2 bg-black flex items-center justify-center rounded-full z-50 w-6 h-6">
+                                                    <TouchableOpacity
+                                                        onPress={() => {
+                                                            taskUpdateMutation.mutate({
+                                                                taskId: task._id,
+                                                                imageIdToDelete:
+                                                                    image._id,
+                                                            });
+                                                        }}
+                                                    >
+                                                        <AntDesign
+                                                            name="close"
+                                                            size={14}
+                                                            color="white"
+                                                        />
+                                                    </TouchableOpacity>
+                                                </View>
+                                            )}
                                     </View>
                                 ))}
 
-                                {task.images.length < 3 && (
-                                    <View className="flex-[0.33] relative border border-border">
-                                        <TouchableOpacity
-                                            onPress={navigateToCameraScreen}
-                                            className="bg-muted flex items-center justify-center"
-                                            style={{
-                                                aspectRatio: 9 / 16,
-                                            }}
-                                        >
-                                            <View className="items-center">
-                                                <EvilIcons
-                                                    name="camera"
-                                                    size={32}
-                                                    color="#4B5563"
-                                                />
+                                {task.images.length === 0 &&
+                                    task.status !== TaskStatus.Pendiente && (
+                                        <Text className="text-muted-foreground">
+                                            No hay imágenes registradas
+                                        </Text>
+                                    )}
 
-                                                <Text className="text-[#4B5563] text-xs">
-                                                    Agregar
-                                                </Text>
-                                            </View>
-                                        </TouchableOpacity>
-                                    </View>
-                                )}
+                                {task.status === TaskStatus.Pendiente &&
+                                    task.images.length < 3 && (
+                                        <View className="flex-[0.33] relative border border-border">
+                                            <TouchableOpacity
+                                                onPress={navigateToCameraScreen}
+                                                className="bg-muted flex items-center justify-center"
+                                                style={{
+                                                    aspectRatio: 9 / 16,
+                                                }}
+                                            >
+                                                <View className="items-center">
+                                                    <EvilIcons
+                                                        name="camera"
+                                                        size={32}
+                                                        color="#4B5563"
+                                                    />
+
+                                                    <Text className="text-[#4B5563] text-xs">
+                                                        Agregar
+                                                    </Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        </View>
+                                    )}
                             </View>
                         </View>
                     </View>
                 </ScrollView>
 
                 <View className="absolute bottom-4 inset-x-0 px-4 bg-transparent">
-                    {task.status === TaskStatus.Pendiente ? (
+                    {task.status === TaskStatus.Pendiente && (
                         <Pressable
                             onPress={() => {
                                 taskUpdateMutation.mutate({
@@ -306,9 +334,19 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                 </View>
                             )}
                         </Pressable>
-                    ) : (
+                    )}
+
+                    {task.status === TaskStatus.Finalizada && (
                         <View className="border border-border p-4 rounded-full bg-white justify-center items-center flex flex-row space-x-1">
                             <Text className="font-bold">Tarea finalizada</Text>
+
+                            <AntDesign name="checkcircleo" size={16} color="black" />
+                        </View>
+                    )}
+
+                    {task.status === TaskStatus.Aprobada && (
+                        <View className="border border-border p-4 rounded-full bg-white justify-center items-center flex flex-row space-x-1">
+                            <Text className="font-bold">Tarea aprobada</Text>
 
                             <AntDesign name="checkcircleo" size={16} color="black" />
                         </View>

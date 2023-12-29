@@ -36,7 +36,7 @@ export enum TaskStatus {
     SinAsignar = 'Sin asignar',
     Pendiente = 'Pendiente',
     Finalizada = 'Finalizada',
-    Aprobado = 'Aprobado',
+    Aprobada = 'Aprobada',
 }
 
 export enum TaskType {
