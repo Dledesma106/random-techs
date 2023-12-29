@@ -17,3 +17,6 @@ package-lock.json
 
 # macOS
 .DS_Store
+
+app.config.js
+.env
