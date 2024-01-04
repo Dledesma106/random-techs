@@ -57,7 +57,7 @@ const fetchTaskById = (id: string) => async () => {
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
-            Authorization: (await JWTTokenService.get()) || '',
+            Authorization: (await JWTTokenService.getAsync()) || '',
         },
     });
 

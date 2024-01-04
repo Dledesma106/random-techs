@@ -1,12 +1,19 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
-import { TASK_BY_ID_QUERY_KEY, TaskByIdQueryData } from './queries';
+import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from './queries';
 
 import { appAxios } from '@/api/axios';
-import JWTTokenService from '@/lib/JWTTokenService';
+import { fetchGraphql } from '@/api/fetch-graphql';
+import {
+    MyAssignedTasksQuery,
+    UpdateMyAssignedTaskDocument,
+    UpdateMyAssignedTaskMutation,
+    UpdateMyAssignedTaskMutationVariables,
+} from '@/api/graphql';
+import { compressedImageToFormData, getCompressedImageAsync } from '@/lib/utils';
 
-import { TASKS_LIST_QUERY_KEY, TasksListQuery } from '../Home/TasksList/queries';
+import { TASKS_LIST_QUERY_KEY } from '../Home/TasksList/queries';
 
 type UseUploadImageToTaskMutation = { data: string };
 type UseUploadImageToTaskMutationVariables = {
@@ -14,30 +21,13 @@ type UseUploadImageToTaskMutationVariables = {
     localURI: string;
 };
 
-const createImageFormData = (localURI: string) => {
-    const photoName = localURI.split('/').pop();
-    if (!photoName) {
-        throw new Error('La imagen no tiene un nombre válido');
-    }
-
-    return {
-        uri: localURI,
-        name: photoName,
-        type: 'image/jpeg',
-    };
-};
-
 export const postImageToTask = async (data: UseUploadImageToTaskMutationVariables) => {
     const { localURI, taskId } = data;
 
-    const photoName = localURI.split('/').pop();
-    if (!photoName) {
-        throw new Error('La imagen no tiene un nombre válido');
-    }
+    const { image, filename } = await getCompressedImageAsync(localURI);
 
     const formData = new FormData();
-    const imageData = createImageFormData(localURI);
-    formData.append('image', imageData);
+    formData.append('image', compressedImageToFormData({ image, filename }));
 
     const response = await appAxios.post<UseUploadImageToTaskMutation>(
         `/images?taskId=${taskId}`,
@@ -62,28 +52,31 @@ export const useUploadImageToTaskMutation = () => {
     >({
         mutationFn: postImageToTask,
         onMutate: async (variables) => {
-            const previousData = client.getQueryData<TaskByIdQueryData>(
+            const previousData = client.getQueryData<TaskByIdQuery>(
                 TASK_BY_ID_QUERY_KEY(variables.taskId),
             );
 
             if (previousData) {
-                client.setQueryData<TaskByIdQueryData>(
+                client.setQueryData<TaskByIdQuery>(
                     TASK_BY_ID_QUERY_KEY(variables.taskId),
                     (oldData) => {
-                        if (!oldData) {
+                        if (!oldData || !oldData.myAssignedTaskById) {
                             return oldData;
                         }
 
-                        const newData: TaskByIdQueryData = {
+                        const newData: TaskByIdQuery = {
                             ...oldData,
-                            images: [
-                                ...oldData.images,
-                                {
-                                    _id: variables.localURI,
-                                    url: variables.localURI,
-                                    unsaved: true,
-                                },
-                            ],
+                            myAssignedTaskById: {
+                                ...oldData.myAssignedTaskById,
+                                images: [
+                                    ...oldData.myAssignedTaskById.images,
+                                    {
+                                        id: variables.localURI,
+                                        url: variables.localURI,
+                                        unsaved: true,
+                                    },
+                                ],
+                            },
                         };
 
                         return newData;
@@ -98,27 +91,30 @@ export const useUploadImageToTaskMutation = () => {
                 return;
             }
 
-            client.setQueryData<TaskByIdQueryData>(
+            client.setQueryData<TaskByIdQuery>(
                 TASK_BY_ID_QUERY_KEY(variables.taskId),
                 (oldData) => {
-                    if (!oldData) {
+                    if (!oldData || !oldData.myAssignedTaskById) {
                         return oldData;
                     }
 
-                    const newData: TaskByIdQueryData = {
+                    const newData: TaskByIdQuery = {
                         ...oldData,
-                        images: oldData.images.map((image) => {
-                            if (image._id !== variables.localURI) {
-                                return image;
-                            }
+                        myAssignedTaskById: {
+                            ...oldData.myAssignedTaskById,
+                            images: oldData.myAssignedTaskById.images.map((image) => {
+                                if (image.id !== variables.localURI) {
+                                    return image;
+                                }
 
-                            return {
-                                ...image,
-                                _id: variables.localURI,
-                                url: variables.localURI,
-                                unsaved: false,
-                            };
-                        }),
+                                return {
+                                    ...image,
+                                    _id: variables.localURI,
+                                    url: variables.localURI,
+                                    unsaved: false,
+                                };
+                            }),
+                        },
                     };
 
                     return newData;
@@ -128,78 +124,69 @@ export const useUploadImageToTaskMutation = () => {
     });
 };
 
-type UseTaskUpdateMutation = {
-    data: TaskByIdQueryData;
-};
-type UseTaskUpdateMutationVariables = {
-    taskId: string;
-    isClosed?: boolean;
-    workOrder?: string;
-    imageIdToDelete?: string;
-};
-
-export const putTaskUpdate = async (data: UseTaskUpdateMutationVariables) => {
-    const response = await appAxios.put<UseTaskUpdateMutation>(
-        `/tech/tasks/${data.taskId}`,
-        {
-            isClosed: data.isClosed,
-            workOrder: data.workOrder,
-            imageIdToDelete: data.imageIdToDelete,
-        },
-        {
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: (await JWTTokenService.get()) || '',
-            },
-        },
-    );
-
-    return response.data;
-};
-
 export const useTaskUpdateMutation = () => {
     const client = useQueryClient();
-    return useMutation<UseTaskUpdateMutation, AxiosError, UseTaskUpdateMutationVariables>(
-        {
-            mutationFn: putTaskUpdate,
-            onSuccess: (data, variables) => {
-                if (!data) {
-                    return;
+    return useMutation<
+        UpdateMyAssignedTaskMutation,
+        Error,
+        UpdateMyAssignedTaskMutationVariables
+    >({
+        mutationFn: (data) => {
+            return fetchGraphql(UpdateMyAssignedTaskDocument, data);
+        },
+        onSuccess: (data, variables) => {
+            const task = data.updateMyAssignedTask.task;
+            console.log('task', task);
+            if (!task) {
+                return;
+            }
+
+            client.setQueryData<MyAssignedTasksQuery>(TASKS_LIST_QUERY_KEY, (oldData) => {
+                if (!oldData) {
+                    return oldData;
                 }
 
-                client.setQueryData<TasksListQuery>(TASKS_LIST_QUERY_KEY, (oldData) => {
-                    if (!oldData) {
-                        return oldData;
-                    }
-
-                    const newData: TasksListQuery = oldData.map((task) => {
-                        if (task._id !== variables.taskId) {
-                            return task;
+                const newData: MyAssignedTasksQuery = {
+                    ...oldData,
+                    myAssignedTasks: oldData.myAssignedTasks.map((someTask) => {
+                        if (someTask.id !== variables.id) {
+                            return someTask;
                         }
 
                         return {
-                            ...task,
-                            status: data.data.status,
+                            ...someTask,
+                            status: task.status,
+                            // TODO: Take into account the unsaved images
+                            images: task.images,
+                            workOrderNumber: task.workOrderNumber,
                         };
-                    });
+                    }),
+                };
+
+                return newData;
+            });
+
+            client.setQueryData<TaskByIdQuery>(
+                TASK_BY_ID_QUERY_KEY(variables.id),
+                (oldData) => {
+                    if (!oldData || !oldData.myAssignedTaskById) {
+                        return oldData;
+                    }
+
+                    const newData: TaskByIdQuery = {
+                        ...oldData,
+                        myAssignedTaskById: {
+                            ...oldData.myAssignedTaskById,
+                            status: task.status,
+                            // TODO: Take into account the unsaved images
+                            images: task.images,
+                            workOrderNumber: task.workOrderNumber,
+                        },
+                    };
 
                     return newData;
-                });
-
-                client.setQueryData<TaskByIdQueryData>(
-                    TASK_BY_ID_QUERY_KEY(variables.taskId),
-                    (oldData) => {
-                        if (!oldData) {
-                            return oldData;
-                        }
-
-                        const newData: TaskByIdQueryData = data.data;
-
-                        return newData;
-                    },
-                );
-            },
+                },
+            );
         },
-    );
+    });
 };

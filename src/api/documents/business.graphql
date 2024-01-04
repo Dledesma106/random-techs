@@ -1,0 +1,6 @@
+query businesses($branch: String) {
+    businesses(branch: $branch) {
+        id
+        name
+    }
+}

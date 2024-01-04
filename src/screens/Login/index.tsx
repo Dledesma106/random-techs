@@ -8,6 +8,7 @@ import {
     Platform,
     TouchableWithoutFeedback,
     Keyboard,
+    Alert,
 } from 'react-native';
 
 import { useLoginMutation } from './mutations';
@@ -43,9 +44,18 @@ const LoginScreen = ({ navigation }: Props) => {
 
     const onSubmit: SubmitHandler<LoginForm> = (data) => {
         mutate(data, {
-            onSuccess: async (data) => {
-                await JWTTokenService.save(data.accessToken);
-                setUser(data.user);
+            onSuccess: async (data, { password }) => {
+                const { accessToken, user } = data.login;
+                console.log(accessToken);
+                console.log(user);
+
+                if (!accessToken || !user) {
+                    Alert.alert('Error', 'No se pudo iniciar sesión');
+                    return;
+                }
+
+                await JWTTokenService.saveAsync(accessToken);
+                setUser(user, password);
                 navigation.replace('Drawer');
             },
         });
@@ -121,9 +131,7 @@ const LoginScreen = ({ navigation }: Props) => {
 
                         {error && !isPending && (
                             <Text className="text-red-500 mt-4">
-                                {error.response?.status === 403
-                                    ? 'Credenciales incorrectas'
-                                    : 'Error al iniciar sesión'}
+                                {error && 'Error al iniciar sesión'}
                             </Text>
                         )}
                     </View>

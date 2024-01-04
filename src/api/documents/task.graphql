@@ -1,0 +1,133 @@
+query myAssignedTasks {
+    myAssignedTasks {
+        id
+        createdAt
+        closedAt
+        description
+        business {
+            id
+            name
+        }
+        branch {
+            id
+            number
+            city {
+                id
+                name
+                province {
+                    id
+                    name
+                }
+            }
+            client {
+                id
+                name
+            }
+        }
+        assigned {
+            id
+            fullName
+        }
+        expenses {
+            amount
+        }
+        taskType
+        status
+    }
+}
+
+query myAssignedTaskById($id: String!) {
+    myAssignedTaskById(id: $id) {
+        id
+        createdAt
+        closedAt
+        description
+        business {
+            id
+            name
+        }
+        images {
+            id
+            url
+        }
+        auditor {
+            fullName
+        }
+        workOrderNumber
+        branch {
+            number
+            city {
+                name
+                province {
+                    name
+                }
+            }
+            client {
+                name
+            }
+        }
+        assigned {
+            id
+            firstName
+            lastName
+            fullName
+            email
+        }
+        expenses {
+            id
+            amount
+            paySource
+            createdAt
+            image {
+                id
+                url
+                urlExpire
+                key
+            }
+            status
+            doneBy {
+                id
+                email
+                fullName
+            }
+        }
+        taskType
+        status
+    }
+}
+
+mutation createTask($input: TaskInput!) {
+    createTask(input: $input) {
+        task {
+            id
+        }
+        success
+        message
+    }
+}
+
+mutation updateMyAssignedTask(
+    $id: String!
+    $status: TaskStatus
+    $workOrderNumber: Int
+    $imageIdToDelete: String
+) {
+    updateMyAssignedTask(
+        id: $id
+        status: $status
+        workOrderNumber: $workOrderNumber
+        imageIdToDelete: $imageIdToDelete
+    ) {
+        task {
+            id
+            status
+            workOrderNumber
+            images {
+                id
+                url
+            }
+        }
+        success
+        message
+    }
+}

@@ -41,7 +41,7 @@ function RootNavigator() {
     const { user } = useUserContext();
 
     return (
-        <Stack.Navigator initialRouteName={'Login'}>
+        <Stack.Navigator initialRouteName={user ? 'Drawer' : 'Login'}>
             <Stack.Screen
                 name="FullScreenCamera"
                 component={FullScreenCameraScreen}

@@ -6,22 +6,21 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import Toast from 'react-native-root-toast';
 
 import { useCreateTaskMutation } from './mutations';
-import { FetchBranchesBranchItem } from './RegisterTaskBranchFieldScreen/queries';
-import { FetchBusinessesDataItem } from './RegisterTaskBusinessFieldScreen/queries';
 
+import { BranchesQuery, BusinessesQuery, TaskStatus, TaskType } from '@/api/graphql';
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { InputFromOuterScreen, TextInput } from '@/components/ui/Input';
+import { useUserContext } from '@/context/userContext/useUser';
 import { cn } from '@/lib/utils';
-import { TaskType } from '@/models/types';
 import { RegisterTaskScreenProp } from '@/navigation/types';
 
 export type CreateTaskFormValues = {
     branch?: {
-        value: FetchBranchesBranchItem;
+        value: BranchesQuery['branches'][0];
         label: string;
     };
     business?: {
-        value: FetchBusinessesDataItem;
+        value: BusinessesQuery['businesses'][0];
         label: string;
     } | null;
     taskType?: TaskType | null;
@@ -30,6 +29,8 @@ export type CreateTaskFormValues = {
 };
 
 const RegisterTask = ({ navigation, route }: RegisterTaskScreenProp) => {
+    const { user } = useUserContext();
+
     const form = useForm<CreateTaskFormValues>();
     const createTaskMutation = useCreateTaskMutation({
         onSuccess: () => {
@@ -78,22 +79,34 @@ const RegisterTask = ({ navigation, route }: RegisterTaskScreenProp) => {
 
     const branch = form.watch('branch')?.value;
     const onSubmit: SubmitHandler<CreateTaskFormValues> = (values) => {
-        const branch = values.branch?.value._id ?? null;
-        const business = values.business?.value._id ?? null;
+        const branch = values.branch?.value.id ?? null;
+        const business = values.business?.value.id ?? null;
         const taskType = values.taskType ?? null;
         const description = values.description ?? null;
         const workOrderNumber = values.workOrderNumber ?? null;
-        if (!branch || !business || !taskType || !description || !workOrderNumber) {
+        if (
+            !branch ||
+            !business ||
+            !taskType ||
+            !description ||
+            !workOrderNumber ||
+            !user
+        ) {
             return;
         }
 
         createTaskMutation.mutate(
             {
-                branch,
-                business,
-                taskType,
-                description,
-                workOrderNumber,
+                input: {
+                    assigned: [user.id],
+                    branch: branch,
+                    business: business,
+                    description: description,
+                    taskType: taskType,
+                    workOrderNumber: workOrderNumber,
+                    auditor: null,
+                    status: TaskStatus.Pendiente,
+                },
             },
             {
                 onSuccess: () => {
@@ -139,7 +152,7 @@ const RegisterTask = ({ navigation, route }: RegisterTaskScreenProp) => {
                                                             {
                                                                 value:
                                                                     field.value?.value
-                                                                        ._id ?? null,
+                                                                        .id ?? null,
                                                             },
                                                         );
                                                     }}
@@ -173,8 +186,8 @@ const RegisterTask = ({ navigation, route }: RegisterTaskScreenProp) => {
                                                             {
                                                                 value:
                                                                     field.value?.value
-                                                                        ._id ?? null,
-                                                                branchId: branch._id,
+                                                                        .id ?? null,
+                                                                branchId: branch.id,
                                                             },
                                                         );
                                                     }}

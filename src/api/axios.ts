@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL =
-    process.env.EXPO_PUBLIC_API_BASE_URL ?? 'https://ransys-test.vercel.app';
+import JWTTokenService from '@/lib/JWTTokenService';
+
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_HOST ?? 'https://ransys-test.vercel.app';
 
 export const appAxios = axios.create({
     baseURL: `${API_BASE_URL}/api`,
@@ -9,5 +10,6 @@ export const appAxios = axios.create({
     headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${JWTTokenService.getAsync()}`,
     },
 });

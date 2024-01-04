@@ -1,15 +1,10 @@
 import { type ClassValue, clsx } from 'clsx';
+import { ImageResult, SaveFormat, manipulateAsync } from 'expo-image-manipulator';
 import { twMerge } from 'tailwind-merge';
-
-import { IUser } from '../models/interfaces';
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
-
-export const formatIds = <T>(doc: T): T => {
-    return JSON.parse(JSON.stringify(doc));
-};
 
 export function dmyDateString(date: Date): string {
     return `${date.getDate() > 10 ? `${date.getDate()}` : `0${date.getDate()}`}/${
@@ -17,27 +12,30 @@ export function dmyDateString(date: Date): string {
     }/${date.getFullYear()}`;
 }
 
-export function userWithoutPassword(user: IUser): IUser {
-    return {
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        fullName: user.fullName,
-        publicKey: user.publicKey,
-        email: user.email,
-        roles: user.roles,
-    };
-}
-
-export const isReachable = async (url: string): Promise<boolean> => {
-    const timeout = new Promise((resolve, reject) => {
-        setTimeout(reject, 2500, 'Request timed out');
-    });
-    const request = fetch(url);
-    try {
-        await Promise.race([timeout, request]);
-        return true;
-    } catch (error) {
-        return false;
+export const getCompressedImageAsync = async (imageURI: string) => {
+    const filename = imageURI.split('/').pop();
+    if (!filename) {
+        throw new Error('La imagen no tiene un nombre válido');
     }
+
+    const image = await manipulateAsync(imageURI, [{ resize: { width: 800 } }], {
+        compress: 0.5,
+        format: SaveFormat.JPEG,
+    });
+
+    return { image, filename };
+};
+
+export const compressedImageToFormData = ({
+    image,
+    filename,
+}: {
+    image: ImageResult;
+    filename: string;
+}) => {
+    return {
+        uri: image.uri,
+        name: filename,
+        type: 'image/jpeg',
+    };
 };

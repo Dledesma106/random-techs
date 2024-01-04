@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { Text, View, ScrollView, Image } from 'react-native';
+import { Text, View, ScrollView, Image, RefreshControl } from 'react-native';
 
 import { useExpenseByIdQuery } from './queries';
 
@@ -11,15 +10,35 @@ const ExpenseOnTask = ({ route }: ExpenseOnTaskScreenRouteProp) => {
     const { expenseId } = route.params;
     const expenseQueryResult = useExpenseByIdQuery(expenseId);
 
-    useEffect(() => {
-        expenseQueryResult.refetch();
-    }, []);
+    if (expenseQueryResult.data) {
+        const expense = expenseQueryResult.data.myAssignedTaskExpenseById;
 
-    if (expenseQueryResult.data && !Array.isArray(expenseQueryResult.data)) {
-        const expense = expenseQueryResult.data;
+        if (!expense) {
+            return (
+                <ScrollView
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={expenseQueryResult.isFetching}
+                            onRefresh={() => expenseQueryResult.refetch()}
+                        />
+                    }
+                    className="bg-white h-screen"
+                >
+                    <Text>No se encontró el gasto</Text>
+                </ScrollView>
+            );
+        }
 
         return (
-            <ScrollView className="bg-white h-screen">
+            <ScrollView
+                refreshControl={
+                    <RefreshControl
+                        refreshing={expenseQueryResult.isFetching}
+                        onRefresh={() => expenseQueryResult.refetch()}
+                    />
+                }
+                className="bg-white h-screen"
+            >
                 <View className="px-4 py-4">
                     <View className="mb-4">
                         <Text className="mb-2 text-gray-800 font-bold">Monto</Text>
@@ -53,7 +72,7 @@ const ExpenseOnTask = ({ route }: ExpenseOnTaskScreenRouteProp) => {
                     <View className="mb-4">
                         <Text className="mb-2 text-gray-800 font-bold">Auditor</Text>
                         <Text className="text-gray-600">
-                            {expense.auditor ? expense.auditor.name : 'Sin asignar'}
+                            {expense.auditor ? expense.auditor.fullName : 'Sin asignar'}
                         </Text>
                     </View>
 
@@ -78,16 +97,32 @@ const ExpenseOnTask = ({ route }: ExpenseOnTaskScreenRouteProp) => {
 
     if (expenseQueryResult.error) {
         return (
-            <View>
+            <ScrollView
+                refreshControl={
+                    <RefreshControl
+                        refreshing={expenseQueryResult.isFetching}
+                        onRefresh={() => expenseQueryResult.refetch()}
+                    />
+                }
+                className="bg-white h-screen"
+            >
                 <Text>Error</Text>
-            </View>
+            </ScrollView>
         );
     }
 
     return (
-        <View>
+        <ScrollView
+            refreshControl={
+                <RefreshControl
+                    refreshing={expenseQueryResult.isFetching}
+                    onRefresh={() => expenseQueryResult.refetch()}
+                />
+            }
+            className="bg-white h-screen"
+        >
             <Text>Cargando...</Text>
-        </View>
+        </ScrollView>
     );
 };
 

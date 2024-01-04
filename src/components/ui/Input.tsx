@@ -67,6 +67,7 @@ export const TextInput = forwardRef<NativeTextInput, InputProps>(
 TextInput.displayName = 'Input';
 
 type InputFromOuterScreenProps<
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     TValue extends Record<string, any> | number | string | boolean | unknown = unknown,
 > = {
     style?: PressableProps['style'];
@@ -80,6 +81,7 @@ type InputFromOuterScreenProps<
 };
 
 interface WithForwardRefType extends React.FC<InputFromOuterScreenProps<unknown>> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <TValue extends Record<string, any> | number | string | boolean | unknown = unknown>(
         props: InputFromOuterScreenProps<TValue>,
     ): ReturnType<React.FC<InputFromOuterScreenProps<TValue>>>;

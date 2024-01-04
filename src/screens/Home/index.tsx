@@ -7,7 +7,7 @@ import { useTasksListQuery } from './TasksList/queries';
 import { HomeTabScreenProp } from '@/navigation/types';
 
 const Home = ({ navigation }: HomeTabScreenProp) => {
-    const tasksQuery = useTasksListQuery({});
+    const tasksQuery = useTasksListQuery();
 
     return (
         <ScrollView
