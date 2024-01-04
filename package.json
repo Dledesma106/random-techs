@@ -12,7 +12,8 @@
         "lint:fix": "eslint --fix './**/*.ts{,x}'",
         "format": "prettier './**/*.ts{,x}'",
         "format:fix": "prettier --write './**/*.ts{,x}'",
-        "lint-format:fix": "yarn lint:fix && yarn format:fix"
+        "lint-format:fix": "yarn lint:fix && yarn format:fix",
+        "gen": "graphql-codegen --config codegen.ts"
     },
     "jest": {
         "preset": "jest-expo"
@@ -55,6 +56,7 @@
         "expo-dev-client": "^2.4.12",
         "expo-font": "~11.4.0",
         "expo-image": "~1.3.5",
+        "expo-image-manipulator": "~11.3.0",
         "expo-linking": "~5.0.2",
         "expo-media-library": "~15.4.1",
         "expo-secure-store": "~12.3.1",
@@ -94,6 +96,13 @@
     "devDependencies": {
         "@babel/core": "^7.23.6",
         "@babel/preset-env": "^7.23.6",
+        "@graphql-codegen/cli": "^3.3.1",
+        "@graphql-codegen/introspection": "^3.0.1",
+        "@graphql-codegen/typed-document-node": "^4.0.1",
+        "@graphql-codegen/typescript": "^3.0.4",
+        "@graphql-codegen/typescript-document-nodes": "^3.0.4",
+        "@graphql-codegen/typescript-operations": "^3.0.4",
+        "@graphql-codegen/typescript-resolvers": "^3.2.1",
         "@tanstack/eslint-plugin-query": "^5.12.1",
         "@types/bcryptjs": "^2.4.6",
         "@types/react": "^18.2.43",

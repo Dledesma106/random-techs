@@ -8,8 +8,9 @@ import {
     View,
 } from 'react-native';
 
-import useBusinessesQuery, { FetchBusinessesDataItem } from './queries';
+import useBusinessesQuery from './queries';
 
+import { BusinessesQuery } from '@/api/graphql';
 import { RegisterTaskBusinessFieldScreenRouteProps } from '@/navigation/types';
 
 const RegisterTaskBusinessFieldScreen = ({
@@ -19,7 +20,7 @@ const RegisterTaskBusinessFieldScreen = ({
     const { value, branchId } = route.params;
     const queryResult = useBusinessesQuery(branchId);
 
-    const handlePress = (branch: FetchBusinessesDataItem) => {
+    const handlePress = (branch: BusinessesQuery['businesses'][0]) => {
         navigation.navigate({
             name: 'RegisterTask',
             params: {
@@ -39,10 +40,10 @@ const RegisterTaskBusinessFieldScreen = ({
                             onRefresh={queryResult.refetch}
                         />
                     }
-                    data={queryResult.data}
+                    data={queryResult.data.businesses}
                     renderItem={({ item }) => {
                         return (
-                            <View className="p-4 border-b border-input" key={item._id}>
+                            <View className="p-4 border-b border-input" key={item.id}>
                                 <TouchableOpacity
                                     className="flex flex-row justify-between"
                                     onPress={() => {
@@ -51,7 +52,7 @@ const RegisterTaskBusinessFieldScreen = ({
                                 >
                                     <Text>{item.name}</Text>
 
-                                    {item._id === value && (
+                                    {item.id === value && (
                                         <Ionicons
                                             name="checkmark-circle"
                                             size={24}
@@ -62,7 +63,7 @@ const RegisterTaskBusinessFieldScreen = ({
                             </View>
                         );
                     }}
-                    keyExtractor={(item) => item._id}
+                    keyExtractor={(item) => item.id}
                 />
             </View>
         );

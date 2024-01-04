@@ -1,2 +1,3 @@
 tailwind.config.js
 babel.config.js
+src/api/graphql.ts

@@ -3,13 +3,15 @@ import { es } from 'date-fns/locale';
 import { useState } from 'react';
 import { Text, View, Pressable, ViewProps } from 'react-native';
 
-import { TasksListQueryDataIem, useTasksListQuery } from './queries';
+import { useTasksListQuery } from './queries';
 
+import { TaskStatus } from '@/api/graphql';
 import { Badge, BadgeText } from '@/components/ui/badge';
 import { Button, ButtonText } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { TaskStatus } from '@/models/types';
 import { HomeTabScreenProp } from '@/navigation/types';
+
+type TaskItem = NonNullable<Props['tasksQuery']['data']>['myAssignedTasks'][0];
 
 type Props = Pick<HomeTabScreenProp, 'navigation'> & {
     tasksQuery: ReturnType<typeof useTasksListQuery>;
@@ -18,7 +20,7 @@ type Props = Pick<HomeTabScreenProp, 'navigation'> & {
 const TasksList = ({ navigation, tasksQuery }: Props) => {
     const [taskStatus, setTaskStatus] = useState<TaskStatus>(TaskStatus.Pendiente);
 
-    const filteredTasks = tasksQuery.data?.filter((task) => {
+    const filteredTasks = tasksQuery.data?.myAssignedTasks.filter((task) => {
         if (taskStatus === null) {
             return true;
         }
@@ -83,7 +85,7 @@ const TasksList = ({ navigation, tasksQuery }: Props) => {
 
                 <View className="px-4 space-y-2">
                     {filteredTasks?.map((task) => (
-                        <Item navigation={navigation} key={task._id} task={task} />
+                        <Item navigation={navigation} key={task.id} task={task} />
                     ))}
 
                     {filteredTasks?.length === 0 && (
@@ -126,7 +128,7 @@ const Header = ({ title }: HeaderProps) => {
 };
 
 type ItemProps = {
-    task: TasksListQueryDataIem;
+    task: TaskItem;
     navigation: Props['navigation'];
     style?: ViewProps['style'];
 };
@@ -145,7 +147,7 @@ const Item = ({ task, navigation, style }: ItemProps) => {
             )}
             onPress={() => {
                 navigation.navigate('Task', {
-                    id: task._id,
+                    id: task.id,
                 });
             }}
             onPressIn={() => {
@@ -163,7 +165,7 @@ const Item = ({ task, navigation, style }: ItemProps) => {
                     </View>
                     <Text className={cn('ml-auto text-xs', 'text-muted-foreground')}>
                         hace{' '}
-                        {formatDistance(task.openedAt, new Date(), {
+                        {formatDistance(task.createdAt, new Date(), {
                             locale: es,
                         })}
                     </Text>

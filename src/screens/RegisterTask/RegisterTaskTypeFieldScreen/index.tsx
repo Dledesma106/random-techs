@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 
-import { TaskType } from '@/models/types';
+import { TaskType } from '@/api/graphql';
 import { RegisterTaskTypeFieldScreenRouteProps } from '@/navigation/types';
 
 const RegisterTaskTypeFieldScreen = ({

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { appAxios } from '@/api/axios';
-import JWTTokenService from '@/lib/JWTTokenService';
+import { fetchGraphql } from '@/api/fetch-graphql';
+import { BusinessesDocument } from '@/api/graphql';
 
 const BUSINESSES_QUERY_KEY = (branchId: string) => [
     'businesses',
@@ -10,36 +10,14 @@ const BUSINESSES_QUERY_KEY = (branchId: string) => [
     },
 ];
 
-export type FetchBusinessesDataItem = {
-    _id: string;
-    name: string;
-};
-
-type FetchBusinessesResponse = {
-    data: FetchBusinessesDataItem[];
-};
-
-const fetchBusinesses = (branchId: string) => async () => {
-    const searchParams = new URLSearchParams();
-    searchParams.append('branchId', branchId);
-
-    const { data } = await appAxios.get<FetchBusinessesResponse>(
-        `/tech/businesses?${searchParams}`,
-        {
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: (await JWTTokenService.get()) || '',
-            },
-        },
-    );
-    return data.data;
-};
-
 const useBusinessesQuery = (branchId: string) => {
     return useQuery({
         queryKey: BUSINESSES_QUERY_KEY(branchId),
-        queryFn: fetchBusinesses(branchId),
+        queryFn: () => {
+            return fetchGraphql(BusinessesDocument, {
+                branch: branchId,
+            });
+        },
     });
 };
 

@@ -29,9 +29,7 @@ import { cn } from '../../lib/utils';
 import { addFullScreenCameraListener } from '../FullScreenCamera';
 
 type FormValues = {
-    isClosed?: boolean;
-    workOrderNumber?: string;
-    imagesIdToDelete?: string;
+    workOrderNumber?: number | null;
 };
 
 const Task = ({ route, navigation }: TaskScreenRouteProp) => {
@@ -44,14 +42,17 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
 
     useEffect(() => {
         const subscription = formMethods.watch((values, { name, type }) => {
-            if (name === 'isClosed' && type === 'change') {
-                if (values.isClosed === undefined) {
+            if (name === 'workOrderNumber' && type === 'change') {
+                const val = values.workOrderNumber;
+                if (val === null || val === undefined || val < 0) {
                     return;
                 }
 
                 taskUpdateMutation.mutate({
-                    taskId: id,
-                    isClosed: values.isClosed,
+                    id: id,
+                    status: null,
+                    imageIdToDelete: null,
+                    workOrderNumber: val,
                 });
             }
         });
@@ -82,7 +83,15 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     }
 
     if (taskQueryResult.data && !Array.isArray(taskQueryResult.data)) {
-        const task = taskQueryResult.data;
+        const task = taskQueryResult.data.myAssignedTaskById;
+
+        if (!task) {
+            return (
+                <View className="flex-1">
+                    <Text>No se encontró la tarea</Text>
+                </View>
+            );
+        }
 
         return (
             <View className="flex-1 bg-white">
@@ -120,7 +129,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                         <View>
                             <Label className="mb-1.5">Fecha de asignación</Label>
                             <Text className="text-muted-foreground">
-                                {dateFns.format(new Date(task.openedAt), 'dd/MM/yyyy')}
+                                {dateFns.format(new Date(task.createdAt), 'dd/MM/yyyy')}
                             </Text>
                         </View>
 
@@ -157,14 +166,24 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                     <FormField
                                         name="workOrderNumber"
                                         control={formMethods.control}
-                                        defaultValue={task.workOrderNumber?.toString()}
+                                        defaultValue={task.workOrderNumber}
                                         render={({
                                             field: { onChange, onBlur, value },
                                         }) => (
                                             <TextInput
                                                 onBlur={onBlur}
-                                                onChangeText={onChange}
-                                                value={value}
+                                                onChangeText={(val) => {
+                                                    onChange(val);
+                                                    taskUpdateMutation.mutate({
+                                                        id: task.id,
+                                                        status: null,
+                                                        imageIdToDelete: null,
+                                                        workOrderNumber: val
+                                                            ? parseInt(val, 10)
+                                                            : null,
+                                                    });
+                                                }}
+                                                value={value?.toString()}
                                                 placeholder="Orden de Trabajo"
                                                 keyboardType="numeric"
                                             />
@@ -184,8 +203,8 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                             <View className="space-y-2 w-full">
                                 {task.expenses.map((expense, index) => (
                                     <Button
-                                        key={expense._id}
-                                        onPress={() => navigateToExpense(expense._id)}
+                                        key={expense.id}
+                                        onPress={() => navigateToExpense(expense.id)}
                                         className="flex flex-row items-center justify-between"
                                         variant="outline"
                                     >
@@ -222,10 +241,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
 
                             <View className="flex flex-row space-x-4">
                                 {task.images.map((image) => (
-                                    <View
-                                        key={image._id}
-                                        className="flex-[0.33] relative"
-                                    >
+                                    <View key={image.id} className="flex-[0.33] relative">
                                         <Image
                                             className="bg-gray-200 relative z-0"
                                             source={{ uri: image.url }}
@@ -255,9 +271,10 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                                     <TouchableOpacity
                                                         onPress={() => {
                                                             taskUpdateMutation.mutate({
-                                                                taskId: task._id,
-                                                                imageIdToDelete:
-                                                                    image._id,
+                                                                id: task.id,
+                                                                imageIdToDelete: image.id,
+                                                                status: null,
+                                                                workOrderNumber: null,
                                                             });
                                                         }}
                                                     >
@@ -313,11 +330,13 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                         <Pressable
                             onPress={() => {
                                 taskUpdateMutation.mutate({
-                                    taskId: task._id,
-                                    isClosed: true,
+                                    id: task.id,
+                                    status: TaskStatus.Finalizada,
+                                    imageIdToDelete: null,
+                                    workOrderNumber: null,
                                 });
                             }}
-                            className="border border-border p-4 rounded-full bg-black justify-center items-center flex flex-row space-x-1 relative"
+                            className="p-4 rounded-full bg-black justify-center items-center flex flex-row space-x-1 relative"
                         >
                             <Text
                                 className={cn(
@@ -330,7 +349,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
 
                             {taskUpdateMutation.isPending && (
                                 <View className="absolute inset-x-0 inset-y-0 flex items-center justify-center">
-                                    <ActivityIndicator size="small" color="black" />
+                                    <ActivityIndicator size="small" color="white" />
                                 </View>
                             )}
                         </Pressable>

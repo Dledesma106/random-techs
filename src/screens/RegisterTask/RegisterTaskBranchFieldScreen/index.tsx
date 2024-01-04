@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 
-import useBranchesQuery, { FetchBranchesBranchItem } from './queries';
+import useBranchesQuery from './queries';
 
+import { BranchesQuery } from '@/api/graphql';
 import { RegisterTaskBranchFieldScreenRouteProp } from '@/navigation/types';
 
 const RegisterTaskBranchFieldScreen = ({
@@ -12,7 +13,7 @@ const RegisterTaskBranchFieldScreen = ({
     const queryResult = useBranchesQuery();
     const { value } = route.params;
 
-    const handlePress = (branch: FetchBranchesBranchItem) => {
+    const handlePress = (branch: BranchesQuery['branches'][0]) => {
         navigation.navigate({
             name: 'RegisterTask',
             params: { branch },
@@ -24,12 +25,12 @@ const RegisterTaskBranchFieldScreen = ({
         return (
             <View className="flex-1 bg-white">
                 <FlatList
-                    data={queryResult.data.sort((a, b) => {
+                    data={queryResult.data.branches.sort((a, b) => {
                         return a.client.name.localeCompare(b.client.name);
                     })}
                     renderItem={({ item }) => {
                         return (
-                            <View className="p-4 border-b border-input" key={item._id}>
+                            <View className="p-4 border-b border-input" key={item.id}>
                                 <TouchableOpacity
                                     onPress={() => {
                                         handlePress(item);
@@ -40,7 +41,7 @@ const RegisterTaskBranchFieldScreen = ({
                                             {item.client.name} - {item.city.name}
                                         </Text>
 
-                                        {item._id === value && (
+                                        {item.id === value && (
                                             <Ionicons
                                                 name="checkmark-circle"
                                                 size={24}
@@ -54,7 +55,7 @@ const RegisterTaskBranchFieldScreen = ({
                                         {item.businesses.map((business) => {
                                             return (
                                                 <Text
-                                                    key={business._id}
+                                                    key={business.id}
                                                     className="text-muted-foreground"
                                                 >
                                                     - {business.name}
@@ -66,7 +67,7 @@ const RegisterTaskBranchFieldScreen = ({
                             </View>
                         );
                     }}
-                    keyExtractor={(item) => item._id}
+                    keyExtractor={(item) => item.id}
                 />
             </View>
         );

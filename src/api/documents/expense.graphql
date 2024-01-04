@@ -1,0 +1,18 @@
+query myAssignedTaskExpenseById($id: String!) {
+    myAssignedTaskExpenseById(id: $id) {
+        id
+        amount
+        expenseType
+        paySource
+        status
+        image {
+            id
+            url
+        }
+        auditor {
+            id
+            fullName
+        }
+        createdAt
+    }
+}

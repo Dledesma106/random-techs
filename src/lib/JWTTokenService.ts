@@ -3,10 +3,11 @@ import * as SecureStore from 'expo-secure-store';
 const KEY = 'jwtToken';
 
 const JWTTokenService = {
-    save: async (value: string) => {
+    saveAsync: async (value: string) => {
+        console.log('JWTTokenService.save', value);
         await SecureStore.setItemAsync(KEY, value);
     },
-    get: async () => {
+    getAsync: async () => {
         const result = await SecureStore.getItemAsync(KEY);
         if (result) {
             return result;
@@ -14,7 +15,7 @@ const JWTTokenService = {
             return null;
         }
     },
-    delete: async () => {
+    deleteAsync: async () => {
         await SecureStore.deleteItemAsync(KEY);
     },
 };

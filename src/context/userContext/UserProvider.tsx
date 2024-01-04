@@ -5,23 +5,21 @@ import { useState, PropsWithChildren, useEffect } from 'react';
 
 import UserContext from './UserContext';
 
+import { LoginMutation } from '@/api/graphql';
 import JWTTokenService from '@/lib/JWTTokenService';
-
-import { IUser } from '../../models/interfaces';
-
-export interface ILoginJson {
-    user: IUser;
-    accessToken: string;
-}
+import { ProfileScreenRouteProp } from '@/navigation/types';
 
 async function hashPassword(password: string) {
     return await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, password);
 }
 
-const saveUserOnSecureStorage = async (user: IUser) => {
+const saveUserOnSecureStorage = async (
+    user: NonNullable<LoginMutation['login']['user']>,
+    password: string,
+) => {
     const hashedUser = {
-        email: user.email,
-        password: hashPassword(user.password),
+        ...user,
+        password: hashPassword(password),
     };
 
     await setItemAsync('user', JSON.stringify(hashedUser));
@@ -37,7 +35,7 @@ const deleteUserDataFromSecureStorage = async () => {
 };
 
 const UserProvider = ({ children }: PropsWithChildren) => {
-    const [user, setUser] = useState<IUser | null>(null);
+    const [user, setUser] = useState<LoginMutation['login']['user'] | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const queryClient = useQueryClient();
 
@@ -54,8 +52,11 @@ const UserProvider = ({ children }: PropsWithChildren) => {
             });
     }, []);
 
-    const loginUser = async (user: IUser) => {
-        // saveUserOnSecureStorage(user);
+    const loginUser = async (
+        user: NonNullable<LoginMutation['login']['user']>,
+        password: string,
+    ) => {
+        saveUserOnSecureStorage(user, password);
         setUser(user);
     };
 
@@ -63,11 +64,16 @@ const UserProvider = ({ children }: PropsWithChildren) => {
         return user !== null;
     }
 
-    function logoutUser(navigation: any) {
+    function logoutUser(navigation: ProfileScreenRouteProp['navigation']) {
         setUser(null);
         queryClient.clear();
         deleteUserDataFromSecureStorage();
-        JWTTokenService.delete();
+        JWTTokenService.deleteAsync();
+
+        if (!navigation) {
+            return;
+        }
+
         navigation.reset({
             index: 0,
             routes: [{ name: 'Login' }],

@@ -1,14 +1,16 @@
 import { createContext } from 'react';
 
+import { LoginMutation } from '@/api/graphql';
 import { ProfileScreenRouteProp } from '@/navigation/types';
 
-import { IUser } from '../../models/interfaces';
-
 interface UserContextProps {
-    user: IUser | null;
+    user: LoginMutation['login']['user'] | null;
     logoutUser: (navigation: ProfileScreenRouteProp['navigation']) => void;
     isLoggedIn: () => boolean;
-    setUser: (user: IUser) => void;
+    setUser: (
+        user: NonNullable<LoginMutation['login']['user']>,
+        password: string,
+    ) => void;
 }
 
 const UserContext = createContext<UserContextProps>({} as UserContextProps);
