@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
-import { appAxios } from '@/api/axios';
+import { createAppAxiosAsync } from '@/api/axios';
 import { IUser } from '@/models/interfaces';
 
 type LoginMutationVariables = {
@@ -20,7 +20,9 @@ const changePassword = async ({
     currentPassword,
     newPassword,
 }: LoginMutationVariables) => {
-    const response = await appAxios.post(
+    const response = await (
+        await createAppAxiosAsync()
+    ).post(
         `/auth/change-password`,
         {
             currentPassword,
