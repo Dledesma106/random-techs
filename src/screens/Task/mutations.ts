@@ -3,7 +3,7 @@ import { AxiosError } from 'axios';
 
 import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from './queries';
 
-import { appAxios } from '@/api/axios';
+import { createAppAxiosAsync } from '@/api/axios';
 import { fetchGraphql } from '@/api/fetch-graphql';
 import {
     MyAssignedTasksQuery,
@@ -29,15 +29,13 @@ export const postImageToTask = async (data: UseUploadImageToTaskMutationVariable
     const formData = new FormData();
     formData.append('image', compressedImageToFormData({ image, filename }));
 
-    const response = await appAxios.post<UseUploadImageToTaskMutation>(
-        `/images?taskId=${taskId}`,
-        formData,
-        {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
+    const response = await (
+        await createAppAxiosAsync()
+    ).post<UseUploadImageToTaskMutation>(`/images?taskId=${taskId}`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
         },
-    );
+    });
 
     return response.data;
 };

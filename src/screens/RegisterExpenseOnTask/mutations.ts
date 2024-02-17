@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
-import { appAxios } from '@/api/axios';
+import { createAppAxiosAsync } from '@/api/axios';
 import JWTTokenService from '@/lib/JWTTokenService';
 import { compressedImageToFormData, getCompressedImageAsync } from '@/lib/utils';
 import { ExpenseStatus, ExpenseType, PaySource } from '@/models/types';
@@ -40,16 +40,14 @@ export const postExpense = async (data: UseUploadImageToExpenseMutationVariables
     formData.append('paySource', paySource);
     formData.append('amount', amount.toString());
 
-    const response = await appAxios.post<UseUploadImageToExpenseMutation>(
-        `/tech/expenses`,
-        formData,
-        {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                Authorization: (await JWTTokenService.getAsync()) || '',
-            },
+    const response = await (
+        await createAppAxiosAsync()
+    ).post<UseUploadImageToExpenseMutation>(`/tech/expenses`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: (await JWTTokenService.getAsync()) || '',
         },
-    );
+    });
 
     return response.data.data;
 };

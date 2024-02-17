@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { appAxios } from '@/api/axios';
-import JWTTokenService from '@/lib/JWTTokenService';
+import { createAppAxiosAsync } from '@/api/axios';
 import {
     ExpenseStatus,
     ExpenseType,
@@ -53,13 +52,9 @@ type FetchTaskById = {
 };
 
 const fetchTaskById = (id: string) => async () => {
-    const response = await appAxios.get<FetchTaskById>(`/tech/tasks/${id}`, {
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: (await JWTTokenService.getAsync()) || '',
-        },
-    });
+    const response = await (
+        await createAppAxiosAsync()
+    ).get<FetchTaskById>(`/tech/tasks/${id}`);
 
     return response.data.data;
 };
