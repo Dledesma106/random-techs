@@ -40,6 +40,7 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
     experiments: {
         tsconfigPaths: true,
     },
+    plugins: ['expo-font', 'expo-secure-store'],
 });
 
 export default config;
