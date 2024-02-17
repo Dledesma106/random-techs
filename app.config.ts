@@ -33,9 +33,9 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
         favicon: './assets/images/favicon.png',
     },
     extra: {
-        // eas: {
-        //     projectId: '27b396d4-0e33-4573-ab58-f18a85482277',
-        // },
+        eas: {
+            projectId: '4a11cd9d-e6c8-4fa5-9703-7a61273e35bf',
+        },
     },
     experiments: {
         tsconfigPaths: true,

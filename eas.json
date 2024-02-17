@@ -1,11 +1,18 @@
 {
-	"build": {
-		"development": {
-			"distribution": "internal"
-		},
-		"preview": {
-			"distribution": "internal"
-		},
-		"production": {}
-	}
+    "build": {
+        "development": {
+            "distribution": "internal"
+        },
+        "preview": {
+            "distribution": "internal",
+            "android": {
+                "buildType": "apk"
+            },
+            "env": {
+                "EXPO_PUBLIC_API_BASE_URL": "https://ransys-test.vercel.app",
+                "EXPO_PUBLIC_API_HOST": "https://ransys-test.vercel.app"
+            }
+        },
+        "production": {}
+    }
 }
