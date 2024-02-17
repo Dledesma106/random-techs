@@ -1,5 +1,5 @@
 import { AntDesign, EvilIcons } from '@expo/vector-icons';
-import dateFns from 'date-fns';
+import { format } from 'date-fns';
 import { useEffect } from 'react';
 import ContentLoader, { Rect } from 'react-content-loader/native';
 import { useForm } from 'react-hook-form';
@@ -129,7 +129,9 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                         <View>
                             <Label className="mb-1.5">Fecha de asignación</Label>
                             <Text className="text-muted-foreground">
-                                {dateFns.format(new Date(task.createdAt), 'dd/MM/yyyy')}
+                                {task.createdAt
+                                    ? format(new Date(task.createdAt), 'dd/MM/yyyy')
+                                    : 'N/A'}
                             </Text>
                         </View>
 
@@ -144,10 +146,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                             <Label className="mb-1.5">Fecha de cierre</Label>
                             <Text className="text-muted-foreground">
                                 {task.closedAt
-                                    ? dateFns.format(
-                                          new Date(task.closedAt),
-                                          'dd/MM/yyyy',
-                                      )
+                                    ? format(new Date(task.closedAt), 'dd/MM/yyyy')
                                     : 'Pendiente'}
                             </Text>
                         </View>
