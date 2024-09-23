@@ -24,6 +24,7 @@ import { TextInput } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { TaskStatus } from '@/models/types';
 import { TaskScreenRouteProp } from '@/navigation/types';
+import { uploadPhoto } from '../../lib/utils';
 
 import { cn } from '../../lib/utils';
 import { addFullScreenCameraListener } from '../FullScreenCamera';

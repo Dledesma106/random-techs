@@ -16,6 +16,10 @@ import Navigation from './src/navigation';
 
 import useCachedResources from '@/hooks/useCachedResources';
 
+import 'react-native-get-random-values';
+import 'react-native-url-polyfill/auto';
+import { ReadableStream } from 'web-streams-polyfill';
+
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
@@ -34,6 +38,8 @@ const queryClient = new QueryClient({
 const asyncStoragePersister = createAsyncStoragePersister({
     storage: AsyncStorage,
 });
+
+globalThis.ReadableStream = ReadableStream as any;
 
 export default function App() {
     const appIsReady = useCachedResources();
