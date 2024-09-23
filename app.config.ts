@@ -34,7 +34,7 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
     },
     extra: {
         eas: {
-            projectId: '4a11cd9d-e6c8-4fa5-9703-7a61273e35bf',
+            projectId: '27b396d4-0e33-4573-ab58-f18a85482277',
         },
         awsAccessKeyId: process.env.EXPO_PUBLIC_AWS_ACCESS_KEY_ID,
         awsSecretAccessKey: process.env.EXPO_PUBLIC_AWS_SECRET_ACCESS_KEY,
