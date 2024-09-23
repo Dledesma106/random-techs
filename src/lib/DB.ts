@@ -12,7 +12,7 @@ this means that to make it efficient we should store entities in a list, and sav
 so:
 to create an object
     -retrieve the list
-    -add the object
+    -add the objects
     -save the list
 to read an existing object
     -retrieve the list
