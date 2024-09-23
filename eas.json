@@ -15,7 +15,8 @@
         },
         "production": {
             "android": {
-                "buildType": "apk"
+                "buildType": "apk",
+                "image": "latest"
             },
             "env": {
                 "EXPO_PUBLIC_API_BASE_URL": "@env:EXPO_PUBLIC_API_BASE_URL",
