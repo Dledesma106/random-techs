@@ -11,9 +11,15 @@ import {
     UpdateMyAssignedTaskMutation,
     UpdateMyAssignedTaskMutationVariables,
 } from '@/api/graphql';
-import { compressedImageToFormData, getCompressedImageAsync } from '@/lib/utils';
+import {
+    compressedImageToFormData,
+    getCompressedImageAsync,
+    uploadPhoto,
+} from '@/lib/utils';
 
 import { TASKS_LIST_QUERY_KEY } from '../Home/TasksList/queries';
+import JWTTokenService from '@/lib/JWTTokenService';
+import Constants from 'expo-constants';
 
 type UseUploadImageToTaskMutation = { data: string };
 type UseUploadImageToTaskMutationVariables = {
@@ -21,22 +27,75 @@ type UseUploadImageToTaskMutationVariables = {
     localURI: string;
 };
 
+const url = `${Constants.expoConfig?.extra?.['apiHost']}/api/images`;
+
 export const postImageToTask = async (data: UseUploadImageToTaskMutationVariables) => {
     const { localURI, taskId } = data;
+    const key = await uploadPhoto(localURI);
 
-    const { image, filename } = await getCompressedImageAsync(localURI);
+    const token = await JWTTokenService.getAsync();
 
-    const formData = new FormData();
-    formData.append('image', compressedImageToFormData({ image, filename }));
+    try {
+        const fetchConfig: RequestInit = {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-Mobile-App': 'true',
+                ...(token
+                    ? {
+                          Authorization: `Bearer ${token}`,
+                      }
+                    : {}),
+            },
+            body: JSON.stringify({ key, taskId }),
+        };
+        const response = await fetch(url, fetchConfig);
+        console.log('response: ', response);
+        if (!response.ok) {
+            throw response;
+        }
+
+        const json = await response.json();
+
+        if (json.errors && json.errors.length > 0) {
+            const firstError = json.errors[0];
+            let message = firstError.message;
+
+            const firstErrorSplitted = firstError.message.split('Error: ');
+            if (firstErrorSplitted.length > 1) {
+                message = firstErrorSplitted.slice(1).join('');
+            }
+
+            if (message === 'Error decoding signature') {
+                sessionStorage.removeItem('token');
+            } else {
+                throw new Error(message);
+            }
+        }
+
+        const data = json.data;
+        if (!data) {
+            throw new Error('No data');
+        }
+
+        return data;
+    } catch (error) {
+        if (error instanceof Response) {
+            if (error.status === 409) {
+                window.location.href = '/request-email-verification';
+            }
+
+            throw error;
+        }
+
+        throw error;
+    }
 
     const response = await (
         await createAppAxiosAsync()
-    ).post<UseUploadImageToTaskMutation>(`/images?taskId=${taskId}`, formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data',
-        },
-    });
-
+    ).post<UseUploadImageToTaskMutation>(`/images?taskId=${taskId}`, key);
+    console.log('response: ', response);
     return response.data;
 };
 
@@ -88,7 +147,7 @@ export const useUploadImageToTaskMutation = () => {
             if (!data) {
                 return;
             }
-
+            console.log('success sending photo key');
             client.setQueryData<TaskByIdQuery>(
                 TASK_BY_ID_QUERY_KEY(variables.taskId),
                 (oldData) => {

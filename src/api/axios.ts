@@ -17,3 +17,7 @@ export const createAppAxiosAsync = async () => {
         },
     });
 };
+
+const apiAsync = createAppAxiosAsync();
+
+export default apiAsync;

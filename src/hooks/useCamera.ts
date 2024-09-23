@@ -1,4 +1,4 @@
-import { Camera, CameraCapturedPicture, CameraType, PermissionStatus } from 'expo-camera';
+import { Camera, CameraView, CameraCapturedPicture, CameraType, PermissionStatus } from 'expo-camera';
 import { useState, useRef } from 'react';
 
 type UseCameraOptions = {
@@ -9,8 +9,8 @@ type UseCameraOptions = {
 
 export type UseCameraResult = {
     hasPermission: boolean | null;
-    type: CameraType;
-    cameraRef: React.RefObject<Camera>;
+    type: string;
+    cameraRef: React.RefObject<CameraView>;
     switchCamera: () => void;
     takePictureAsync: () => Promise<CameraCapturedPicture | null>;
     askForPermissions: () => Promise<PermissionStatus>;
@@ -21,12 +21,12 @@ export type UseCameraResult = {
 
 const useCamera = (options: UseCameraOptions = {}): UseCameraResult => {
     const {
-        defaultType = CameraType.back,
+        defaultType = 'back',
         isSwitchable = false,
         showByDefault = false,
     } = options;
 
-    const cameraRef = useRef<Camera>(null);
+    const cameraRef = useRef<CameraView>(null);
 
     const [type, setType] = useState(defaultType);
     const [showCamera, setShowCamera] = useState(showByDefault);
@@ -41,10 +41,10 @@ const useCamera = (options: UseCameraOptions = {}): UseCameraResult => {
     const switchCamera = () => {
         if (!isSwitchable) return;
 
-        if (type === CameraType.back) {
-            setType(CameraType.front);
+        if (type === 'back') {
+            setType('front');
         } else {
-            setType(CameraType.back);
+            setType('back');
         }
     };
 
@@ -53,7 +53,7 @@ const useCamera = (options: UseCameraOptions = {}): UseCameraResult => {
         if (!camera) return null;
 
         const picture = await camera.takePictureAsync();
-        return picture;
+        return picture ?? null;
     };
 
     return {

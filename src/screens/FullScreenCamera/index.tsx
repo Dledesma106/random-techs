@@ -1,5 +1,5 @@
 import { EvilIcons } from '@expo/vector-icons';
-import { Camera } from 'expo-camera';
+import { CameraView, BarcodeType } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 import { useEffect, useState } from 'react';
 import {
@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import useCamera from '@/hooks/useCamera';
 import { FullScreenCameraProps } from '@/navigation/types';
+import { uploadPhoto } from '@/lib/utils';
 
 const EVENT_NAME = 'fullscreen-camera-photo-taken-event';
 
@@ -52,7 +53,7 @@ const FullScreenCameraScreen = ({ navigation }: FullScreenCameraProps) => {
         setPhotoURI(picture.uri);
     };
 
-    const onPhotoTaken = (uri: string) => {
+    const onPhotoTaken = async (uri: string) => {
         emitFullScreenCameraEvent(uri);
         navigation.goBack();
     };
@@ -89,7 +90,7 @@ const FullScreenCameraScreen = ({ navigation }: FullScreenCameraProps) => {
 
     return (
         <SafeAreaView className="flex-1">
-            <Camera
+            <CameraView
                 className="flex-1 w-full"
                 ref={useCameraResult.cameraRef}
                 ratio="16:9"
@@ -117,7 +118,7 @@ const FullScreenCameraScreen = ({ navigation }: FullScreenCameraProps) => {
                         />
                     </View>
                 </View>
-            </Camera>
+            </CameraView>
         </SafeAreaView>
     );
 };
