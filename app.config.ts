@@ -36,10 +36,10 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
         eas: {
             projectId: '4a11cd9d-e6c8-4fa5-9703-7a61273e35bf',
         },
-        awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        awsRegion: process.env.AWS_REGION,
-        awsBucketName: process.env.AWS_BUCKET_NAME,
+        awsAccessKeyId: process.env.EXPO_PUBLIC_AWS_ACCESS_KEY_ID,
+        awsSecretAccessKey: process.env.EXPO_PUBLIC_AWS_SECRET_ACCESS_KEY,
+        awsRegion: process.env.EXPO_PUBLIC_AWS_REGION,
+        awsBucketName: process.env.EXPO_PUBLIC_AWS_BUCKET_NAME,
         apiHost: process.env.EXPO_PUBLIC_API_HOST,
     },
     experiments: {
