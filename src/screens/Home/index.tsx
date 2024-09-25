@@ -1,5 +1,4 @@
 import { RefreshControl, ScrollView } from 'react-native';
-
 // import ActivityList from './ActivityList';
 import TasksList from './TasksList';
 import { useTasksListQuery } from './TasksList/queries';
