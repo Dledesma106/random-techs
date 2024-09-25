@@ -48,7 +48,7 @@ const awsBucketName = Constants.expoConfig?.extra?.['awsBucketName'];
 const awsRegion = Constants.expoConfig?.extra?.['awsRegion'];
 const awsSecretAccessKey = Constants.expoConfig?.extra?.['awsSecretAccessKey'];
 
-const S3Credentials = {
+export const S3Credentials = {
     bucketName: awsBucketName,
     region: awsRegion,
     accessKeyId: awsAccessKeyId,
