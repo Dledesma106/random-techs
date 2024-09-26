@@ -28,6 +28,7 @@ import { uploadPhoto } from '../../lib/utils';
 
 import { cn } from '../../lib/utils';
 import { addFullScreenCameraListener } from '../FullScreenCamera';
+import useImagePicker from '@/hooks/useImagePicker';
 
 type FormValues = {
     workOrderNumber?: number | null;
@@ -37,7 +38,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     const { id } = route.params;
     const taskQueryResult = useTaskByIdQuery(id);
     const formMethods = useForm<FormValues>();
-
+    const { pickImage } = useImagePicker();
     const uploadImageMutation = useUploadImageToTaskMutation();
     const taskUpdateMutation = useTaskUpdateMutation();
 
@@ -299,14 +300,16 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                 {task.status === TaskStatus.Pendiente &&
                                     task.images.length < 3 && (
                                         <View className="flex-[0.33] relative border border-border">
-                                            <TouchableOpacity
-                                                onPress={navigateToCameraScreen}
-                                                className="bg-muted flex items-center justify-center"
+                                            <View
+                                                className="bg-muted flex items-center justify-around"
                                                 style={{
                                                     aspectRatio: 9 / 16,
                                                 }}
                                             >
-                                                <View className="items-center">
+                                                <TouchableOpacity
+                                                    onPress={navigateToCameraScreen}
+                                                    className="items-center"
+                                                >
                                                     <EvilIcons
                                                         name="camera"
                                                         size={32}
@@ -314,10 +317,27 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                                     />
 
                                                     <Text className="text-[#4B5563] text-xs">
-                                                        Agregar
+                                                        Tomar foto
                                                     </Text>
-                                                </View>
-                                            </TouchableOpacity>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity
+                                                    onPress={async () => {
+                                                        const uri = await pickImage();
+                                                        if (uri) addPictureToTask(uri);
+                                                    }}
+                                                    className="items-center"
+                                                >
+                                                    <EvilIcons
+                                                        name="image"
+                                                        size={32}
+                                                        color="#4B5563"
+                                                    />
+
+                                                    <Text className="text-[#4B5563] text-xs">
+                                                        Elegir foto
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            </View>
                                         </View>
                                     )}
                             </View>
