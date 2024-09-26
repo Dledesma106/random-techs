@@ -103,7 +103,10 @@ const TasksList = ({ navigation, tasksQuery }: Props) => {
     if (tasksQuery.error) {
         return (
             <View className="my-4">
-                <Header title="Error al cargar las tareas" />
+                <Header
+                    title="Error al cargar las tareas"
+                    description={tasksQuery.error.message}
+                />
             </View>
         );
     }
@@ -117,12 +120,14 @@ const TasksList = ({ navigation, tasksQuery }: Props) => {
 
 type HeaderProps = {
     title: string;
+    description?: string;
 };
 
-const Header = ({ title }: HeaderProps) => {
+const Header = ({ title, description }: HeaderProps) => {
     return (
         <View className="flex flex-row items-center justify-between px-4 mb-4">
             <Text className="font-bold text-lg">{title}</Text>
+            <Text>{description}</Text>
         </View>
     );
 };
