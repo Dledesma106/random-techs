@@ -3,7 +3,7 @@ import { ExpoConfig, ConfigContext } from 'expo/config';
 
 const config = ({ config }: ConfigContext): ExpoConfig => ({
     ...config,
-    name: 'random-techs',
+    name: 'Tecnicos Random',
     slug: 'random-techs',
     version: '1.0.0',
     orientation: 'portrait',
