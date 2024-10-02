@@ -1,9 +1,9 @@
 import { type ClassValue, clsx } from 'clsx';
 import { ImageResult, SaveFormat, manipulateAsync } from 'expo-image-manipulator';
 import { twMerge } from 'tailwind-merge';
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import Constants from 'expo-constants';
+import s3Client, { S3Credentials } from './s3Client';
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -43,36 +43,21 @@ export const compressedImageToFormData = ({
     };
 };
 
-const awsAccessKeyId = Constants.expoConfig?.extra?.['awsAccessKeyId'];
-const awsBucketName = Constants.expoConfig?.extra?.['awsBucketName'];
-const awsRegion = Constants.expoConfig?.extra?.['awsRegion'];
-const awsSecretAccessKey = Constants.expoConfig?.extra?.['awsSecretAccessKey'];
-
-export const S3Credentials = {
-    bucketName: awsBucketName,
-    region: awsRegion,
-    accessKeyId: awsAccessKeyId,
-    secretAccessKey: awsSecretAccessKey,
-};
-
-const getS3Client = () => {
-    const { region, accessKeyId, secretAccessKey } = S3Credentials;
-    const s3Client = new S3Client({
-        region: region,
-        credentials: {
-            accessKeyId: accessKeyId,
-            secretAccessKey: secretAccessKey,
-        },
-    });
-    return s3Client;
-};
+export function stringifyObject(obj: Record<string, any>): string {
+    let resultado = '';
+    for (const propiedad in obj) {
+        if (obj.hasOwnProperty(propiedad)) {
+            resultado += `${propiedad}: ${obj[propiedad]}\n`;
+        }
+    }
+    return resultado;
+}
 
 export const uploadPhoto = async (uri: string) => {
     const response = await fetch(uri);
     const filename = uri.split(`/`).pop();
     const blob = await response.blob();
     const key = `${Date.now()}-${filename}`;
-    const s3Client = getS3Client();
 
     const { bucketName } = S3Credentials;
     const command = new PutObjectCommand({
@@ -90,8 +75,6 @@ export const uploadPhoto = async (uri: string) => {
 };
 
 export const getS3SignedUrl = async (key: string) => {
-    const s3Client = getS3Client();
-
     const command = new GetObjectCommand({
         Bucket: S3Credentials.bucketName,
         Key: key,

@@ -79,8 +79,8 @@ const RegisterExpenseOnTask = ({
 
                     navigation.goBack();
                 },
-                onError: () => {
-                    Toast.show('Ocurrió un error', {
+                onError: (error) => {
+                    Toast.show(`Ocurrió un error: ${error}`, {
                         duration: Toast.durations.LONG,
                         position: Toast.positions.BOTTOM,
                     });
