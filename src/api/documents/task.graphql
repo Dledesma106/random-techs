@@ -106,18 +106,8 @@ mutation createTask($input: TaskInput!) {
     }
 }
 
-mutation updateMyAssignedTask(
-    $id: String!
-    $status: TaskStatus
-    $workOrderNumber: Int
-    $imageIdToDelete: String
-) {
-    updateMyAssignedTask(
-        id: $id
-        status: $status
-        workOrderNumber: $workOrderNumber
-        imageIdToDelete: $imageIdToDelete
-    ) {
+mutation updateMyAssignedTask($input: UpdateMyTaskInput!) {
+    updateMyAssignedTask(input: $input) {
         task {
             id
             status

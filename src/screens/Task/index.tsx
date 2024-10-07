@@ -2,7 +2,7 @@ import { AntDesign, EvilIcons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { useEffect } from 'react';
 import ContentLoader, { Rect } from 'react-content-loader/native';
-import { useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import {
     Text,
     View,
@@ -15,7 +15,7 @@ import {
 import { TouchableOpacity } from 'react-native-gesture-handler';
 
 import { useTaskUpdateMutation, useUploadImageToTaskMutation } from './mutations';
-import { useTaskByIdQuery } from './queries';
+import { TaskByIdQuery, useTaskByIdQuery } from './queries';
 
 import { Badge, BadgeText } from '@/components/ui/badge';
 import { Button, ButtonText } from '@/components/ui/button';
@@ -24,51 +24,38 @@ import { TextInput } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { TaskStatus } from '@/models/types';
 import { TaskScreenRouteProp } from '@/navigation/types';
-import { uploadPhoto } from '../../lib/utils';
+import { stringifyObject, uploadPhoto } from '../../lib/utils';
 
 import { cn } from '../../lib/utils';
 import { addFullScreenCameraListener } from '../FullScreenCamera';
 import useImagePicker from '@/hooks/useImagePicker';
+import ImageThumbnail from './ImageThumbnail';
+import AddImage from './AddImage';
 
-type FormValues = {
-    workOrderNumber?: number | null;
-};
+interface InputImage {
+    key: string;
+    uri: string;
+    unsaved: boolean;
+}
+interface TaskFormInputs {
+    workOrderNumber: string;
+    images: InputImage[];
+}
 
 const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     const { id } = route.params;
-    const taskQueryResult = useTaskByIdQuery(id);
-    const formMethods = useForm<FormValues>();
+    const { data, isPending, refetch, error } = useTaskByIdQuery(id);
+    const formMethods = useForm<TaskFormInputs>();
+    const { control, setValue, watch, handleSubmit, reset } = formMethods;
     const { pickImage } = useImagePicker();
-    const uploadImageMutation = useUploadImageToTaskMutation();
-    const taskUpdateMutation = useTaskUpdateMutation();
+    const { mutateAsync: updateTask, isPending: isUpdatePending } =
+        useTaskUpdateMutation();
 
-    useEffect(() => {
-        const subscription = formMethods.watch((values, { name, type }) => {
-            if (name === 'workOrderNumber' && type === 'change') {
-                const val = values.workOrderNumber;
-                if (val === null || val === undefined || val < 0) {
-                    return;
-                }
-
-                taskUpdateMutation.mutate({
-                    id: id,
-                    status: null,
-                    imageIdToDelete: null,
-                    workOrderNumber: val,
-                });
-            }
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, [formMethods.watch]);
-
-    const addPictureToTask = (uri: string) => {
-        uploadImageMutation.mutate({
-            taskId: id,
-            localURI: uri,
-        });
+    const addPictureToTask = async (uri: string) => {
+        const currentImages = watch('images') ?? [];
+        setValue('images', [...currentImages, { key: '', uri, unsaved: true }]);
+        const key = String(await uploadPhoto(uri));
+        setValue('images', [...currentImages, { key, uri, unsaved: false }]);
     };
 
     const navigateToCameraScreen = () => {
@@ -84,8 +71,27 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
         navigation.navigate('ExpenseOnTask', { expenseId: id });
     }
 
-    if (taskQueryResult.data && !Array.isArray(taskQueryResult.data)) {
-        const task = taskQueryResult.data.myAssignedTaskById;
+    const onSubmit: SubmitHandler<TaskFormInputs> = async (formData) => {
+        const { workOrderNumber, images } = formData;
+        const imageKeys = images.map((image) => image.key);
+        await updateTask({
+            input: {
+                id,
+                workOrderNumber,
+                imageIdToDelete: null,
+                imageKeys,
+            },
+        });
+        reset();
+    };
+
+    const selectImage = async () => {
+        const uri = await pickImage();
+        if (uri) addPictureToTask(uri);
+    };
+
+    if (data && !Array.isArray(data)) {
+        const task = data.myAssignedTaskById;
 
         if (!task) {
             return (
@@ -95,17 +101,22 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
             );
         }
 
+        const imagesAmount = (task.images.length ?? 0) + (watch('images')?.length ?? 0);
+
         return (
             <View className="flex-1 bg-white">
                 <ScrollView
                     refreshControl={
-                        <RefreshControl
-                            refreshing={taskQueryResult.isPending}
-                            onRefresh={taskQueryResult.refetch}
-                        />
+                        <RefreshControl refreshing={isPending} onRefresh={refetch} />
                     }
                     className="flex-1"
                 >
+                    {process.env.EXPO_PUBLIC_ENVIRONMENT === 'development' && (
+                        <>
+                            <Text>{stringifyObject(task)}</Text>
+                            <Text>form: {stringifyObject(watch())} </Text>
+                        </>
+                    )}
                     <View className="px-4 pt-4 pb-24 space-y-4">
                         <View className="items-start">
                             <Badge className="mb-4">
@@ -166,8 +177,8 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                 <Form {...formMethods}>
                                     <FormField
                                         name="workOrderNumber"
-                                        control={formMethods.control}
-                                        defaultValue={task.workOrderNumber}
+                                        control={control}
+                                        defaultValue={String(task.workOrderNumber ?? '')}
                                         render={({
                                             field: { onChange, onBlur, value },
                                         }) => (
@@ -175,14 +186,6 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                                 onBlur={onBlur}
                                                 onChangeText={(val) => {
                                                     onChange(val);
-                                                    taskUpdateMutation.mutate({
-                                                        id: task.id,
-                                                        status: null,
-                                                        imageIdToDelete: null,
-                                                        workOrderNumber: val
-                                                            ? parseInt(val, 10)
-                                                            : null,
-                                                    });
                                                 }}
                                                 value={value?.toString()}
                                                 placeholder="Orden de Trabajo"
@@ -237,60 +240,19 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
 
                         <View>
                             <Label className="mb-1.5">
-                                Imágenes ({task.images.length} de 3)
+                                Imágenes ({imagesAmount} de 3)
                             </Label>
 
                             <View className="flex flex-row space-x-4">
                                 {task.images.map((image) => (
-                                    <View key={image.id} className="flex-[0.33] relative">
-                                        <Image
-                                            className="bg-gray-200 relative z-0"
-                                            source={{ uri: image.url }}
-                                            style={{
-                                                borderRadius: 6,
-                                                aspectRatio: 9 / 16,
-                                            }}
-                                        />
-
-                                        {image.unsaved && (
-                                            <View className="absolute inset-x-0 inset-y-0 flex items-center justify-center bg-white/70">
-                                                <ActivityIndicator
-                                                    className="mb-1"
-                                                    size="small"
-                                                    color="black"
-                                                />
-
-                                                <Text className="text-xs text-black">
-                                                    Subiendo...
-                                                </Text>
-                                            </View>
-                                        )}
-
-                                        {task.status === TaskStatus.Pendiente &&
-                                            image.unsaved && (
-                                                <View className="absolute top-2 right-2 bg-black flex items-center justify-center rounded-full z-50 w-6 h-6">
-                                                    <TouchableOpacity
-                                                        onPress={() => {
-                                                            taskUpdateMutation.mutate({
-                                                                id: task.id,
-                                                                imageIdToDelete: image.id,
-                                                                status: null,
-                                                                workOrderNumber: null,
-                                                            });
-                                                        }}
-                                                    >
-                                                        <AntDesign
-                                                            name="close"
-                                                            size={14}
-                                                            color="white"
-                                                        />
-                                                    </TouchableOpacity>
-                                                </View>
-                                            )}
-                                    </View>
+                                    <ImageThumbnail key={image.id} image={image} />
                                 ))}
 
-                                {task.images.length === 0 &&
+                                {watch('images')?.map((image) => (
+                                    <ImageThumbnail key={image.key} image={image} />
+                                ))}
+
+                                {imagesAmount === 0 &&
                                     task.status !== TaskStatus.Pendiente && (
                                         <Text className="text-muted-foreground">
                                             No hay imágenes registradas
@@ -298,47 +260,13 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                     )}
 
                                 {task.status === TaskStatus.Pendiente &&
-                                    task.images.length < 3 && (
-                                        <View className="flex-[0.33] relative border border-border">
-                                            <View
-                                                className="bg-muted flex items-center justify-around"
-                                                style={{
-                                                    aspectRatio: 9 / 16,
-                                                }}
-                                            >
-                                                <TouchableOpacity
-                                                    onPress={navigateToCameraScreen}
-                                                    className="items-center"
-                                                >
-                                                    <EvilIcons
-                                                        name="camera"
-                                                        size={32}
-                                                        color="#4B5563"
-                                                    />
-
-                                                    <Text className="text-[#4B5563] text-xs">
-                                                        Tomar foto
-                                                    </Text>
-                                                </TouchableOpacity>
-                                                <TouchableOpacity
-                                                    onPress={async () => {
-                                                        const uri = await pickImage();
-                                                        if (uri) addPictureToTask(uri);
-                                                    }}
-                                                    className="items-center"
-                                                >
-                                                    <EvilIcons
-                                                        name="image"
-                                                        size={32}
-                                                        color="#4B5563"
-                                                    />
-
-                                                    <Text className="text-[#4B5563] text-xs">
-                                                        Elegir foto
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                        </View>
+                                    imagesAmount < 3 && (
+                                        <AddImage
+                                            navigateToCameraScreen={
+                                                navigateToCameraScreen
+                                            }
+                                            selectImage={selectImage}
+                                        />
                                     )}
                             </View>
                         </View>
@@ -348,26 +276,19 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                 <View className="absolute bottom-4 inset-x-0 px-4 bg-transparent">
                     {task.status === TaskStatus.Pendiente && (
                         <Pressable
-                            onPress={() => {
-                                taskUpdateMutation.mutate({
-                                    id: task.id,
-                                    status: TaskStatus.Finalizada,
-                                    imageIdToDelete: null,
-                                    workOrderNumber: null,
-                                });
-                            }}
+                            onPress={handleSubmit(onSubmit)}
                             className="p-4 rounded-full bg-black justify-center items-center flex flex-row space-x-1 relative"
                         >
                             <Text
                                 className={cn(
                                     'font-bold text-white',
-                                    taskUpdateMutation.isPending && 'opacity-0',
+                                    isUpdatePending && 'opacity-0',
                                 )}
                             >
-                                Finalizar tarea
+                                Enviar tarea
                             </Text>
 
-                            {taskUpdateMutation.isPending && (
+                            {isUpdatePending && (
                                 <View className="absolute inset-x-0 inset-y-0 flex items-center justify-center">
                                     <ActivityIndicator size="small" color="white" />
                                 </View>
@@ -377,7 +298,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
 
                     {task.status === TaskStatus.Finalizada && (
                         <View className="border border-border p-4 rounded-full bg-white justify-center items-center flex flex-row space-x-1">
-                            <Text className="font-bold">Tarea finalizada</Text>
+                            <Text className="font-bold">Tarea Enviada</Text>
 
                             <AntDesign name="checkcircleo" size={16} color="black" />
                         </View>
@@ -395,15 +316,12 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
         );
     }
 
-    if (taskQueryResult.error) {
+    if (error) {
         return (
             <View className="flex-1 bg-white">
                 <ScrollView
                     refreshControl={
-                        <RefreshControl
-                            refreshing={taskQueryResult.isPending}
-                            onRefresh={taskQueryResult.refetch}
-                        />
+                        <RefreshControl refreshing={isPending} onRefresh={refetch} />
                     }
                     className="flex-1 bg-white"
                     contentContainerStyle={{ flex: 1 }}

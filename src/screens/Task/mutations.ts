@@ -51,7 +51,6 @@ export const postImageToTask = async (data: UseUploadImageToTaskMutationVariable
             body: JSON.stringify({ key, taskId }),
         };
         const response = await fetch(url, fetchConfig);
-        console.log('response: ', response);
         if (!response.ok) {
             throw response;
         }
@@ -147,7 +146,6 @@ export const useUploadImageToTaskMutation = () => {
             if (!data) {
                 return;
             }
-            console.log('success sending photo key');
             client.setQueryData<TaskByIdQuery>(
                 TASK_BY_ID_QUERY_KEY(variables.taskId),
                 (oldData) => {
@@ -166,7 +164,6 @@ export const useUploadImageToTaskMutation = () => {
 
                                 return {
                                     ...image,
-                                    _id: variables.localURI,
                                     url: variables.localURI,
                                     unsaved: false,
                                 };
@@ -191,9 +188,10 @@ export const useTaskUpdateMutation = () => {
         mutationFn: (data) => {
             return fetchGraphql(UpdateMyAssignedTaskDocument, data);
         },
+        onError: (error) => console.log(error),
         onSuccess: (data, variables) => {
             const task = data.updateMyAssignedTask.task;
-            console.log('task', task);
+            console.log('task: ', task);
             if (!task) {
                 return;
             }
@@ -202,11 +200,12 @@ export const useTaskUpdateMutation = () => {
                 if (!oldData) {
                     return oldData;
                 }
+                console.log('oldData: ', oldData);
 
                 const newData: MyAssignedTasksQuery = {
                     ...oldData,
                     myAssignedTasks: oldData.myAssignedTasks.map((someTask) => {
-                        if (someTask.id !== variables.id) {
+                        if (someTask.id !== variables.input.id) {
                             return someTask;
                         }
 
@@ -224,7 +223,7 @@ export const useTaskUpdateMutation = () => {
             });
 
             client.setQueryData<TaskByIdQuery>(
-                TASK_BY_ID_QUERY_KEY(variables.id),
+                TASK_BY_ID_QUERY_KEY(variables.input.id),
                 (oldData) => {
                     if (!oldData || !oldData.myAssignedTaskById) {
                         return oldData;
@@ -244,6 +243,9 @@ export const useTaskUpdateMutation = () => {
                     return newData;
                 },
             );
+            client.invalidateQueries({
+                queryKey: ['tasks', 'detail', task.id],
+            });
         },
     });
 };

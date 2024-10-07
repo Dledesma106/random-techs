@@ -17,6 +17,7 @@ export type Scalars = {
     Float: number;
     Date: any;
     DateTime: any;
+    JSON: any;
 };
 
 export type Branch = {
@@ -25,6 +26,20 @@ export type Branch = {
     city: City;
     client: Client;
     id: Scalars['ID'];
+    number: Scalars['Int'];
+};
+
+export type BranchCrudResult = {
+    __typename?: 'BranchCrudResult';
+    branch: Maybe<Branch>;
+    message: Maybe<Scalars['String']>;
+    success: Scalars['Boolean'];
+};
+
+export type BranchInput = {
+    businessesIds: Array<Scalars['String']>;
+    cityId: Scalars['String'];
+    clientId: Scalars['String'];
     number: Scalars['Int'];
 };
 
@@ -39,6 +54,18 @@ export type City = {
     id: Scalars['ID'];
     name: Scalars['String'];
     province: Province;
+};
+
+export type CityCrudResult = {
+    __typename?: 'CityCrudResult';
+    city: Maybe<City>;
+    message: Maybe<Scalars['String']>;
+    success: Scalars['Boolean'];
+};
+
+export type CityInput = {
+    name: Scalars['String'];
+    provinceId: Scalars['String'];
 };
 
 export type Client = {
@@ -86,7 +113,6 @@ export type Image = {
     __typename?: 'Image';
     id: Scalars['ID'];
     key: Scalars['String'];
-    name: Scalars['String'];
     url: Scalars['String'];
     urlExpire: Maybe<Scalars['DateTime']>;
 };
@@ -102,14 +128,32 @@ export type LoginUserResult = {
 
 export type Mutation = {
     __typename?: 'Mutation';
+    createBranch: BranchCrudResult;
+    createCity: CityCrudResult;
     createPreventive: PreventiveCrudResult;
     createTask: TaskCrudResult;
+    createUser: UserCrudPothosRef;
+    deleteBranch: BranchCrudResult;
+    deleteCity: CityCrudResult;
+    deletePreventive: PreventiveCrudResult;
     deleteTask: TaskCrudResult;
     login: LoginUserResult;
+    sendNewUserRandomPassword: UserCrudPothosRef;
+    updateBranch: BranchCrudResult;
+    updateCity: CityCrudResult;
     updateMyAssignedTask: TaskCrudResult;
     updatePreventive: PreventiveCrudResult;
     updateTask: TaskCrudResult;
     updateTaskExpenseStatus: TaskCrudResult;
+    updateUser: UserCrudPothosRef;
+};
+
+export type MutationCreateBranchArgs = {
+    input: BranchInput;
+};
+
+export type MutationCreateCityArgs = {
+    input: CityInput;
 };
 
 export type MutationCreatePreventiveArgs = {
@@ -118,6 +162,22 @@ export type MutationCreatePreventiveArgs = {
 
 export type MutationCreateTaskArgs = {
     input: TaskInput;
+};
+
+export type MutationCreateUserArgs = {
+    input: UserInput;
+};
+
+export type MutationDeleteBranchArgs = {
+    id: Scalars['String'];
+};
+
+export type MutationDeleteCityArgs = {
+    id: Scalars['String'];
+};
+
+export type MutationDeletePreventiveArgs = {
+    id: Scalars['String'];
 };
 
 export type MutationDeleteTaskArgs = {
@@ -129,11 +189,22 @@ export type MutationLoginArgs = {
     password: Scalars['String'];
 };
 
-export type MutationUpdateMyAssignedTaskArgs = {
+export type MutationSendNewUserRandomPasswordArgs = {
     id: Scalars['String'];
-    imageIdToDelete: InputMaybe<Scalars['String']>;
-    status: InputMaybe<TaskStatus>;
-    workOrderNumber: InputMaybe<Scalars['Int']>;
+};
+
+export type MutationUpdateBranchArgs = {
+    id: Scalars['String'];
+    input: BranchInput;
+};
+
+export type MutationUpdateCityArgs = {
+    id: Scalars['String'];
+    input: CityInput;
+};
+
+export type MutationUpdateMyAssignedTaskArgs = {
+    input: UpdateMyTaskInput;
 };
 
 export type MutationUpdatePreventiveArgs = {
@@ -151,15 +222,23 @@ export type MutationUpdateTaskExpenseStatusArgs = {
     status: ExpenseStatus;
 };
 
+export type MutationUpdateUserArgs = {
+    id: Scalars['String'];
+    input: UserInput;
+};
+
 export type Preventive = {
     __typename?: 'Preventive';
     assigned: Array<User>;
+    assignedIDs: Array<Scalars['String']>;
+    batteryChangedAt: Maybe<Scalars['DateTime']>;
     branch: Branch;
     business: Business;
     createdAt: Scalars['DateTime'];
     deleted: Scalars['Boolean'];
     frequency: Scalars['Int'];
     id: Scalars['ID'];
+    lastDoneAt: Maybe<Scalars['DateTime']>;
     months: Array<Scalars['String']>;
     observations: Maybe<Scalars['String']>;
     status: PreventiveStatus;
@@ -198,6 +277,7 @@ export type Province = {
 export type Query = {
     __typename?: 'Query';
     branches: Array<Branch>;
+    branchesOfClient: Array<Branch>;
     businesses: Array<Business>;
     cities: Array<City>;
     images: Array<Image>;
@@ -209,6 +289,13 @@ export type Query = {
     taskById: Maybe<Task>;
     tasks: Array<Task>;
     users: Array<User>;
+};
+
+export type QueryBranchesOfClientArgs = {
+    businessId: InputMaybe<Scalars['String']>;
+    cityId: InputMaybe<Scalars['String']>;
+    clientId: Scalars['String'];
+    provinceId: InputMaybe<Scalars['String']>;
 };
 
 export type QueryBusinessesArgs = {
@@ -257,6 +344,7 @@ export type Task = {
     id: Scalars['ID'];
     images: Array<Image>;
     imagesIDs: Array<Scalars['String']>;
+    metadata: Scalars['JSON'];
     status: TaskStatus;
     taskType: TaskType;
     workOrderNumber: Maybe<Scalars['Int']>;
@@ -275,6 +363,7 @@ export type TaskInput = {
     branch: Scalars['String'];
     business: Scalars['String'];
     description: Scalars['String'];
+    metadata: Scalars['JSON'];
     status: TaskStatus;
     taskType: TaskType;
     workOrderNumber: InputMaybe<Scalars['Int']>;
@@ -297,6 +386,13 @@ export const TaskType = {
 } as const;
 
 export type TaskType = (typeof TaskType)[keyof typeof TaskType];
+export type UpdateMyTaskInput = {
+    id: Scalars['String'];
+    imageIdToDelete: InputMaybe<Scalars['String']>;
+    imageKeys: Array<Scalars['String']>;
+    workOrderNumber: Scalars['String'];
+};
+
 export type User = {
     __typename?: 'User';
     city: Maybe<City>;
@@ -304,6 +400,21 @@ export type User = {
     firstName: Scalars['String'];
     fullName: Scalars['String'];
     id: Scalars['ID'];
+    lastName: Scalars['String'];
+    roles: Array<Role>;
+};
+
+export type UserCrudPothosRef = {
+    __typename?: 'UserCrudPothosRef';
+    message: Maybe<Scalars['String']>;
+    success: Scalars['Boolean'];
+    user: Maybe<User>;
+};
+
+export type UserInput = {
+    city: Scalars['String'];
+    email: Scalars['String'];
+    firstName: Scalars['String'];
     lastName: Scalars['String'];
     roles: Array<Role>;
 };
@@ -480,10 +591,7 @@ export type CreateTaskMutation = {
 };
 
 export type UpdateMyAssignedTaskMutationVariables = Exact<{
-    id: Scalars['String'];
-    status: InputMaybe<TaskStatus>;
-    workOrderNumber: InputMaybe<Scalars['Int']>;
-    imageIdToDelete: InputMaybe<Scalars['String']>;
+    input: UpdateMyTaskInput;
 }>;
 
 export type UpdateMyAssignedTaskMutation = {
@@ -1455,41 +1563,17 @@ export const UpdateMyAssignedTaskDocument = {
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'input' },
+                    },
                     type: {
                         kind: 'NonNullType',
                         type: {
                             kind: 'NamedType',
-                            name: { kind: 'Name', value: 'String' },
+                            name: { kind: 'Name', value: 'UpdateMyTaskInput' },
                         },
                     },
-                },
-                {
-                    kind: 'VariableDefinition',
-                    variable: {
-                        kind: 'Variable',
-                        name: { kind: 'Name', value: 'status' },
-                    },
-                    type: {
-                        kind: 'NamedType',
-                        name: { kind: 'Name', value: 'TaskStatus' },
-                    },
-                },
-                {
-                    kind: 'VariableDefinition',
-                    variable: {
-                        kind: 'Variable',
-                        name: { kind: 'Name', value: 'workOrderNumber' },
-                    },
-                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
-                },
-                {
-                    kind: 'VariableDefinition',
-                    variable: {
-                        kind: 'Variable',
-                        name: { kind: 'Name', value: 'imageIdToDelete' },
-                    },
-                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
                 },
             ],
             selectionSet: {
@@ -1501,34 +1585,10 @@ export const UpdateMyAssignedTaskDocument = {
                         arguments: [
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'id' },
+                                name: { kind: 'Name', value: 'input' },
                                 value: {
                                     kind: 'Variable',
-                                    name: { kind: 'Name', value: 'id' },
-                                },
-                            },
-                            {
-                                kind: 'Argument',
-                                name: { kind: 'Name', value: 'status' },
-                                value: {
-                                    kind: 'Variable',
-                                    name: { kind: 'Name', value: 'status' },
-                                },
-                            },
-                            {
-                                kind: 'Argument',
-                                name: { kind: 'Name', value: 'workOrderNumber' },
-                                value: {
-                                    kind: 'Variable',
-                                    name: { kind: 'Name', value: 'workOrderNumber' },
-                                },
-                            },
-                            {
-                                kind: 'Argument',
-                                name: { kind: 'Name', value: 'imageIdToDelete' },
-                                value: {
-                                    kind: 'Variable',
-                                    name: { kind: 'Name', value: 'imageIdToDelete' },
+                                    name: { kind: 'Name', value: 'input' },
                                 },
                             },
                         ],

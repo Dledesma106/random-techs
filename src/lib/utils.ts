@@ -47,7 +47,7 @@ export function stringifyObject(obj: Record<string, any>): string {
     let resultado = '';
     for (const propiedad in obj) {
         if (obj.hasOwnProperty(propiedad)) {
-            resultado += `${propiedad}: ${obj[propiedad]}\n`;
+            resultado += `${propiedad}: ${typeof obj[propiedad] === 'object' ? stringifyObject(obj[propiedad]) : obj[propiedad]}\n`;
         }
     }
     return resultado;
