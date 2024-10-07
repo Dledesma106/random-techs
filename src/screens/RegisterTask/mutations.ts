@@ -8,7 +8,7 @@ import {
     CreateTaskMutationVariables,
 } from '@/api/graphql';
 
-import { TASKS_LIST_QUERY_KEY } from '../Home/TasksList/queries';
+import { TASKS_LIST_QUERY_KEY } from '@/hooks/api/tasks/useGetMyAssignedTasks';
 
 type Options = UseMutationOptions<
     CreateTaskMutation,

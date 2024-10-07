@@ -9,16 +9,18 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
+    TouchableOpacity,
 } from 'react-native';
-
-import { useLoginMutation } from './mutations';
 
 import { ButtonWithSpinner } from '@/components/ButtonWithSpinner';
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { TextInput } from '@/components/ui/Input';
+import { RootStackParamList } from '@/navigation/types';
+import useLogin from '@/hooks/api/auth/useLogin';
+import { useState } from 'react';
+import { Feather } from '@expo/vector-icons';
 import { useUserContext } from '@/context/userContext/useUser';
 import JWTTokenService from '@/lib/JWTTokenService';
-import { RootStackParamList } from '@/navigation/types';
 
 interface LoginForm {
     email: string;
@@ -28,7 +30,8 @@ interface LoginForm {
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 const LoginScreen = ({ navigation }: Props) => {
-    const { mutate, error, isPending } = useLoginMutation();
+    const { mutate, error, isPending } = useLogin();
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const { setUser } = useUserContext();
 
     const form = useForm<LoginForm>({
@@ -70,7 +73,7 @@ const LoginScreen = ({ navigation }: Props) => {
                 >
                     <View className="px-4 w-full">
                         <Text className="text-2xl font-bold mb-4 text-gray-800 text-center">
-                            Random Tech
+                            Tecnicos Random
                         </Text>
 
                         <Form {...form}>
@@ -94,6 +97,7 @@ const LoginScreen = ({ navigation }: Props) => {
                                                 onBlur={field.onBlur}
                                                 ref={field.ref}
                                                 placeholder="Email"
+                                                autoCapitalize="none"
                                             />
                                             <FormMessage />
                                         </FormItem>
@@ -107,14 +111,35 @@ const LoginScreen = ({ navigation }: Props) => {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Contraseña</FormLabel>
-                                            <TextInput
-                                                value={field.value}
-                                                onChangeText={field.onChange}
-                                                onBlur={field.onBlur}
-                                                ref={field.ref}
-                                                placeholder="Contraseña"
-                                                secureTextEntry
-                                            />
+                                            <View className="relative">
+                                                <TextInput
+                                                    value={field.value}
+                                                    onChangeText={field.onChange}
+                                                    onBlur={field.onBlur}
+                                                    ref={field.ref}
+                                                    placeholder="Contraseña"
+                                                    secureTextEntry={!isPasswordVisible}
+                                                    autoCapitalize="none"
+                                                />
+                                                <TouchableOpacity
+                                                    className="absolute right-4 top-4"
+                                                    onPress={() =>
+                                                        setIsPasswordVisible(
+                                                            !isPasswordVisible,
+                                                        )
+                                                    }
+                                                >
+                                                    <Feather
+                                                        name={
+                                                            !isPasswordVisible
+                                                                ? 'eye'
+                                                                : 'eye-off'
+                                                        }
+                                                        size={24}
+                                                        color="#000"
+                                                    />
+                                                </TouchableOpacity>
+                                            </View>
                                             <FormMessage />
                                         </FormItem>
                                     )}
