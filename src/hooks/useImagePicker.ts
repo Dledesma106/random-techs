@@ -1,11 +1,11 @@
-import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
+import { useState } from 'react';
 
 const useImagePicker = () => {
     const [uri, setUri] = useState<string | null>(null);
 
     const pickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
+        const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             aspect: [4, 3],
             quality: 1,

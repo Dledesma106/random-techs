@@ -19,7 +19,7 @@ export type TaskByIdQuery = Omit<MyAssignedTaskByIdQuery, 'myAssignedTaskById'> 
         | null;
 };
 
-export const useTaskByIdQuery = (id: string) => {
+export const useGetMyAssignedTaskById = (id: string) => {
     return useQuery<unknown, Error, TaskByIdQuery>({
         queryKey: ['tasks', 'detail', id],
         queryFn: () => fetchGraphql(MyAssignedTaskByIdDocument, { id }),

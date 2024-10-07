@@ -1,4 +1,10 @@
-import { Camera, CameraView, CameraCapturedPicture, CameraType, PermissionStatus } from 'expo-camera';
+import {
+    Camera,
+    CameraView,
+    CameraCapturedPicture,
+    CameraType,
+    PermissionStatus,
+} from 'expo-camera';
 import { useState, useRef } from 'react';
 
 type UseCameraOptions = {
@@ -20,11 +26,7 @@ export type UseCameraResult = {
 };
 
 const useCamera = (options: UseCameraOptions = {}): UseCameraResult => {
-    const {
-        defaultType = 'back',
-        isSwitchable = false,
-        showByDefault = false,
-    } = options;
+    const { defaultType = 'back', isSwitchable = false, showByDefault = false } = options;
 
     const cameraRef = useRef<CameraView>(null);
 

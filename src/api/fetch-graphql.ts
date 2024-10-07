@@ -1,6 +1,7 @@
 import { TypedDocumentNode } from '@graphql-typed-document-node/core';
-import { print } from 'graphql/language/printer';
 import Constants from 'expo-constants';
+import { print } from 'graphql/language/printer';
+
 import JWTTokenService from '@/lib/JWTTokenService';
 
 export { gql } from 'graphql-request';
