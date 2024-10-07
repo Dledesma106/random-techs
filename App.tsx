@@ -8,6 +8,9 @@ import { StatusBar } from 'expo-status-bar';
 import { RootSiblingParent } from 'react-native-root-siblings';
 import Toast from 'react-native-root-toast';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ReadableStream } from 'web-streams-polyfill';
+import 'react-native-get-random-values';
+import 'react-native-url-polyfill/auto';
 
 import DbProvider from './src/context/dbContext/DbProvider';
 import UserProvider from './src/context/userContext/UserProvider';
@@ -15,10 +18,6 @@ import useColorScheme from './src/hooks/useColorScheme';
 import Navigation from './src/navigation';
 
 import useCachedResources from '@/hooks/useCachedResources';
-
-import 'react-native-get-random-values';
-import 'react-native-url-polyfill/auto';
-import { ReadableStream } from 'web-streams-polyfill';
 
 const queryClient = new QueryClient({
     defaultOptions: {

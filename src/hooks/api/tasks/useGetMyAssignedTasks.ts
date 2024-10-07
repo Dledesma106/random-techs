@@ -5,7 +5,7 @@ import { MyAssignedTasksDocument } from '@/api/graphql';
 
 export const TASKS_LIST_QUERY_KEY = ['tasks'];
 
-export const useTasksListQuery = () => {
+export const useGetMyAssignedTasks = () => {
     return useQuery({
         queryKey: TASKS_LIST_QUERY_KEY,
         queryFn: () => fetchGraphql(MyAssignedTasksDocument, {}),

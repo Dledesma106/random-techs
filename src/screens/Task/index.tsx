@@ -1,36 +1,32 @@
-import { AntDesign, EvilIcons } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 import { format } from 'date-fns';
-import { useEffect } from 'react';
 import ContentLoader, { Rect } from 'react-content-loader/native';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import {
     Text,
     View,
     ScrollView,
-    Image,
     RefreshControl,
     ActivityIndicator,
     Pressable,
 } from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 
-import { useTaskUpdateMutation, useUploadImageToTaskMutation } from './mutations';
-import { TaskByIdQuery, useTaskByIdQuery } from './queries';
+import AddImage from './AddImage';
+import ImageThumbnail from './ImageThumbnail';
 
 import { Badge, BadgeText } from '@/components/ui/badge';
 import { Button, ButtonText } from '@/components/ui/button';
 import { Form, FormField } from '@/components/ui/form';
 import { TextInput } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
+import { useGetMyAssignedTaskById } from '@/hooks/api/tasks/useGetMyAssignedTaskById';
+import { useUpdateMyAssignedTask } from '@/hooks/api/tasks/useUpdateMyAssignedTask';
+import useImagePicker from '@/hooks/useImagePicker';
+import { stringifyObject, uploadPhoto, cn } from '@/lib/utils';
 import { TaskStatus } from '@/models/types';
 import { TaskScreenRouteProp } from '@/navigation/types';
-import { stringifyObject, uploadPhoto } from '../../lib/utils';
 
-import { cn } from '../../lib/utils';
 import { addFullScreenCameraListener } from '../FullScreenCamera';
-import useImagePicker from '@/hooks/useImagePicker';
-import ImageThumbnail from './ImageThumbnail';
-import AddImage from './AddImage';
 
 interface InputImage {
     key: string;
@@ -44,12 +40,12 @@ interface TaskFormInputs {
 
 const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     const { id } = route.params;
-    const { data, isPending, refetch, error } = useTaskByIdQuery(id);
+    const { data, isPending, refetch, error } = useGetMyAssignedTaskById(id);
     const formMethods = useForm<TaskFormInputs>();
     const { control, setValue, watch, handleSubmit, reset } = formMethods;
     const { pickImage } = useImagePicker();
     const { mutateAsync: updateTask, isPending: isUpdatePending } =
-        useTaskUpdateMutation();
+        useUpdateMyAssignedTask();
 
     const addPictureToTask = async (uri: string) => {
         const currentImages = watch('images') ?? [];

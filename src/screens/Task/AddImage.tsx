@@ -1,5 +1,5 @@
-import { View, Text, TouchableOpacity } from 'react-native';
 import { EvilIcons } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity } from 'react-native';
 
 type Props = { navigateToCameraScreen: () => void; selectImage: () => void };
 

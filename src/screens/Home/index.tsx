@@ -1,12 +1,13 @@
 import { RefreshControl, ScrollView } from 'react-native';
+
 // import ActivityList from './ActivityList';
 import TasksList from './TasksList';
-import { useTasksListQuery } from './TasksList/queries';
 
+import { useGetMyAssignedTasks } from '@/hooks/api/tasks/useGetMyAssignedTasks';
 import { HomeTabScreenProp } from '@/navigation/types';
 
 const Home = ({ navigation }: HomeTabScreenProp) => {
-    const tasksQuery = useTasksListQuery();
+    const tasksQuery = useGetMyAssignedTasks();
 
     return (
         <ScrollView
