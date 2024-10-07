@@ -6,7 +6,10 @@ import JWTTokenService from '@/lib/JWTTokenService';
 import { compressedImageToFormData, getCompressedImageAsync } from '@/lib/utils';
 import { ExpenseStatus, ExpenseType, PaySource } from '@/models/types';
 
-import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from '../Task/queries';
+import {
+    TASK_BY_ID_QUERY_KEY,
+    TaskByIdQuery,
+} from '@/hooks/api/tasks/useGetMyAssignedTaskById';
 
 type UseUploadImageToExpenseMutation = {
     data: {
