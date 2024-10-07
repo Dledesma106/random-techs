@@ -1,11 +1,11 @@
 import { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import { print } from 'graphql/language/printer';
-
+import Constants from 'expo-constants';
 import JWTTokenService from '@/lib/JWTTokenService';
 
 export { gql } from 'graphql-request';
 
-const url = `${process.env.EXPO_PUBLIC_API_HOST}/api/graphql`;
+const url = `${Constants.expoConfig?.extra?.['apiHost']}/api/graphql`;
 
 export async function fetchGraphql<T, V>(
     query: TypedDocumentNode<T, V>,
@@ -33,7 +33,7 @@ export async function fetchGraphql<T, V>(
             },
             body: JSON.stringify({
                 query: print(query),
-                variables: variables || undefined,
+                variables: variables ?? undefined,
             }),
             ...options,
         };
@@ -48,10 +48,10 @@ export async function fetchGraphql<T, V>(
         if (json.errors && json.errors.length > 0) {
             const firstError = json.errors[0];
             let message = firstError.message;
-
             const firstErrorSplitted = firstError.message.split('Error: ');
             if (firstErrorSplitted.length > 1) {
                 message = firstErrorSplitted.slice(1).join('');
+                console.log('error message: ', message);
             }
 
             if (message === 'Error decoding signature') {
