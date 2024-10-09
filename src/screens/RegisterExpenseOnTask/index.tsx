@@ -16,17 +16,24 @@ import Toast from 'react-native-root-toast';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import RHFDropdown from './Dropdown';
-import { useCreateTaskExpenseMutation } from './mutations';
 
 import { ExpenseType, PaySource, expenseTypes, paySources } from '@/models/types';
 import { RegisterExpenseOnTaskScreenRouteProp } from '@/navigation/types';
 import { addFullScreenCameraListener } from '@/screens/FullScreenCamera';
+import { useCreateExpenseOnTask } from '@/hooks/api/expense/useCreateExpenseOnTask';
+import { deletePhoto, stringifyObject, uploadPhoto } from '@/lib/utils';
+
+interface InputImage {
+    key: string;
+    uri: string;
+    unsaved: boolean;
+}
 
 type FormValues = {
     amount: string;
     paySource: PaySource;
     expenseType: ExpenseType;
-    imageURI?: string;
+    image?: InputImage;
 };
 
 const RegisterExpenseOnTask = ({
@@ -44,87 +51,96 @@ const RegisterExpenseOnTask = ({
         reset,
     } = useForm<FormValues>();
 
-    useEffect(() => {
-        return () => {
-            reset();
-        };
-    }, [taskId]);
+    const { mutateAsync: createExpense, isPending } = useCreateExpenseOnTask();
 
-    const createExpenseMutation = useCreateTaskExpenseMutation();
-
-    const createExpense: SubmitHandler<FormValues> = (data) => {
-        if (!data.imageURI) {
+    const onSubmit: SubmitHandler<FormValues> = async (data) => {
+        if (!data.amount) {
+            Toast.show('El monto es requerido', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+            });
+            return;
+        }
+        if (!data.expenseType) {
+            Toast.show('El tipo de gasto es requerido', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+            });
+            return;
+        }
+        if (!data.paySource) {
+            Toast.show('La fuente de pago es requerida', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+            });
+            return;
+        }
+        if (!data.image) {
             Toast.show('La imagen es requerida', {
                 duration: Toast.durations.LONG,
                 position: Toast.positions.BOTTOM,
             });
-
             return;
         }
 
-        createExpenseMutation.mutate(
-            {
-                taskId,
+        await createExpense({
+            taskId,
+            expenseData: {
                 amount: parseFloat(data.amount),
                 paySource: data.paySource,
                 expenseType: data.expenseType,
-                imageURI: data.imageURI,
+                imageKey: data.image.key,
             },
-            {
-                onSuccess: () => {
-                    Toast.show('Gasto registrado', {
-                        duration: Toast.durations.LONG,
-                        position: Toast.positions.BOTTOM,
-                    });
+        });
+        navigation.goBack();
+        reset();
+    };
 
-                    navigation.goBack();
-                },
-                onError: (error) => {
-                    Toast.show(`Ocurrió un error: ${error}`, {
-                        duration: Toast.durations.LONG,
-                        position: Toast.positions.BOTTOM,
-                    });
-                },
-            },
-        );
+    const deleteImage = async () => {
+        const key = watch('image.key');
+        await deletePhoto(key);
+        setValue('image', undefined);
+    };
+
+    const addPictureToExpense = async (uri: string) => {
+        setValue('image', { key: '', uri, unsaved: true });
+        const key = String(await uploadPhoto(uri));
+        setValue('image', { key, uri, unsaved: false });
     };
 
     const goToCameraScreen = () => {
-        addFullScreenCameraListener((uri) => {
-            setValue('imageURI', uri);
-        });
+        addFullScreenCameraListener(addPictureToExpense);
         navigation.navigate('FullScreenCamera');
     };
 
-    const imageURI = watch('imageURI');
-
+    const imageURI = watch('image.uri');
     return (
         <SafeAreaView className="flex-1">
             <View className="flex-1 bg-white">
                 <View className="flex flex-row items-center justify-between px-4 py-2 border-b border-gray-200">
                     <TouchableOpacity
-                        className={clsx(createExpenseMutation.isPending && 'opacity-30')}
-                        disabled={createExpenseMutation.isPending}
+                        className={clsx(isPending && 'opacity-30')}
+                        disabled={isPending}
                         onPress={() => navigation.goBack()}
                     >
                         <AntDesign name="arrowleft" size={24} color="black" />
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        onPress={handleSubmit(createExpense)}
+                        onPress={handleSubmit(onSubmit)}
                         className="font-bold"
                     >
                         <View className="rounded bg-black relative flex">
                             <Text
                                 className={clsx(
                                     'font-bold text-white text-xs p-2',
-                                    createExpenseMutation.isPending && 'opacity-0',
+                                    isPending && 'opacity-0',
                                 )}
                             >
                                 Registrar gasto
                             </Text>
 
-                            {createExpenseMutation.isPending && (
+                            {isPending && (
                                 <View className="absolute inset-0 w-full h-full flex items-center justify-center flex-1">
                                     <ActivityIndicator size="small" color="#FFF" />
                                 </View>
@@ -134,6 +150,11 @@ const RegisterExpenseOnTask = ({
                 </View>
 
                 <ScrollView className="py-4 flex-1">
+                    {process.env.NODE_ENV === 'development' && (
+                        <>
+                            <Text>form {stringifyObject(watch())}</Text>
+                        </>
+                    )}
                     <View className="w-full mb-4 px-4">
                         <Text className="mb-2 text-gray-800 font-bold">Monto</Text>
                         <Controller
@@ -182,44 +203,52 @@ const RegisterExpenseOnTask = ({
                                 label: type,
                                 value: type,
                             }))}
-                            label="Tipo de pago"
+                            label="Fuente de pago"
                         />
                     </View>
 
                     {imageURI && (
                         <View className="px-4 pt-4">
                             <Pressable
-                                onPress={() => setValue('imageURI', undefined)}
-                                className="flex flex-row items-center justify-between py-1"
+                                onPress={() =>
+                                    navigation.navigate('FullScreenImage', {
+                                        uri: imageURI,
+                                    })
+                                }
                             >
-                                <Text className="text-gray-600">Imagen</Text>
-                                <AntDesign name="close" size={14} color="gray" />
+                                <View className="flex-1 relative">
+                                    <Image
+                                        source={{ uri: imageURI }}
+                                        style={{
+                                            borderRadius: 6,
+                                            aspectRatio: 9 / 16,
+                                        }}
+                                    />
+                                    <Pressable
+                                        onPress={deleteImage}
+                                        className="flex flex-row items-center justify-center py-1 absolute rounded-full w-8 h-8 bg-black top-2 right-2"
+                                    >
+                                        <AntDesign name="close" size={20} color="white" />
+                                    </Pressable>
+                                </View>
                             </Pressable>
-
-                            <View className="flex-1">
-                                <Image
-                                    source={{ uri: imageURI }}
-                                    style={{
-                                        borderRadius: 6,
-                                        aspectRatio: 9 / 16,
-                                    }}
-                                />
-                            </View>
                         </View>
                     )}
 
-                    <View className="pt-8 px-4">
-                        <TouchableOpacity
-                            onPress={goToCameraScreen}
-                            className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
-                        >
-                            <Text className="font-semibold text-white">
-                                Añadir Imagen
-                            </Text>
+                    {!imageURI && (
+                        <View className="pt-8 px-4">
+                            <TouchableOpacity
+                                onPress={goToCameraScreen}
+                                className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
+                            >
+                                <Text className="font-semibold text-white">
+                                    Añadir Imagen
+                                </Text>
 
-                            <EvilIcons name="camera" size={22} color="white" />
-                        </TouchableOpacity>
-                    </View>
+                                <EvilIcons name="camera" size={22} color="white" />
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </ScrollView>
             </View>
         </SafeAreaView>

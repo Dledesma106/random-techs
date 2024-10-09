@@ -1,4 +1,8 @@
-import { PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import {
+    PutObjectCommand,
+    GetObjectCommand,
+    DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { type ClassValue, clsx } from 'clsx';
 import { ImageResult, SaveFormat, manipulateAsync } from 'expo-image-manipulator';
@@ -15,34 +19,6 @@ export function dmyDateString(date: Date): string {
         date.getMonth() + 1 > 10 ? `${date.getMonth() + 1}` : `0${date.getMonth() + 1}`
     }/${date.getFullYear()}`;
 }
-
-export const getCompressedImageAsync = async (imageURI: string) => {
-    const filename = imageURI.split('/').pop();
-    if (!filename) {
-        throw new Error('La imagen no tiene un nombre válido');
-    }
-
-    const image = await manipulateAsync(imageURI, [{ resize: { width: 800 } }], {
-        compress: 0.5,
-        format: SaveFormat.JPEG,
-    });
-
-    return { image, filename };
-};
-
-export const compressedImageToFormData = ({
-    image,
-    filename,
-}: {
-    image: ImageResult;
-    filename: string;
-}) => {
-    return {
-        uri: image.uri,
-        name: filename,
-        type: 'image/jpeg',
-    };
-};
 
 export function stringifyObject(obj: Record<string, any>): string {
     let resultado = '';
@@ -72,6 +48,19 @@ export const uploadPhoto = async (uri: string) => {
         return key;
     } catch (error) {
         console.log('error when sending command: ', error);
+    }
+};
+
+export const deletePhoto = async (key: string) => {
+    const { bucketName } = S3Credentials;
+    try {
+        const command = new DeleteObjectCommand({
+            Bucket: bucketName,
+            Key: key,
+        });
+        await s3Client.send(command);
+    } catch (error) {
+        console.error('Error deleting file:', error);
     }
 };
 

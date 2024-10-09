@@ -1,25 +1,46 @@
-import { Text, View, ScrollView, Image, RefreshControl } from 'react-native';
-
-import { useExpenseByIdQuery } from './queries';
+import {
+    Text,
+    View,
+    ScrollView,
+    Image,
+    RefreshControl,
+    TouchableOpacity,
+} from 'react-native';
 
 import { ExpenseOnTaskScreenRouteProp } from '@/navigation/types';
 
 import { dmyDateString } from '../../lib/utils';
+import { useGetExpenseById } from '@/hooks/api/expense/useGetExpenseById';
+import { format } from 'date-fns';
+import { EvilIcons } from '@expo/vector-icons';
+import { useDeleteExpenseById } from '@/hooks/api/expense/useDeleteExpenseById';
+import ConfirmButton from '@/components/ConfirmButton';
 
-const ExpenseOnTask = ({ route }: ExpenseOnTaskScreenRouteProp) => {
-    const { expenseId } = route.params;
-    const expenseQueryResult = useExpenseByIdQuery(expenseId);
+const ExpenseOnTask = ({ navigation, route }: ExpenseOnTaskScreenRouteProp) => {
+    const { expenseId, taskId } = route.params;
+    const {
+        data: expenseData,
+        isFetching: isFetchingExpense,
+        refetch,
+        error: queryError,
+    } = useGetExpenseById(expenseId);
+    const { mutateAsync: deleteTask } = useDeleteExpenseById(expenseId);
 
-    if (expenseQueryResult.data) {
-        const expense = expenseQueryResult.data.myAssignedTaskExpenseById;
+    const handleDeleteExpense = async () => {
+        await deleteTask({ id: expenseId, taskId });
+        navigation.goBack();
+    };
+
+    if (expenseData) {
+        const expense = expenseData.myAssignedTaskExpenseById;
 
         if (!expense) {
             return (
                 <ScrollView
                     refreshControl={
                         <RefreshControl
-                            refreshing={expenseQueryResult.isFetching}
-                            onRefresh={() => expenseQueryResult.refetch()}
+                            refreshing={isFetchingExpense}
+                            onRefresh={() => refetch()}
                         />
                     }
                     className="bg-white h-screen"
@@ -33,8 +54,8 @@ const ExpenseOnTask = ({ route }: ExpenseOnTaskScreenRouteProp) => {
             <ScrollView
                 refreshControl={
                     <RefreshControl
-                        refreshing={expenseQueryResult.isFetching}
-                        onRefresh={() => expenseQueryResult.refetch()}
+                        refreshing={isFetchingExpense}
+                        onRefresh={() => refetch()}
                     />
                 }
                 className="bg-white h-screen"
@@ -53,14 +74,16 @@ const ExpenseOnTask = ({ route }: ExpenseOnTaskScreenRouteProp) => {
                     </View>
 
                     <View className="mb-4">
-                        <Text className="mb-2 text-gray-800 font-bold">Tipo de pago</Text>
+                        <Text className="mb-2 text-gray-800 font-bold">
+                            Fuente de pago
+                        </Text>
                         <Text className="text-gray-600">{expense.paySource}</Text>
                     </View>
 
                     <View className="mb-4">
                         <Text className="mb-2 text-gray-800 font-bold">Fecha</Text>
                         <Text className="text-gray-600">
-                            {dmyDateString(new Date(expense.createdAt))}
+                            {format(new Date(expense.createdAt), 'dd/MM/yyyy')}
                         </Text>
                     </View>
 
@@ -79,7 +102,14 @@ const ExpenseOnTask = ({ route }: ExpenseOnTaskScreenRouteProp) => {
                     <View className="mb-4">
                         <Text className="mb-2 text-gray-800 font-bold">Imagen</Text>
 
-                        <View className="mx-auto w-8/12">
+                        <TouchableOpacity
+                            onPress={() =>
+                                navigation.navigate('FullScreenImage', {
+                                    uri: expense.image.url,
+                                })
+                            }
+                            className="mx-auto w-8/12"
+                        >
                             <Image
                                 className="bg-gray-200"
                                 source={{ uri: expense.image.url }}
@@ -88,20 +118,26 @@ const ExpenseOnTask = ({ route }: ExpenseOnTaskScreenRouteProp) => {
                                     aspectRatio: 9 / 16,
                                 }}
                             />
-                        </View>
+                        </TouchableOpacity>
                     </View>
                 </View>
+                <ConfirmButton
+                    title="Eliminar Gasto"
+                    confirmMessage="¿Seguro que quiere eliminar el gasto?"
+                    onConfirm={handleDeleteExpense}
+                    icon={<EvilIcons name="trash" size={22} color="white" />}
+                />
             </ScrollView>
         );
     }
 
-    if (expenseQueryResult.error) {
+    if (queryError) {
         return (
             <ScrollView
                 refreshControl={
                     <RefreshControl
-                        refreshing={expenseQueryResult.isFetching}
-                        onRefresh={() => expenseQueryResult.refetch()}
+                        refreshing={isFetchingExpense}
+                        onRefresh={() => refetch()}
                     />
                 }
                 className="bg-white h-screen"
@@ -115,8 +151,8 @@ const ExpenseOnTask = ({ route }: ExpenseOnTaskScreenRouteProp) => {
         <ScrollView
             refreshControl={
                 <RefreshControl
-                    refreshing={expenseQueryResult.isFetching}
-                    onRefresh={() => expenseQueryResult.refetch()}
+                    refreshing={isFetchingExpense}
+                    onRefresh={() => refetch()}
                 />
             }
             className="bg-white h-screen"

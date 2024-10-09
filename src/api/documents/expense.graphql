@@ -16,3 +16,28 @@ query myAssignedTaskExpenseById($id: String!) {
         createdAt
     }
 }
+
+mutation createExpenseOnTask($taskId: String!, $expenseData: ExpenseInput!) {
+    createExpenseOnTask(taskId: $taskId, expenseData: $expenseData) {
+        success
+        message
+        expense {
+            id
+            image {
+                id
+                url
+                key
+            }
+        }
+    }
+}
+
+mutation deleteExpense($id: String!, $taskId: String!) {
+    deleteExpense(id: $id, taskId: $taskId) {
+        success
+        message
+        expense {
+            id
+        }
+    }
+}
