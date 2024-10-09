@@ -24,7 +24,7 @@ const TasksList = ({ navigation, tasksQuery }: TaskListProps) => {
 
         return task.status === taskStatus;
     });
-
+    console.log(tasksQuery.error);
     if (tasksQuery.data) {
         return (
             <View className="py-4 flex-1">

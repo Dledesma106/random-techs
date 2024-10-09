@@ -63,8 +63,8 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
         navigation.navigate('RegisterExpenseOnTask', { taskId: id });
     }
 
-    function navigateToExpense(id: string) {
-        navigation.navigate('ExpenseOnTask', { expenseId: id });
+    function navigateToExpense(expenseId: string) {
+        navigation.navigate('ExpenseOnTask', { expenseId, taskId: id });
     }
 
     const onSubmit: SubmitHandler<TaskFormInputs> = async (formData) => {
@@ -169,7 +169,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
 
                         <View>
                             <Label className="mb-1.5">Orden de Trabajo</Label>
-                            {task.status === TaskStatus.Pendiente ? (
+                            {task.status !== TaskStatus.Aprobada ? (
                                 <Form {...formMethods}>
                                     <FormField
                                         name="workOrderNumber"
@@ -201,28 +201,30 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                             <Label className="mb-1.5">Gastos</Label>
 
                             <View className="space-y-2 w-full">
-                                {task.expenses.map((expense, index) => (
+                                {task.expenses.map((expense) => (
                                     <Button
                                         key={expense.id}
                                         onPress={() => navigateToExpense(expense.id)}
                                         className="flex flex-row items-center justify-between"
                                         variant="outline"
                                     >
-                                        <ButtonText>Gasto {index + 1}</ButtonText>
+                                        <ButtonText>
+                                            {expense.expenseType} - ${expense.amount}
+                                        </ButtonText>
 
                                         <AntDesign name="right" size={14} color="gray" />
                                     </Button>
                                 ))}
 
                                 {task.expenses.length === 0 &&
-                                    task.status !== TaskStatus.Pendiente && (
+                                    task.status === TaskStatus.Aprobada && (
                                         <Text className="text-muted-foreground">
                                             No hay gastos registrados
                                         </Text>
                                     )}
                             </View>
 
-                            {task.status === TaskStatus.Pendiente && (
+                            {task.status !== TaskStatus.Aprobada && (
                                 <Button
                                     variant="outline"
                                     size="sm"
@@ -241,21 +243,37 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
 
                             <View className="flex flex-row space-x-4">
                                 {task.images.map((image) => (
-                                    <ImageThumbnail key={image.id} image={image} />
+                                    <ImageThumbnail
+                                        key={image.id}
+                                        image={image}
+                                        onPress={() =>
+                                            navigation.navigate('FullScreenImage', {
+                                                uri: image.url,
+                                            })
+                                        }
+                                    />
                                 ))}
 
                                 {watch('images')?.map((image) => (
-                                    <ImageThumbnail key={image.key} image={image} />
+                                    <ImageThumbnail
+                                        key={image.key}
+                                        image={image}
+                                        onPress={() =>
+                                            navigation.navigate('FullScreenImage', {
+                                                uri: image.uri,
+                                            })
+                                        }
+                                    />
                                 ))}
 
                                 {imagesAmount === 0 &&
-                                    task.status !== TaskStatus.Pendiente && (
+                                    task.status === TaskStatus.Aprobada && (
                                         <Text className="text-muted-foreground">
                                             No hay imágenes registradas
                                         </Text>
                                     )}
 
-                                {task.status === TaskStatus.Pendiente &&
+                                {task.status !== TaskStatus.Aprobada &&
                                     imagesAmount < 3 && (
                                         <AddImage
                                             navigateToCameraScreen={

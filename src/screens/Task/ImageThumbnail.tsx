@@ -1,4 +1,6 @@
-import { View, Text, Image, ActivityIndicator } from 'react-native';
+import { RootStackParamList } from '@/navigation/types';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { View, Text, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
 
 interface ImageInput {
     __typename?: 'Image';
@@ -9,24 +11,28 @@ interface ImageInput {
     unsaved?: boolean;
 }
 
-type Props = { image: ImageInput };
+type Props = {
+    image: ImageInput;
+    onPress: () => void;
+};
 
-const ImageThumbnail = ({ image }: Props) => {
+const ImageThumbnail = ({ image, onPress }: Props) => {
     return (
-        <View className="flex-[0.33] relative">
-            <Image
-                className="bg-gray-200 relative z-0"
-                source={{ uri: image.url ?? image.uri }}
-                style={{
-                    borderRadius: 6,
-                    aspectRatio: 9 / 16,
-                }}
-            />
+        <View className="flex-[0.20] relative m-1">
+            <TouchableOpacity onPress={onPress}>
+                <Image
+                    className="bg-gray-200 relative z-0"
+                    source={{ uri: image.url ?? image.uri }}
+                    style={{
+                        borderRadius: 6,
+                        aspectRatio: 9 / 16,
+                    }}
+                />
+            </TouchableOpacity>
 
             {image.unsaved && (
                 <View className="absolute inset-x-0 inset-y-0 flex items-center justify-center bg-white/70">
                     <ActivityIndicator className="mb-1" size="small" color="black" />
-
                     <Text className="text-xs text-black">Subiendo...</Text>
                 </View>
             )}

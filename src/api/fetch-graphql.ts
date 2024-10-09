@@ -18,7 +18,8 @@ export async function fetchGraphql<T, V>(
     } = {},
 ) {
     const token = await JWTTokenService.getAsync();
-
+    console.log(variables);
+    console.log(print(query));
     try {
         const fetchConfig: RequestInit = {
             method: 'POST',

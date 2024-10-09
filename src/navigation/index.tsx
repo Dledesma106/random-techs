@@ -11,6 +11,7 @@ import { RootStackParamList, RootTabParamList } from './types';
 import AccountSettings from '@/screens/AccountSettings';
 import ExpenseOnTask from '@/screens/ExpenseOnTask';
 import FullScreenCameraScreen from '@/screens/FullScreenCamera';
+import FullScreenImageScreen from '@/screens/FullScreenImage';
 import ProfileScreen from '@/screens/Profile';
 import RegisterExpenseOnTask from '@/screens/RegisterExpenseOnTask';
 import RegisterTask from '@/screens/RegisterTask';
@@ -23,15 +24,18 @@ import Home from '../screens/Home';
 import Login from '../screens/Login';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import Task from '../screens/Task';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
     return (
-        <NavigationContainer
-            linking={LinkingConfiguration}
-            theme={colorScheme === 'light' ? DarkTheme : DefaultTheme}
-        >
-            <RootNavigator />
-        </NavigationContainer>
+        <GestureHandlerRootView>
+            <NavigationContainer
+                linking={LinkingConfiguration}
+                theme={colorScheme === 'light' ? DarkTheme : DefaultTheme}
+            >
+                <RootNavigator />
+            </NavigationContainer>
+        </GestureHandlerRootView>
     );
 }
 
@@ -46,6 +50,12 @@ function RootNavigator() {
                 name="FullScreenCamera"
                 component={FullScreenCameraScreen}
                 options={{ headerShown: false, title: 'Inicio' }}
+            />
+
+            <Stack.Screen
+                name="FullScreenImage"
+                component={FullScreenImageScreen}
+                options={{ headerShown: false }}
             />
 
             <Stack.Screen

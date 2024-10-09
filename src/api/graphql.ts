@@ -87,6 +87,20 @@ export type Expense = {
     status: ExpenseStatus;
 };
 
+export type ExpenseCrudResult = {
+    __typename?: 'ExpenseCrudResult';
+    expense: Maybe<Expense>;
+    message: Maybe<Scalars['String']>;
+    success: Scalars['Boolean'];
+};
+
+export type ExpenseInput = {
+    amount: Scalars['Int'];
+    expenseType: ExpenseType;
+    imageKey: Scalars['String'];
+    paySource: ExpensePaySource;
+};
+
 export const ExpensePaySource = {
     Reintegro: 'Reintegro',
     Tarjeta: 'Tarjeta',
@@ -130,11 +144,13 @@ export type Mutation = {
     __typename?: 'Mutation';
     createBranch: BranchCrudResult;
     createCity: CityCrudResult;
+    createExpenseOnTask: ExpenseCrudResult;
     createPreventive: PreventiveCrudResult;
     createTask: TaskCrudResult;
     createUser: UserCrudPothosRef;
     deleteBranch: BranchCrudResult;
     deleteCity: CityCrudResult;
+    deleteExpense: ExpenseCrudResult;
     deletePreventive: PreventiveCrudResult;
     deleteTask: TaskCrudResult;
     login: LoginUserResult;
@@ -156,6 +172,11 @@ export type MutationCreateCityArgs = {
     input: CityInput;
 };
 
+export type MutationCreateExpenseOnTaskArgs = {
+    expenseData: ExpenseInput;
+    taskId: Scalars['String'];
+};
+
 export type MutationCreatePreventiveArgs = {
     data: PreventiveInput;
 };
@@ -174,6 +195,11 @@ export type MutationDeleteBranchArgs = {
 
 export type MutationDeleteCityArgs = {
     id: Scalars['String'];
+};
+
+export type MutationDeleteExpenseArgs = {
+    id: Scalars['String'];
+    taskId: Scalars['String'];
 };
 
 export type MutationDeletePreventiveArgs = {
@@ -491,6 +517,40 @@ export type MyAssignedTaskExpenseByIdQuery = {
     } | null;
 };
 
+export type CreateExpenseOnTaskMutationVariables = Exact<{
+    taskId: Scalars['String'];
+    expenseData: ExpenseInput;
+}>;
+
+export type CreateExpenseOnTaskMutation = {
+    __typename?: 'Mutation';
+    createExpenseOnTask: {
+        __typename?: 'ExpenseCrudResult';
+        success: boolean;
+        message: string | null;
+        expense: {
+            __typename?: 'Expense';
+            id: string;
+            image: { __typename?: 'Image'; id: string; url: string; key: string };
+        } | null;
+    };
+};
+
+export type DeleteExpenseMutationVariables = Exact<{
+    id: Scalars['String'];
+    taskId: Scalars['String'];
+}>;
+
+export type DeleteExpenseMutation = {
+    __typename?: 'Mutation';
+    deleteExpense: {
+        __typename?: 'ExpenseCrudResult';
+        success: boolean;
+        message: string | null;
+        expense: { __typename?: 'Expense'; id: string } | null;
+    };
+};
+
 export type MyAssignedTasksQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MyAssignedTasksQuery = {
@@ -562,6 +622,7 @@ export type MyAssignedTaskByIdQuery = {
             id: string;
             amount: number;
             paySource: ExpensePaySource;
+            expenseType: ExpenseType;
             createdAt: any;
             status: ExpenseStatus;
             image: {
@@ -984,6 +1045,222 @@ export const MyAssignedTaskExpenseByIdDocument = {
     MyAssignedTaskExpenseByIdQuery,
     MyAssignedTaskExpenseByIdQueryVariables
 >;
+export const CreateExpenseOnTaskDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'createExpenseOnTask' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'taskId' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'expenseData' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'ExpenseInput' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'createExpenseOnTask' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'taskId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'taskId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'expenseData' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'expenseData' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'message' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'expense' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'image' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'url',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'key',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    CreateExpenseOnTaskMutation,
+    CreateExpenseOnTaskMutationVariables
+>;
+export const DeleteExpenseDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'deleteExpense' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'taskId' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deleteExpense' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'taskId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'taskId' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'message' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'expense' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<DeleteExpenseMutation, DeleteExpenseMutationVariables>;
 export const MyAssignedTasksDocument = {
     kind: 'Document',
     definitions: [
@@ -1383,6 +1660,13 @@ export const MyAssignedTaskByIdDocument = {
                                                 name: {
                                                     kind: 'Name',
                                                     value: 'paySource',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'expenseType',
                                                 },
                                             },
                                             {

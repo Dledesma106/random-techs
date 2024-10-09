@@ -19,8 +19,10 @@ export type RootStackParamList = {
     };
     ExpenseOnTask: {
         expenseId: string;
+        taskId: string;
     };
     FullScreenCamera: undefined;
+    FullScreenImage: { uri: string };
     RegisterTask: {
         branch?: BranchesQuery['branches'][0] | null;
         business?: BusinessesQuery['businesses'][0] | null;
@@ -54,6 +56,10 @@ export type RegisterTaskScreenProp = RootStackScreenProps<'RegisterTask'>;
 export type FullScreenCameraProps = RootStackScreenProps<'FullScreenCamera'>;
 
 export type TaskScreenRouteProp = NativeStackScreenProps<RootStackParamList, 'Task'>;
+export type FullScreenImageProp = NativeStackScreenProps<
+    RootStackParamList,
+    'FullScreenImage'
+>;
 export type RegisterExpenseOnTaskScreenRouteProp = NativeStackScreenProps<
     RootStackParamList,
     'RegisterExpenseOnTask'
