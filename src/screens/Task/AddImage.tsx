@@ -1,14 +1,20 @@
 import { EvilIcons } from '@expo/vector-icons';
 import { View, Text, TouchableOpacity } from 'react-native';
 
-type Props = { navigateToCameraScreen: () => void; selectImage: () => void };
+type Props = {
+    navigateToCameraScreen: () => void;
+    selectImage: () => void;
+    maxImageAmount: number;
+};
 
-const AddImage = ({ navigateToCameraScreen, selectImage }: Props) => {
+const AddImage = ({ navigateToCameraScreen, selectImage, maxImageAmount }: Props) => {
+    const flexPercent = Math.trunc(100 / maxImageAmount);
     return (
-        <View className="flex-[0.33] relative border border-border">
+        <View className={`flex-[0.${String(flexPercent)}] relative border border-border`}>
             <View
                 className="bg-muted flex items-center justify-around"
                 style={{
+                    borderRadius: 6,
                     aspectRatio: 9 / 16,
                 }}
             >

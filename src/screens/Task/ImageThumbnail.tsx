@@ -14,15 +14,17 @@ interface ImageInput {
 type Props = {
     image: ImageInput;
     onPress: () => void;
+    maxImageAmount: number;
 };
 
-const ImageThumbnail = ({ image, onPress }: Props) => {
+const ImageThumbnail = ({ image, onPress, maxImageAmount }: Props) => {
+    const flexPercent = Math.trunc(100 / maxImageAmount);
     return (
-        <View className="flex-[0.20] relative m-1">
+        <View className={`flex-[0.${String(flexPercent)}] relative m-1`}>
             <TouchableOpacity onPress={onPress}>
                 <Image
                     className="bg-gray-200 relative z-0"
-                    source={{ uri: image.url ?? image.uri }}
+                    source={{ uri: image.url }}
                     style={{
                         borderRadius: 6,
                         aspectRatio: 9 / 16,
