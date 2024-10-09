@@ -28,6 +28,7 @@ import { TaskScreenRouteProp } from '@/navigation/types';
 
 import { addFullScreenCameraListener } from '../FullScreenCamera';
 
+const MAX_IMAGE_AMOUNT = 5;
 interface InputImage {
     key: string;
     uri: string;
@@ -238,7 +239,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
 
                         <View>
                             <Label className="mb-1.5">
-                                Imágenes ({imagesAmount} de 3)
+                                Imágenes ({imagesAmount} de {MAX_IMAGE_AMOUNT})
                             </Label>
 
                             <View className="flex flex-row space-x-4">
@@ -246,6 +247,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                     <ImageThumbnail
                                         key={image.id}
                                         image={image}
+                                        maxImageAmount={MAX_IMAGE_AMOUNT}
                                         onPress={() =>
                                             navigation.navigate('FullScreenImage', {
                                                 uri: image.url,
@@ -258,6 +260,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                     <ImageThumbnail
                                         key={image.key}
                                         image={image}
+                                        maxImageAmount={MAX_IMAGE_AMOUNT}
                                         onPress={() =>
                                             navigation.navigate('FullScreenImage', {
                                                 uri: image.uri,
@@ -274,12 +277,13 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                     )}
 
                                 {task.status !== TaskStatus.Aprobada &&
-                                    imagesAmount < 3 && (
+                                    imagesAmount < MAX_IMAGE_AMOUNT && (
                                         <AddImage
                                             navigateToCameraScreen={
                                                 navigateToCameraScreen
                                             }
                                             selectImage={selectImage}
+                                            maxImageAmount={MAX_IMAGE_AMOUNT}
                                         />
                                     )}
                             </View>

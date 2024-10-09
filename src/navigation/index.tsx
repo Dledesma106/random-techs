@@ -4,6 +4,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ColorSchemeName } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 
 import LinkingConfiguration from './LinkingConfiguration';
 import { RootStackParamList, RootTabParamList } from './types';
@@ -33,6 +34,7 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
                 linking={LinkingConfiguration}
                 theme={colorScheme === 'light' ? DarkTheme : DefaultTheme}
             >
+                <StatusBar style="dark" />
                 <RootNavigator />
             </NavigationContainer>
         </GestureHandlerRootView>
