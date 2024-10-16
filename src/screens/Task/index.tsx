@@ -28,7 +28,7 @@ import { TaskStatus } from '@/models/types';
 import { TaskScreenRouteProp } from '@/navigation/types';
 
 import { addFullScreenCameraListener } from '../FullScreenCamera';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Zoomable } from '@likashefqet/react-native-image-zoom';
 import { Image } from 'expo-image';
 import ConfirmButton from '@/components/ConfirmButton';
@@ -43,6 +43,7 @@ interface InputImage {
 }
 interface TaskFormInputs {
     workOrderNumber: string;
+    observations: string;
     images: InputImage[];
 }
 
@@ -50,12 +51,29 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     const { id } = route.params;
     const { data, isPending, refetch, error } = useGetMyAssignedTaskById(id);
     const [fullScreenImage, setFullScreenImage] = useState<ThumbnailImage | null>(null);
-    const formMethods = useForm<TaskFormInputs>();
+    const formMethods = useForm<TaskFormInputs>({
+        defaultValues: {
+            observations: data?.myAssignedTaskById?.observations ?? '',
+            workOrderNumber: data?.myAssignedTaskById?.workOrderNumber
+                ? String(data?.myAssignedTaskById?.workOrderNumber)
+                : '',
+        },
+    });
     const { control, setValue, watch, handleSubmit, reset } = formMethods;
     const { pickImage } = useImagePicker();
     const { mutateAsync: deleteImage } = useDeleteImageById();
     const { mutateAsync: updateTask, isPending: isUpdatePending } =
         useUpdateMyAssignedTask();
+
+    useEffect(() => {
+        const task = data?.myAssignedTaskById;
+        if (!task) return;
+        setValue(
+            'workOrderNumber',
+            task.workOrderNumber ? String(task.workOrderNumber) : '',
+        );
+        setValue('observations', task.observations ?? '');
+    }, [data]);
 
     const addPictureToTask = async (uri: string) => {
         const currentImages = watch('images') ?? [];
@@ -78,10 +96,11 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     }
 
     const onSubmit: SubmitHandler<TaskFormInputs> = async (formData) => {
-        const { workOrderNumber, images } = formData;
+        const { workOrderNumber, images, observations } = formData;
         const imageKeys = images.map((image) => image.key);
         await updateTask({
             input: {
+                observations,
                 id,
                 workOrderNumber,
                 imageKeys,
@@ -91,7 +110,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     };
 
     const handleDeleteImage = async (image: ThumbnailImage) => {
-        if (image.id) return deleteImage({ imageId: image.id, taskId: id });
+        if (image.id) await deleteImage({ imageId: image.id, taskId: id });
         if (image.key) {
             try {
                 const currentImages = watch('images');
@@ -241,8 +260,42 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                                     onChange(val);
                                                 }}
                                                 value={value?.toString()}
-                                                placeholder="Orden de Trabajo"
+                                                placeholder={
+                                                    String(task.workOrderNumber) ??
+                                                    'Orden de Trabajo'
+                                                }
                                                 keyboardType="numeric"
+                                            />
+                                        )}
+                                    />
+                                </Form>
+                            ) : (
+                                <Text className="text-muted-foreground">
+                                    {task.workOrderNumber || 'No especificado'}
+                                </Text>
+                            )}
+                        </View>
+
+                        <View>
+                            <Label className="mb-1.5">Observaciones</Label>
+                            {task.status !== TaskStatus.Aprobada ? (
+                                <Form {...formMethods}>
+                                    <FormField
+                                        name="observations"
+                                        control={control}
+                                        defaultValue={String(task.observations ?? '')}
+                                        render={({
+                                            field: { onChange, onBlur, value },
+                                        }) => (
+                                            <TextInput
+                                                onBlur={onBlur}
+                                                onChangeText={(val) => {
+                                                    onChange(val);
+                                                }}
+                                                value={String(value)}
+                                                placeholder={
+                                                    task.observations ?? 'Observaciones'
+                                                }
                                             />
                                         )}
                                     />
