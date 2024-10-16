@@ -11,7 +11,7 @@ const AddImage = ({ navigateToCameraScreen, selectImage, maxImageAmount }: Props
     const flexPercent = Math.trunc(100 / maxImageAmount);
     return (
         <View
-            className={`flex-[0.${String(flexPercent)}] bg-muted items-center justify-around border border-border`}
+            className={`flex-[0.20] bg-muted items-center justify-around border border-border`}
             style={{
                 borderRadius: 6,
                 aspectRatio: 9 / 16,

@@ -61,6 +61,7 @@ export const deletePhoto = async (key: string) => {
         await s3Client.send(command);
     } catch (error) {
         console.error('Error deleting file:', error);
+        throw new Error('Error deleting file');
     }
 };
 

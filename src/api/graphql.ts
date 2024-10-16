@@ -151,6 +151,7 @@ export type Mutation = {
     deleteBranch: BranchCrudResult;
     deleteCity: CityCrudResult;
     deleteExpense: ExpenseCrudResult;
+    deleteImage: TaskCrudResult;
     deletePreventive: PreventiveCrudResult;
     deleteTask: TaskCrudResult;
     login: LoginUserResult;
@@ -199,6 +200,11 @@ export type MutationDeleteCityArgs = {
 
 export type MutationDeleteExpenseArgs = {
     id: Scalars['String'];
+    taskId: Scalars['String'];
+};
+
+export type MutationDeleteImageArgs = {
+    imageId: Scalars['String'];
     taskId: Scalars['String'];
 };
 
@@ -414,7 +420,6 @@ export const TaskType = {
 export type TaskType = (typeof TaskType)[keyof typeof TaskType];
 export type UpdateMyTaskInput = {
     id: Scalars['String'];
-    imageIdToDelete: InputMaybe<Scalars['String']>;
     imageKeys: Array<Scalars['String']>;
     workOrderNumber: Scalars['String'];
 };
@@ -658,6 +663,27 @@ export type UpdateMyAssignedTaskMutationVariables = Exact<{
 export type UpdateMyAssignedTaskMutation = {
     __typename?: 'Mutation';
     updateMyAssignedTask: {
+        __typename?: 'TaskCrudResult';
+        success: boolean;
+        message: string | null;
+        task: {
+            __typename?: 'Task';
+            id: string;
+            status: TaskStatus;
+            workOrderNumber: number | null;
+            images: Array<{ __typename?: 'Image'; id: string; url: string }>;
+        } | null;
+    };
+};
+
+export type DeleteImageMutationVariables = Exact<{
+    taskId: Scalars['String'];
+    imageId: Scalars['String'];
+}>;
+
+export type DeleteImageMutation = {
+    __typename?: 'Mutation';
+    deleteImage: {
         __typename?: 'TaskCrudResult';
         success: boolean;
         message: string | null;
@@ -1945,3 +1971,130 @@ export const UpdateMyAssignedTaskDocument = {
     UpdateMyAssignedTaskMutation,
     UpdateMyAssignedTaskMutationVariables
 >;
+export const DeleteImageDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'DeleteImage' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'taskId' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'imageId' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deleteImage' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'taskId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'taskId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'imageId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'imageId' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'message' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'task' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'status' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'workOrderNumber',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'images' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'url',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<DeleteImageMutation, DeleteImageMutationVariables>;
