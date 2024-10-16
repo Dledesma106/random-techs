@@ -377,6 +377,7 @@ export type Task = {
     images: Array<Image>;
     imagesIDs: Array<Scalars['String']>;
     metadata: Scalars['JSON'];
+    observations: Maybe<Scalars['String']>;
     status: TaskStatus;
     taskType: TaskType;
     workOrderNumber: Maybe<Scalars['Int']>;
@@ -421,6 +422,7 @@ export type TaskType = (typeof TaskType)[keyof typeof TaskType];
 export type UpdateMyTaskInput = {
     id: Scalars['String'];
     imageKeys: Array<Scalars['String']>;
+    observations: InputMaybe<Scalars['String']>;
     workOrderNumber: Scalars['String'];
 };
 
@@ -598,6 +600,7 @@ export type MyAssignedTaskByIdQuery = {
         createdAt: any;
         closedAt: any | null;
         description: string;
+        observations: string | null;
         workOrderNumber: number | null;
         taskType: TaskType;
         status: TaskStatus;
@@ -1519,6 +1522,10 @@ export const MyAssignedTaskByIdDocument = {
                                 {
                                     kind: 'Field',
                                     name: { kind: 'Name', value: 'description' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'observations' },
                                 },
                                 {
                                     kind: 'Field',

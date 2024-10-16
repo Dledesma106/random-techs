@@ -42,6 +42,7 @@ query myAssignedTaskById($id: String!) {
         createdAt
         closedAt
         description
+        observations
         business {
             id
             name
