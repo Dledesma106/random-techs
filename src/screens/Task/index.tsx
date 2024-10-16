@@ -41,7 +41,7 @@ interface InputImage {
     uri: string;
     unsaved: boolean;
 }
-interface TaskFormInputs {
+interface FormInputs {
     workOrderNumber: string;
     observations: string;
     images: InputImage[];
@@ -51,15 +51,15 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     const { id } = route.params;
     const { data, isPending, refetch, error } = useGetMyAssignedTaskById(id);
     const [fullScreenImage, setFullScreenImage] = useState<ThumbnailImage | null>(null);
-    const formMethods = useForm<TaskFormInputs>({
-        defaultValues: {
-            observations: data?.myAssignedTaskById?.observations ?? '',
-            workOrderNumber: data?.myAssignedTaskById?.workOrderNumber
-                ? String(data?.myAssignedTaskById?.workOrderNumber)
-                : '',
-        },
-    });
-    const { control, setValue, watch, handleSubmit, reset } = formMethods;
+    const formMethods = useForm<FormInputs>();
+    const {
+        control,
+        setValue,
+        watch,
+        handleSubmit,
+        reset,
+        formState: { isDirty },
+    } = formMethods;
     const { pickImage } = useImagePicker();
     const { mutateAsync: deleteImage } = useDeleteImageById();
     const { mutateAsync: updateTask, isPending: isUpdatePending } =
@@ -68,11 +68,11 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     useEffect(() => {
         const task = data?.myAssignedTaskById;
         if (!task) return;
-        setValue(
-            'workOrderNumber',
-            task.workOrderNumber ? String(task.workOrderNumber) : '',
-        );
-        setValue('observations', task.observations ?? '');
+        reset({
+            workOrderNumber: task.workOrderNumber ? String(task.workOrderNumber) : '',
+            observations: task.observations ?? '',
+            images: undefined,
+        });
     }, [data]);
 
     const addPictureToTask = async (uri: string) => {
@@ -95,7 +95,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
         navigation.navigate('ExpenseOnTask', { expenseId, taskId: id });
     }
 
-    const onSubmit: SubmitHandler<TaskFormInputs> = async (formData) => {
+    const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
         const { workOrderNumber, images, observations } = formData;
         const imageKeys = images.map((image) => image.key);
         await updateTask({
@@ -174,6 +174,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
         }
 
         const imagesAmount = (task.images.length ?? 0) + (watch('images')?.length ?? 0);
+        const isFormDirty = isDirty || watch('images')?.length > 0;
 
         return (
             <View className="flex-1 bg-white">
@@ -391,29 +392,30 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                 </ScrollView>
 
                 <View className="absolute bottom-4 inset-x-0 px-4 bg-transparent">
-                    {task.status === TaskStatus.Pendiente && (
-                        <Pressable
-                            onPress={handleSubmit(onSubmit)}
-                            className="p-4 rounded-full bg-black justify-center items-center flex flex-row space-x-1 relative"
-                        >
-                            <Text
-                                className={cn(
-                                    'font-bold text-white',
-                                    isUpdatePending && 'opacity-0',
-                                )}
+                    {task.status === TaskStatus.Pendiente ||
+                        (isFormDirty && (
+                            <Pressable
+                                onPress={handleSubmit(onSubmit)}
+                                className="p-4 rounded-full bg-black justify-center items-center flex flex-row space-x-1 relative"
                             >
-                                Enviar tarea
-                            </Text>
+                                <Text
+                                    className={cn(
+                                        'font-bold text-white',
+                                        isUpdatePending && 'opacity-0',
+                                    )}
+                                >
+                                    Enviar tarea
+                                </Text>
 
-                            {isUpdatePending && (
-                                <View className="absolute inset-x-0 inset-y-0 flex items-center justify-center">
-                                    <ActivityIndicator size="small" color="white" />
-                                </View>
-                            )}
-                        </Pressable>
-                    )}
+                                {isUpdatePending && (
+                                    <View className="absolute inset-x-0 inset-y-0 flex items-center justify-center">
+                                        <ActivityIndicator size="small" color="white" />
+                                    </View>
+                                )}
+                            </Pressable>
+                        ))}
 
-                    {task.status === TaskStatus.Finalizada && (
+                    {task.status === TaskStatus.Finalizada && !isFormDirty && (
                         <View className="border border-border p-4 rounded-full bg-white justify-center items-center flex flex-row space-x-1">
                             <Text className="font-bold">Tarea Enviada</Text>
 
