@@ -111,7 +111,7 @@ const ExpenseOnTask = ({ navigation, route }: ExpenseOnTaskScreenRouteProp) => {
                             className="mx-auto w-8/12"
                         >
                             <Image
-                                className="bg-gray-200"
+                                className="bg-gray-200 mb-14"
                                 source={{ uri: expense.image.url }}
                                 style={{
                                     borderRadius: 6,

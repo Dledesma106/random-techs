@@ -2,18 +2,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { fetchGraphql } from '@/api/fetch-graphql';
 import {
-    DeleteExpenseDocument,
-    DeleteExpenseMutation,
-    DeleteExpenseMutationVariables,
+    DeleteImageDocument,
+    DeleteImageMutation,
+    DeleteImageMutationVariables,
 } from '@/api/graphql';
-import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from '../tasks/useGetMyAssignedTaskById';
+import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from './useGetMyAssignedTaskById';
 import Toast from 'react-native-root-toast';
 
-export const useDeleteExpenseById = (id: string) => {
+export const useDeleteImageById = () => {
     const client = useQueryClient();
-    return useMutation<DeleteExpenseMutation, Error, DeleteExpenseMutationVariables>({
-        mutationFn: () => fetchGraphql(DeleteExpenseDocument, { id, taskId: '' }),
-        onSuccess: (data, { id, taskId }) => {
+    return useMutation<DeleteImageMutation, Error, DeleteImageMutationVariables>({
+        mutationFn: ({ imageId, taskId }) =>
+            fetchGraphql(DeleteImageDocument, { imageId, taskId }),
+        onSuccess: (data, { imageId, taskId }) => {
             if (!data) return;
 
             client.setQueryData<TaskByIdQuery>(
@@ -23,22 +24,22 @@ export const useDeleteExpenseById = (id: string) => {
                         return oldData;
                     }
                     const {
-                        deleteExpense: { expense: newExpense },
+                        deleteImage: { task: newTask },
                     } = data;
-                    if (!newExpense) return oldData;
+                    if (!newTask) return oldData;
                     const newData: TaskByIdQuery = {
                         ...oldData,
                         myAssignedTaskById: {
                             ...oldData.myAssignedTaskById,
-                            expenses: oldData.myAssignedTaskById.expenses.filter(
-                                (expense) => expense.id !== newExpense.id,
+                            images: oldData.myAssignedTaskById.images.filter(
+                                (image) => image.id !== imageId,
                             ),
                         },
                     };
                     return newData;
                 },
             );
-            Toast.show('Gasto Eliminado', {
+            Toast.show('Imagen eliminada', {
                 duration: Toast.durations.LONG,
                 position: Toast.positions.BOTTOM,
             });

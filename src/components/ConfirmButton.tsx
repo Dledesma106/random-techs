@@ -16,17 +16,15 @@ const ConfirmButton: React.FC<ConfirmButtonProps> = ({
     confirmMessage,
     onConfirm,
     icon,
-    className,
 }) => {
     const [modalVisible, setModalVisible] = useState(false);
-
     const handleConfirm = () => {
         setModalVisible(false);
         onConfirm();
     };
 
     return (
-        <View className={className}>
+        <View className="absolute bottom-1 w-screen">
             <View className="pb-4 px-4 relative">
                 <Pressable
                     onPress={() => setModalVisible(true)}

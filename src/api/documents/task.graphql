@@ -122,3 +122,19 @@ mutation updateMyAssignedTask($input: UpdateMyTaskInput!) {
         message
     }
 }
+
+mutation DeleteImage($taskId: String!, $imageId: String!) {
+    deleteImage(taskId: $taskId, imageId: $imageId) {
+        success
+        message
+        task {
+            id
+            status
+            workOrderNumber
+            images {
+                id
+                url
+            }
+        }
+    }
+}

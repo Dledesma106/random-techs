@@ -1,4 +1,4 @@
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign, EvilIcons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import ContentLoader, { Rect } from 'react-content-loader/native';
 import { SubmitHandler, useForm } from 'react-hook-form';
@@ -9,10 +9,11 @@ import {
     RefreshControl,
     ActivityIndicator,
     Pressable,
+    TouchableOpacity,
 } from 'react-native';
 
 import AddImage from './AddImage';
-import ImageThumbnail from './ImageThumbnail';
+import ImageThumbnail, { ThumbnailImage } from './ImageThumbnail';
 
 import { Badge, BadgeText } from '@/components/ui/badge';
 import { Button, ButtonText } from '@/components/ui/button';
@@ -22,11 +23,17 @@ import { Label } from '@/components/ui/label';
 import { useGetMyAssignedTaskById } from '@/hooks/api/tasks/useGetMyAssignedTaskById';
 import { useUpdateMyAssignedTask } from '@/hooks/api/tasks/useUpdateMyAssignedTask';
 import useImagePicker from '@/hooks/useImagePicker';
-import { stringifyObject, uploadPhoto, cn } from '@/lib/utils';
+import { stringifyObject, uploadPhoto, cn, deletePhoto } from '@/lib/utils';
 import { TaskStatus } from '@/models/types';
 import { TaskScreenRouteProp } from '@/navigation/types';
 
 import { addFullScreenCameraListener } from '../FullScreenCamera';
+import { useState } from 'react';
+import { Zoomable } from '@likashefqet/react-native-image-zoom';
+import { Image } from 'expo-image';
+import ConfirmButton from '@/components/ConfirmButton';
+import { useDeleteImageById } from '@/hooks/api/tasks/useDeleteImageById';
+import Toast from 'react-native-root-toast';
 
 const MAX_IMAGE_AMOUNT = 5;
 interface InputImage {
@@ -42,9 +49,11 @@ interface TaskFormInputs {
 const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     const { id } = route.params;
     const { data, isPending, refetch, error } = useGetMyAssignedTaskById(id);
+    const [fullScreenImage, setFullScreenImage] = useState<ThumbnailImage | null>(null);
     const formMethods = useForm<TaskFormInputs>();
     const { control, setValue, watch, handleSubmit, reset } = formMethods;
     const { pickImage } = useImagePicker();
+    const { mutateAsync: deleteImage } = useDeleteImageById();
     const { mutateAsync: updateTask, isPending: isUpdatePending } =
         useUpdateMyAssignedTask();
 
@@ -75,17 +84,64 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
             input: {
                 id,
                 workOrderNumber,
-                imageIdToDelete: null,
                 imageKeys,
             },
         });
         reset();
     };
 
+    const handleDeleteImage = async (image: ThumbnailImage) => {
+        if (image.id) return deleteImage({ imageId: image.id, taskId: id });
+        if (image.key) {
+            try {
+                const currentImages = watch('images');
+                const filteredImages = currentImages.filter(
+                    (thisImage) => thisImage.key !== image.key,
+                );
+                setValue('images', filteredImages);
+                await deletePhoto(image.key);
+                Toast.show('Imagen eliminada', {
+                    duration: Toast.durations.LONG,
+                    position: Toast.positions.BOTTOM,
+                });
+            } catch (error) {
+                Toast.show('Error al eliminar imagen', {
+                    duration: Toast.durations.LONG,
+                    position: Toast.positions.BOTTOM,
+                });
+            }
+        }
+        setFullScreenImage(null);
+        return;
+    };
+
     const selectImage = async () => {
         const uri = await pickImage();
         if (uri) addPictureToTask(uri);
     };
+
+    if (fullScreenImage)
+        return (
+            <View className="flex-1 relative">
+                <Zoomable>
+                    <Image
+                        className="flex-1"
+                        source={{ uri: fullScreenImage.url ?? fullScreenImage.uri }}
+                    />
+                </Zoomable>
+                <View className="absolute top-2 right-2 bg-black flex items-center justify-center rounded-full z-50 w-8 h-8 opacity-0.5">
+                    <TouchableOpacity onPress={() => setFullScreenImage(null)}>
+                        <AntDesign name="close" size={20} color="white" />
+                    </TouchableOpacity>
+                </View>
+                <ConfirmButton
+                    onConfirm={() => handleDeleteImage(fullScreenImage)}
+                    title="Eliminar foto"
+                    confirmMessage="¿Seguro que quiere eliminar la foto?"
+                    icon={<EvilIcons name="trash" size={22} color="white" />}
+                />
+            </View>
+        );
 
     if (data && !Array.isArray(data)) {
         const task = data.myAssignedTaskById;
@@ -247,12 +303,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                     <ImageThumbnail
                                         key={image.id}
                                         image={image}
-                                        maxImageAmount={MAX_IMAGE_AMOUNT}
-                                        onPress={() =>
-                                            navigation.navigate('FullScreenImage', {
-                                                uri: image.url,
-                                            })
-                                        }
+                                        onImagePress={() => setFullScreenImage(image)}
                                     />
                                 ))}
 
@@ -260,12 +311,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                     <ImageThumbnail
                                         key={image.key}
                                         image={image}
-                                        maxImageAmount={MAX_IMAGE_AMOUNT}
-                                        onPress={() =>
-                                            navigation.navigate('FullScreenImage', {
-                                                uri: image.uri,
-                                            })
-                                        }
+                                        onImagePress={() => setFullScreenImage(image)}
                                     />
                                 ))}
 

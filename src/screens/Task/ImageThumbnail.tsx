@@ -1,8 +1,9 @@
 import { RootStackParamList } from '@/navigation/types';
+import { AntDesign } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { View, Text, Image, ActivityIndicator, TouchableOpacity } from 'react-native';
 
-interface ImageInput {
+export interface ThumbnailImage {
     __typename?: 'Image';
     id?: string;
     url?: string;
@@ -12,19 +13,18 @@ interface ImageInput {
 }
 
 type Props = {
-    image: ImageInput;
-    onPress: () => void;
-    maxImageAmount: number;
+    image: ThumbnailImage;
+    onImagePress: () => void;
 };
 
-const ImageThumbnail = ({ image, onPress, maxImageAmount }: Props) => {
-    const flexPercent = Math.trunc(100 / maxImageAmount);
+const ImageThumbnail = ({ image, onImagePress }: Props) => {
+    //const flexPercent = Math.trunc(100 / maxImageAmount);
     return (
-        <View className={`flex-[0.${String(flexPercent)}] relative m-1`}>
-            <TouchableOpacity onPress={onPress}>
+        <View className={`flex-[0.20] relative m-1`}>
+            <TouchableOpacity onPress={onImagePress}>
                 <Image
                     className="bg-gray-200 relative z-0"
-                    source={{ uri: image.url }}
+                    source={{ uri: image.url ?? image.uri }}
                     style={{
                         borderRadius: 6,
                         aspectRatio: 9 / 16,
@@ -38,28 +38,6 @@ const ImageThumbnail = ({ image, onPress, maxImageAmount }: Props) => {
                     <Text className="text-xs text-black">Subiendo...</Text>
                 </View>
             )}
-
-            {/* {task.status === TaskStatus.Pendiente &&
-                image.unsaved && (
-                    <View className="absolute top-2 right-2 bg-black flex items-center justify-center rounded-full z-50 w-6 h-6">
-                        <TouchableOpacity
-                            onPress={() => {
-                                taskUpdateMutation.mutate({
-                                    id: task.id,
-                                    imageIdToDelete: image.id,
-                                    status: null,
-                                    workOrderNumber: null,
-                                });
-                            }}
-                        >
-                            <AntDesign
-                                name="close"
-                                size={14}
-                                color="white"
-                            />
-                        </TouchableOpacity>
-                    </View>
-                )} */}
         </View>
     );
 };
