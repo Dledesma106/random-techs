@@ -212,18 +212,18 @@ const RegisterExpenseOnTask = ({
                         />
                     </View>
 
-                    {imageURI && (
+                    {watch('image') && (
                         <View className="px-4 pt-4">
-                            <Pressable
+                            <TouchableOpacity
                                 onPress={() =>
                                     navigation.navigate('FullScreenImage', {
-                                        uri: imageURI,
+                                        uri: watch('image')?.uri ?? '',
                                     })
                                 }
                             >
                                 <View className="flex-1 relative">
                                     <Image
-                                        source={{ uri: imageURI }}
+                                        source={{ uri: watch('image')?.uri }}
                                         style={{
                                             borderRadius: 6,
                                             aspectRatio: 9 / 16,
@@ -241,18 +241,18 @@ const RegisterExpenseOnTask = ({
                                             </Text>
                                         </View>
                                     )}
-                                    <Pressable
+                                    <TouchableOpacity
                                         onPress={deleteImage}
                                         className="flex flex-row items-center justify-center py-1 absolute rounded-full w-8 h-8 bg-black top-2 right-2"
                                     >
                                         <AntDesign name="close" size={20} color="white" />
-                                    </Pressable>
+                                    </TouchableOpacity>
                                 </View>
-                            </Pressable>
+                            </TouchableOpacity>
                         </View>
                     )}
 
-                    {!imageURI && (
+                    {!watch('image') && (
                         <View className="pt-8 px-4">
                             <TouchableOpacity
                                 onPress={goToCameraScreen}

@@ -8,7 +8,6 @@ import {
     ScrollView,
     RefreshControl,
     ActivityIndicator,
-    Pressable,
     TouchableOpacity,
 } from 'react-native';
 
@@ -253,7 +252,6 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
             watch('expenseIdsToDelete')?.length > 0 ||
             watch('imageIdsToDelete')?.length > 0 ||
             String(new Date(watch('closedAt'))) !== String(new Date(task.closedAt));
-
         return (
             <View className="flex-1 bg-white">
                 <ScrollView
@@ -367,10 +365,10 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                                     onChange(val);
                                                 }}
                                                 value={value?.toString()}
-                                                placeholder={
-                                                    String(task.workOrderNumber) ??
-                                                    'Orden de Trabajo'
-                                                }
+                                                placeholder={String(
+                                                    task.workOrderNumber ??
+                                                        'Orden de Trabajo',
+                                                )}
                                                 keyboardType="numeric"
                                             />
                                         )}
@@ -538,28 +536,27 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                 </ScrollView>
 
                 <View className="absolute bottom-4 inset-x-0 px-4 bg-transparent">
-                    {task.status === TaskStatus.Pendiente ||
-                        (isFormDirty && (
-                            <Pressable
-                                onPress={handleSubmit(onSubmit)}
-                                className="p-4 rounded-full bg-black justify-center items-center flex flex-row space-x-1 relative"
-                            >
-                                <Text
-                                    className={cn(
-                                        'font-bold text-white',
-                                        isUpdatePending && 'opacity-0',
-                                    )}
-                                >
-                                    Enviar tarea
-                                </Text>
-
-                                {isUpdatePending && (
-                                    <View className="absolute inset-x-0 inset-y-0 flex items-center justify-center">
-                                        <ActivityIndicator size="small" color="white" />
-                                    </View>
+                    {(task.status === TaskStatus.Pendiente || isFormDirty) && (
+                        <TouchableOpacity
+                            onPress={handleSubmit(onSubmit)}
+                            className="p-4 rounded-full bg-black justify-center items-center flex flex-row space-x-1 relative"
+                        >
+                            <Text
+                                className={cn(
+                                    'font-bold text-white',
+                                    isUpdatePending && 'opacity-0',
                                 )}
-                            </Pressable>
-                        ))}
+                            >
+                                Enviar tarea
+                            </Text>
+
+                            {isUpdatePending && (
+                                <View className="absolute inset-x-0 inset-y-0 flex items-center justify-center">
+                                    <ActivityIndicator size="small" color="white" />
+                                </View>
+                            )}
+                        </TouchableOpacity>
+                    )}
 
                     {task.status === TaskStatus.Finalizada && !isFormDirty && (
                         <View className="border border-border p-4 rounded-full bg-white justify-center items-center flex flex-row space-x-1">

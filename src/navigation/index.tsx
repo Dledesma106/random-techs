@@ -149,11 +149,11 @@ function DrawerNavigator() {
                 options={{ title: 'Random', headerTitleAlign: 'center' }}
             />
 
-            <Drawer.Screen
+            {/*             <Drawer.Screen
                 name="RegisterTask"
                 component={RegisterTask}
                 options={{ title: 'Registrar una tarea' }}
-            />
+            /> */}
         </Drawer.Navigator>
     );
 }

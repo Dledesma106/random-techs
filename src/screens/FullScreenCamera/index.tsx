@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import useCamera from '@/hooks/useCamera';
 import { FullScreenCameraProps } from '@/navigation/types';
+import { Zoomable } from '@likashefqet/react-native-image-zoom';
 
 const EVENT_NAME = 'fullscreen-camera-photo-taken-event';
 
@@ -61,7 +62,9 @@ const FullScreenCameraScreen = ({ navigation }: FullScreenCameraProps) => {
         return (
             <SafeAreaView className="flex-1">
                 <View className="flex-1">
-                    <ImageBackground className="flex-1" source={{ uri: photoURI }} />
+                    <Zoomable>
+                        <ImageBackground className="flex-1" source={{ uri: photoURI }} />
+                    </Zoomable>
                 </View>
 
                 <View className="px-4 py-4 bg-black flex flex-row justify-between">
