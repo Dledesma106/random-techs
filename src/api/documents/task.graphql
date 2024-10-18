@@ -115,6 +115,7 @@ mutation updateMyAssignedTask($input: UpdateMyTaskInput!) {
             status
             workOrderNumber
             observations
+            closedAt
             images {
                 id
                 url

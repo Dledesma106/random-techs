@@ -420,8 +420,9 @@ export const TaskType = {
 
 export type TaskType = (typeof TaskType)[keyof typeof TaskType];
 export type UpdateMyTaskInput = {
+    closedAt: InputMaybe<Scalars['DateTime']>;
     id: Scalars['String'];
-    imageKeys: Array<Scalars['String']>;
+    imageKeys: InputMaybe<Array<Scalars['String']>>;
     observations: InputMaybe<Scalars['String']>;
     workOrderNumber: Scalars['String'];
 };
@@ -675,6 +676,7 @@ export type UpdateMyAssignedTaskMutation = {
             status: TaskStatus;
             workOrderNumber: number | null;
             observations: string | null;
+            closedAt: any | null;
             images: Array<{ __typename?: 'Image'; id: string; url: string }>;
         } | null;
     };
@@ -1940,6 +1942,10 @@ export const UpdateMyAssignedTaskDocument = {
                                                     kind: 'Name',
                                                     value: 'observations',
                                                 },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'closedAt' },
                                             },
                                             {
                                                 kind: 'Field',
