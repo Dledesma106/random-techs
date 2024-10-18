@@ -674,6 +674,7 @@ export type UpdateMyAssignedTaskMutation = {
             id: string;
             status: TaskStatus;
             workOrderNumber: number | null;
+            observations: string | null;
             images: Array<{ __typename?: 'Image'; id: string; url: string }>;
         } | null;
     };
@@ -1931,6 +1932,13 @@ export const UpdateMyAssignedTaskDocument = {
                                                 name: {
                                                     kind: 'Name',
                                                     value: 'workOrderNumber',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'observations',
                                                 },
                                             },
                                             {
