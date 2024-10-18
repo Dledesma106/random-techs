@@ -160,7 +160,6 @@ const RegisterExpenseOnTask = ({
                             <Text>form {stringifyObject(watch())}</Text>
                         </>
                     )}
-                    <Text>form {stringifyObject(watch())}</Text>
                     <View className="w-full mb-4 px-4">
                         <Text className="mb-2 text-gray-800 font-bold">Monto</Text>
                         <Controller
@@ -213,41 +212,6 @@ const RegisterExpenseOnTask = ({
                         />
                     </View>
 
-                    {watch('image') && (
-                        <View className="mb-4">
-                            <Text className="mb-2 text-gray-800 font-bold">Imagen</Text>
-
-                            <TouchableOpacity
-                                onPress={() =>
-                                    navigation.navigate('FullScreenImage', {
-                                        uri: watch('image.uri') ?? '',
-                                    })
-                                }
-                                className="mx-auto w-8/12"
-                            >
-                                <Image
-                                    className="bg-gray-200 mb-14"
-                                    source={{ uri: watch('image.uri') }}
-                                    style={{
-                                        borderRadius: 6,
-                                        aspectRatio: 9 / 16,
-                                    }}
-                                />
-                                {watch('image')?.unsaved && (
-                                    <View className="absolute inset-x-0 inset-y-0 flex items-center justify-center bg-white/70">
-                                        <ActivityIndicator
-                                            className="mb-1"
-                                            size="small"
-                                            color="black"
-                                        />
-                                        <Text className="text-xs text-black">
-                                            Subiendo...
-                                        </Text>
-                                    </View>
-                                )}
-                            </TouchableOpacity>
-                        </View>
-                    )}
                     {watch('image') && (
                         <View className="px-4 pt-4">
                             <TouchableOpacity
