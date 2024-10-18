@@ -66,6 +66,7 @@ export const TextInput = forwardRef<NativeTextInput, InputProps>(
                     {icon && (
                         <TouchableOpacity
                             onPress={onIconPress}
+                            disabled={!onIconPress}
                             className="absolute right-4 top-4"
                         >
                             {icon}

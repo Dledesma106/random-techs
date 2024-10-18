@@ -3,6 +3,7 @@ import { CompositeScreenProps } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { StackScreenProps } from '@react-navigation/stack';
 
+import { ExpenseInput } from '@/screens/Task';
 import { BranchesQuery, BusinessesQuery, TaskType } from '@/api/graphql';
 
 export type RootStackParamList = {
@@ -20,6 +21,9 @@ export type RootStackParamList = {
     ExpenseOnTask: {
         expenseId: string;
         taskId: string;
+    };
+    ExpenseOnTaskForm: {
+        expense: ExpenseInput;
     };
     FullScreenCamera: undefined;
     FullScreenImage: { uri: string };
@@ -68,6 +72,11 @@ export type RegisterExpenseOnTaskScreenRouteProp = NativeStackScreenProps<
 export type ExpenseOnTaskScreenRouteProp = NativeStackScreenProps<
     RootStackParamList,
     'ExpenseOnTask'
+>;
+
+export type ExpenseOnTaskFormScreenRouteProp = NativeStackScreenProps<
+    RootStackParamList,
+    'ExpenseOnTaskForm'
 >;
 
 export type HomeScreenRouteProp = NativeStackScreenProps<RootStackParamList, 'Home'>;
