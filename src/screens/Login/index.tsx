@@ -120,25 +120,23 @@ const LoginScreen = ({ navigation }: Props) => {
                                                     placeholder="Contraseña"
                                                     secureTextEntry={!isPasswordVisible}
                                                     autoCapitalize="none"
-                                                />
-                                                <TouchableOpacity
-                                                    className="absolute right-4 top-4"
-                                                    onPress={() =>
+                                                    icon={
+                                                        <Feather
+                                                            name={
+                                                                !isPasswordVisible
+                                                                    ? 'eye'
+                                                                    : 'eye-off'
+                                                            }
+                                                            size={24}
+                                                            color="#000"
+                                                        />
+                                                    }
+                                                    onIconPress={() =>
                                                         setIsPasswordVisible(
                                                             !isPasswordVisible,
                                                         )
                                                     }
-                                                >
-                                                    <Feather
-                                                        name={
-                                                            !isPasswordVisible
-                                                                ? 'eye'
-                                                                : 'eye-off'
-                                                        }
-                                                        size={24}
-                                                        color="#000"
-                                                    />
-                                                </TouchableOpacity>
+                                                />
                                             </View>
                                             <FormMessage />
                                         </FormItem>

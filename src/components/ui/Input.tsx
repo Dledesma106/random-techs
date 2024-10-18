@@ -3,17 +3,24 @@ import {
     TextInput as NativeTextInput,
     Pressable,
     PressableProps,
+    StyleProp,
     Text,
     TextInputProps,
+    TextStyle,
+    TouchableOpacity,
     View,
 } from 'react-native';
 
 import { cn } from '@/lib/utils';
 
-export interface InputProps extends TextInputProps {}
+export interface InputProps extends TextInputProps {
+    inputStyle?: StyleProp<TextStyle>;
+    icon?: JSX.Element;
+    onIconPress?: () => void;
+}
 
 export const TextInput = forwardRef<NativeTextInput, InputProps>(
-    ({ className, style, onBlur, ...props }, ref) => {
+    ({ className, style, inputStyle, onBlur, icon, onIconPress, ...props }, ref) => {
         const [isFocused, setIsFocused] = useState(false);
 
         const handleFocus = () => setIsFocused(true);
@@ -49,16 +56,21 @@ export const TextInput = forwardRef<NativeTextInput, InputProps>(
                             'rounded-md border bg-background border-input py-3 px-3 ring-offset-background disabled:opacity-50',
                             className,
                         )}
-                        style={{
-                            fontSize: 14,
-                            lineHeight: 17,
-                        }}
+                        style={[{ fontSize: 14, lineHeight: 17 }, inputStyle]}
                         ref={ref}
                         onBlur={handleBlur}
                         onFocus={handleFocus}
                         placeholderTextColor="hsl(215.4 16.3% 46.9%)"
                         {...props}
                     />
+                    {icon && (
+                        <TouchableOpacity
+                            onPress={onIconPress}
+                            className="absolute right-4 top-4"
+                        >
+                            {icon}
+                        </TouchableOpacity>
+                    )}
                 </View>
             </View>
         );

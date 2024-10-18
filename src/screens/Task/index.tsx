@@ -1,7 +1,7 @@
 import { AntDesign, EvilIcons } from '@expo/vector-icons';
-import { format } from 'date-fns';
+import { format, setDate } from 'date-fns';
 import ContentLoader, { Rect } from 'react-content-loader/native';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm, Controller } from 'react-hook-form';
 import {
     Text,
     View,
@@ -26,6 +26,7 @@ import useImagePicker from '@/hooks/useImagePicker';
 import { stringifyObject, uploadPhoto, cn, deletePhoto } from '@/lib/utils';
 import { TaskStatus } from '@/models/types';
 import { TaskScreenRouteProp } from '@/navigation/types';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 import { addFullScreenCameraListener } from '../FullScreenCamera';
 import { useEffect, useState } from 'react';
@@ -45,12 +46,14 @@ interface FormInputs {
     workOrderNumber: string;
     observations: string;
     images: InputImage[];
+    closedAt: Date;
 }
 
 const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     const { id } = route.params;
     const { data, isPending, refetch, error } = useGetMyAssignedTaskById(id);
     const [fullScreenImage, setFullScreenImage] = useState<ThumbnailImage | null>(null);
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const formMethods = useForm<FormInputs>();
     const {
         control,
@@ -71,6 +74,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
         reset({
             workOrderNumber: task.workOrderNumber ? String(task.workOrderNumber) : '',
             observations: task.observations ?? '',
+            closedAt: task.closedAt ? new Date(task.closedAt) : undefined,
             images: undefined,
         });
     }, [data]);
@@ -96,16 +100,19 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     }
 
     const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
-        const { workOrderNumber, images, observations } = formData;
-        const imageKeys = images.map((image) => image.key);
-        await updateTask({
-            input: {
-                observations,
-                id,
-                workOrderNumber,
-                imageKeys,
-            },
-        });
+        const { workOrderNumber, images, observations, closedAt } = formData;
+        const imageKeys = images ? images.map((image) => image.key) : [];
+        try {
+            await updateTask({
+                input: {
+                    observations,
+                    id,
+                    workOrderNumber,
+                    imageKeys,
+                    closedAt,
+                },
+            });
+        } catch (error) {}
         reset();
     };
 
@@ -174,7 +181,10 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
         }
 
         const imagesAmount = (task.images.length ?? 0) + (watch('images')?.length ?? 0);
-        const isFormDirty = isDirty || watch('images')?.length > 0;
+        const isFormDirty =
+            isDirty ||
+            watch('images')?.length > 0 ||
+            String(new Date(watch('closedAt'))) !== String(new Date(task.closedAt));
 
         return (
             <View className="flex-1 bg-white">
@@ -229,21 +239,50 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                         </View>
 
                         <View>
-                            <Label className="mb-1.5">Fecha de cierre</Label>
-                            <Text className="text-muted-foreground">
-                                {task.closedAt
-                                    ? format(new Date(task.closedAt), 'dd/MM/yyyy')
-                                    : 'Pendiente'}
-                            </Text>
-                        </View>
-
-                        <View>
                             <Label className="mb-1.5">Auditor</Label>
                             <Text className="text-muted-foreground">
                                 {task.auditor ? task.auditor.fullName : 'Pendiente'}
                             </Text>
                         </View>
 
+                        <View>
+                            <Label className="mb-1.5">Fecha de cierre</Label>
+
+                            <View>
+                                <TouchableOpacity
+                                    onPress={() => setDatePickerVisibility(true)}
+                                >
+                                    <TextInput
+                                        inputStyle={{ color: 'black' }}
+                                        editable={false}
+                                        icon={<EvilIcons name="calendar" size={24} />}
+                                    >
+                                        {watch('closedAt')
+                                            ? format(
+                                                  new Date(watch('closedAt')),
+                                                  'dd/MM/yyyy',
+                                              )
+                                            : task.closedAt
+                                              ? format(
+                                                    new Date(task.closedAt),
+                                                    'dd/MM/yyyy',
+                                                )
+                                              : 'Pendiente'}
+                                    </TextInput>
+                                </TouchableOpacity>
+                                <DateTimePickerModal
+                                    isVisible={isDatePickerVisible}
+                                    mode="date"
+                                    onConfirm={(date) => {
+                                        setValue('closedAt', date);
+                                        console.log('closedAt', watch('closedAt'));
+                                        setDatePickerVisibility(false);
+                                    }}
+                                    onCancel={() => setDatePickerVisibility(false)}
+                                    date={watch('closedAt') || new Date()}
+                                />
+                            </View>
+                        </View>
                         <View>
                             <Label className="mb-1.5">Orden de Trabajo</Label>
                             {task.status !== TaskStatus.Aprobada ? (

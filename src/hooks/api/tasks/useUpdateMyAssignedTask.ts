@@ -43,7 +43,8 @@ export const useUpdateMyAssignedTask = () => {
                         return {
                             ...someTask,
                             status: task.status,
-                            // TODO: Take into account the unsaved images
+                            observations: task.observations,
+                            closedAt: task.closedAt,
                             images: task.images,
                             workOrderNumber: task.workOrderNumber,
                         };
