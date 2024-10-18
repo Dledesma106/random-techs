@@ -11,6 +11,7 @@ import {
     TextInput,
     Image,
     ActivityIndicator,
+    DeviceEventEmitter,
 } from 'react-native';
 import Toast from 'react-native-root-toast';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,6 +24,21 @@ import { addFullScreenCameraListener } from '@/screens/FullScreenCamera';
 import { useCreateExpenseOnTask } from '@/hooks/api/expense/useCreateExpenseOnTask';
 import { deletePhoto, stringifyObject, uploadPhoto } from '@/lib/utils';
 
+const EVENT_NAME = 'expense-registered-on-task-event';
+
+export const addRegisterExpenseOnTaskListener = (
+    callback: (expense: FormValues) => void,
+) => {
+    DeviceEventEmitter.addListener(EVENT_NAME, callback);
+};
+
+const removeRegisterExpenseOnTaskListener = () => {
+    DeviceEventEmitter.removeAllListeners(EVENT_NAME);
+};
+
+const emitRegisterExpenseOnTaskEvent = (expense: FormValues) => {
+    DeviceEventEmitter.emit(EVENT_NAME, expense);
+};
 interface InputImage {
     key: string;
     uri: string;
@@ -51,7 +67,11 @@ const RegisterExpenseOnTask = ({
         reset,
     } = useForm<FormValues>();
 
-    const { mutateAsync: createExpense, isPending } = useCreateExpenseOnTask();
+    useEffect(() => {
+        return () => {
+            removeRegisterExpenseOnTaskListener();
+        };
+    }, []);
 
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
         if (!data.amount) {
@@ -83,15 +103,15 @@ const RegisterExpenseOnTask = ({
             return;
         }
 
-        await createExpense({
-            taskId,
-            expenseData: {
-                amount: parseFloat(data.amount),
-                paySource: data.paySource,
-                expenseType: data.expenseType,
-                imageKey: data.image.key,
-            },
-        });
+        if (!data.image.key) {
+            Toast.show('Espere a que la imagen termine de subirse', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+            });
+            return;
+        }
+
+        emitRegisterExpenseOnTaskEvent(data);
         navigation.goBack();
         reset();
     };
@@ -118,11 +138,7 @@ const RegisterExpenseOnTask = ({
         <SafeAreaView className="flex-1">
             <View className="flex-1 bg-white">
                 <View className="flex flex-row items-center justify-between px-4 py-2 border-b border-gray-200">
-                    <TouchableOpacity
-                        className={clsx(isPending && 'opacity-30')}
-                        disabled={isPending}
-                        onPress={() => navigation.goBack()}
-                    >
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
                         <AntDesign name="arrowleft" size={24} color="black" />
                     </TouchableOpacity>
 
@@ -131,20 +147,9 @@ const RegisterExpenseOnTask = ({
                         className="font-bold"
                     >
                         <View className="rounded bg-black relative flex">
-                            <Text
-                                className={clsx(
-                                    'font-bold text-white text-xs p-2',
-                                    isPending && 'opacity-0',
-                                )}
-                            >
+                            <Text className={clsx('font-bold text-white text-xs p-2')}>
                                 Registrar gasto
                             </Text>
-
-                            {isPending && (
-                                <View className="absolute inset-0 w-full h-full flex items-center justify-center flex-1">
-                                    <ActivityIndicator size="small" color="#FFF" />
-                                </View>
-                            )}
                         </View>
                     </TouchableOpacity>
                 </View>
@@ -224,6 +229,18 @@ const RegisterExpenseOnTask = ({
                                             aspectRatio: 9 / 16,
                                         }}
                                     />
+                                    {watch('image')?.unsaved && (
+                                        <View className="absolute inset-x-0 inset-y-0 flex items-center justify-center bg-white/70">
+                                            <ActivityIndicator
+                                                className="mb-1"
+                                                size="small"
+                                                color="black"
+                                            />
+                                            <Text className="text-xs text-black">
+                                                Subiendo...
+                                            </Text>
+                                        </View>
+                                    )}
                                     <Pressable
                                         onPress={deleteImage}
                                         className="flex flex-row items-center justify-center py-1 absolute rounded-full w-8 h-8 bg-black top-2 right-2"

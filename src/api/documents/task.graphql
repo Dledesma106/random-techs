@@ -116,6 +116,25 @@ mutation updateMyAssignedTask($input: UpdateMyTaskInput!) {
             workOrderNumber
             observations
             closedAt
+            expenses {
+                id
+                amount
+                paySource
+                expenseType
+                createdAt
+                image {
+                    id
+                    url
+                    urlExpire
+                    key
+                }
+                status
+                doneBy {
+                    id
+                    email
+                    fullName
+                }
+            }
             images {
                 id
                 url

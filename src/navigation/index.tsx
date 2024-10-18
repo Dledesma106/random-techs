@@ -26,6 +26,7 @@ import Login from '../screens/Login';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import Task from '../screens/Task';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import ExpenseOnTaskForm from '@/screens/ExpenseOnTaskForm';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
     return (
@@ -87,6 +88,12 @@ function RootNavigator() {
             <Stack.Screen
                 name="ExpenseOnTask"
                 component={ExpenseOnTask}
+                options={{ title: 'Gasto' }}
+            />
+
+            <Stack.Screen
+                name="ExpenseOnTaskForm"
+                component={ExpenseOnTaskForm}
                 options={{ title: 'Gasto' }}
             />
 

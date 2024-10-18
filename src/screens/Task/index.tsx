@@ -1,7 +1,7 @@
 import { AntDesign, EvilIcons } from '@expo/vector-icons';
-import { format, setDate } from 'date-fns';
+import { format } from 'date-fns';
 import ContentLoader, { Rect } from 'react-content-loader/native';
-import { SubmitHandler, useForm, Controller } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import {
     Text,
     View,
@@ -24,7 +24,7 @@ import { useGetMyAssignedTaskById } from '@/hooks/api/tasks/useGetMyAssignedTask
 import { useUpdateMyAssignedTask } from '@/hooks/api/tasks/useUpdateMyAssignedTask';
 import useImagePicker from '@/hooks/useImagePicker';
 import { stringifyObject, uploadPhoto, cn, deletePhoto } from '@/lib/utils';
-import { TaskStatus } from '@/models/types';
+import { PaySource, TaskStatus } from '@/models/types';
 import { TaskScreenRouteProp } from '@/navigation/types';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
@@ -35,17 +35,30 @@ import { Image } from 'expo-image';
 import ConfirmButton from '@/components/ConfirmButton';
 import { useDeleteImageById } from '@/hooks/api/tasks/useDeleteImageById';
 import Toast from 'react-native-root-toast';
-
+import { ExpenseType } from '@/api/graphql';
+import { addRegisterExpenseOnTaskListener } from '../RegisterExpenseOnTask';
+import { addDeleteExpenseOnTaskListener } from '../ExpenseOnTaskForm';
+import { addDeleteExpenseByIdListener } from '../ExpenseOnTask';
 const MAX_IMAGE_AMOUNT = 5;
 interface InputImage {
     key: string;
     uri: string;
     unsaved: boolean;
 }
+
+export type ExpenseInput = {
+    amount: string;
+    paySource: PaySource;
+    expenseType: ExpenseType;
+    image?: InputImage;
+};
 interface FormInputs {
     workOrderNumber: string;
     observations: string;
     images: InputImage[];
+    expenses: ExpenseInput[];
+    imageIdsToDelete: string[];
+    expenseIdsToDelete: string[];
     closedAt: Date;
 }
 
@@ -76,6 +89,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
             observations: task.observations ?? '',
             closedAt: task.closedAt ? new Date(task.closedAt) : undefined,
             images: undefined,
+            expenses: undefined,
         });
     }, [data]);
 
@@ -86,21 +100,66 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
         setValue('images', [...currentImages, { key, uri, unsaved: false }]);
     };
 
+    const addExpenseToTask = (expense: ExpenseInput) => {
+        const currentExpenses = watch('expenses') ?? [];
+        setValue('expenses', [...currentExpenses, expense]);
+    };
+
+    const removeExpenseOnForm = (expenseImageKey: string) => {
+        const currentExpenses = watch('expenses') ?? [];
+        setValue(
+            'expenses',
+            currentExpenses.filter((expense) => expense.image?.key !== expenseImageKey),
+        );
+    };
+
+    const deleteExpenseById = (expenseId: string) => {
+        const currentExpenseIdsToDelete = watch('expenseIdsToDelete') ?? [];
+        setValue('expenseIdsToDelete', [...currentExpenseIdsToDelete, expenseId]);
+    };
+
+    const deleteImageById = (imageId: string) => {
+        const currentImageIdsToDelete = watch('imageIdsToDelete') ?? [];
+        setValue('imageIdsToDelete', [...currentImageIdsToDelete, imageId]);
+    };
+
     const navigateToCameraScreen = () => {
         addFullScreenCameraListener(addPictureToTask);
         navigation.navigate('FullScreenCamera');
     };
 
     function navigateToRegisterExpense() {
+        addRegisterExpenseOnTaskListener(addExpenseToTask);
         navigation.navigate('RegisterExpenseOnTask', { taskId: id });
     }
 
     function navigateToExpense(expenseId: string) {
+        addDeleteExpenseByIdListener(deleteExpenseById);
         navigation.navigate('ExpenseOnTask', { expenseId, taskId: id });
     }
 
+    function navigateToExpenseOnTaskForm(expense: ExpenseInput) {
+        addDeleteExpenseOnTaskListener(removeExpenseOnForm);
+        navigation.navigate('ExpenseOnTaskForm', { expense });
+    }
+
     const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
-        const { workOrderNumber, images, observations, closedAt } = formData;
+        const {
+            workOrderNumber,
+            images,
+            observations,
+            closedAt,
+            expenses,
+            imageIdsToDelete,
+            expenseIdsToDelete,
+        } = formData;
+        const formatedExpenses = expenses?.map((expense) => ({
+            amount: parseInt(expense.amount),
+            paySource: expense.paySource,
+            expenseType: expense.expenseType,
+            imageKey: expense.image?.key ?? '',
+        }));
+        console.log('expenses for input: ', formatedExpenses);
         const imageKeys = images ? images.map((image) => image.key) : [];
         try {
             await updateTask({
@@ -110,6 +169,9 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                     workOrderNumber,
                     imageKeys,
                     closedAt,
+                    expenses: formatedExpenses,
+                    imageIdsToDelete,
+                    expenseIdsToDelete,
                 },
             });
         } catch (error) {}
@@ -117,7 +179,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     };
 
     const handleDeleteImage = async (image: ThumbnailImage) => {
-        if (image.id) await deleteImage({ imageId: image.id, taskId: id });
+        if (image.id) deleteImageById(image.id);
         if (image.key) {
             try {
                 const currentImages = watch('images');
@@ -180,10 +242,16 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
             );
         }
 
-        const imagesAmount = (task.images.length ?? 0) + (watch('images')?.length ?? 0);
+        const imagesAmount =
+            (task.images.length ?? 0) -
+            (watch('imageIdsToDelete')?.length ?? 0) +
+            (watch('images')?.length ?? 0);
         const isFormDirty =
             isDirty ||
             watch('images')?.length > 0 ||
+            watch('expenses')?.length > 0 ||
+            watch('expenseIdsToDelete')?.length > 0 ||
+            watch('imageIdsToDelete')?.length > 0 ||
             String(new Date(watch('closedAt'))) !== String(new Date(task.closedAt));
 
         return (
@@ -275,7 +343,6 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                     mode="date"
                                     onConfirm={(date) => {
                                         setValue('closedAt', date);
-                                        console.log('closedAt', watch('closedAt'));
                                         setDatePickerVisibility(false);
                                     }}
                                     onCancel={() => setDatePickerVisibility(false)}
@@ -351,20 +418,53 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                             <Label className="mb-1.5">Gastos</Label>
 
                             <View className="space-y-2 w-full">
-                                {task.expenses.map((expense) => (
-                                    <Button
-                                        key={expense.id}
-                                        onPress={() => navigateToExpense(expense.id)}
-                                        className="flex flex-row items-center justify-between"
-                                        variant="outline"
-                                    >
-                                        <ButtonText>
-                                            {expense.expenseType} - ${expense.amount}
-                                        </ButtonText>
+                                {task.expenses
+                                    .filter(
+                                        (expense) =>
+                                            !watch('expenseIdsToDelete')?.includes(
+                                                expense.id,
+                                            ),
+                                    )
+                                    .map((expense) => (
+                                        <Button
+                                            key={expense.id}
+                                            onPress={() => navigateToExpense(expense.id)}
+                                            className="flex flex-row items-center justify-between"
+                                            variant="outline"
+                                        >
+                                            <ButtonText>
+                                                {expense.expenseType} - ${expense.amount}
+                                            </ButtonText>
 
-                                        <AntDesign name="right" size={14} color="gray" />
-                                    </Button>
-                                ))}
+                                            <AntDesign
+                                                name="right"
+                                                size={14}
+                                                color="gray"
+                                            />
+                                        </Button>
+                                    ))}
+
+                                {watch('expenses') &&
+                                    watch('expenses').map((expense) => (
+                                        <Button
+                                            key={expense.image?.key}
+                                            onPress={() =>
+                                                navigateToExpenseOnTaskForm(expense)
+                                            }
+                                            className="flex flex-row items-center justify-between"
+                                            variant="outline"
+                                        >
+                                            <ButtonText>
+                                                {expense.expenseType} - ${expense.amount}
+                                            </ButtonText>
+
+                                            <AntDesign
+                                                name="right"
+                                                size={14}
+                                                color="gray"
+                                            />
+                                        </Button>
+                                    ))}
 
                                 {task.expenses.length === 0 &&
                                     task.status === TaskStatus.Aprobada && (
@@ -392,13 +492,20 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                             </Label>
 
                             <View className="flex flex-row space-x-4">
-                                {task.images.map((image) => (
-                                    <ImageThumbnail
-                                        key={image.id}
-                                        image={image}
-                                        onImagePress={() => setFullScreenImage(image)}
-                                    />
-                                ))}
+                                {task.images
+                                    .filter(
+                                        (image) =>
+                                            !watch('imageIdsToDelete')?.includes(
+                                                image.id,
+                                            ),
+                                    )
+                                    .map((image) => (
+                                        <ImageThumbnail
+                                            key={image.id}
+                                            image={image}
+                                            onImagePress={() => setFullScreenImage(image)}
+                                        />
+                                    ))}
 
                                 {watch('images')?.map((image) => (
                                     <ImageThumbnail

@@ -5,29 +5,48 @@ import {
     Image,
     RefreshControl,
     TouchableOpacity,
+    DeviceEventEmitter,
 } from 'react-native';
 
 import { ExpenseOnTaskScreenRouteProp } from '@/navigation/types';
-
-import { dmyDateString } from '../../lib/utils';
 import { useGetExpenseById } from '@/hooks/api/expense/useGetExpenseById';
 import { format } from 'date-fns';
 import { EvilIcons } from '@expo/vector-icons';
 import { useDeleteExpenseById } from '@/hooks/api/expense/useDeleteExpenseById';
 import ConfirmButton from '@/components/ConfirmButton';
+import { useEffect } from 'react';
+
+const EVENT_NAME = 'expense-deleted-by-id-event';
+
+export const addDeleteExpenseByIdListener = (callback: (expenseId: string) => void) => {
+    DeviceEventEmitter.addListener(EVENT_NAME, callback);
+};
+
+const removeDeleteExpenseByIdListener = () => {
+    DeviceEventEmitter.removeAllListeners(EVENT_NAME);
+};
+
+const emitDeleteExpenseByIdEvent = (expenseId: string) => {
+    DeviceEventEmitter.emit(EVENT_NAME, expenseId);
+};
 
 const ExpenseOnTask = ({ navigation, route }: ExpenseOnTaskScreenRouteProp) => {
-    const { expenseId, taskId } = route.params;
+    const { expenseId } = route.params;
     const {
         data: expenseData,
         isFetching: isFetchingExpense,
         refetch,
         error: queryError,
     } = useGetExpenseById(expenseId);
-    const { mutateAsync: deleteTask } = useDeleteExpenseById(expenseId);
+
+    useEffect(() => {
+        return () => {
+            removeDeleteExpenseByIdListener();
+        };
+    }, []);
 
     const handleDeleteExpense = async () => {
-        await deleteTask({ id: expenseId, taskId });
+        await emitDeleteExpenseByIdEvent(expenseId);
         navigation.goBack();
     };
 

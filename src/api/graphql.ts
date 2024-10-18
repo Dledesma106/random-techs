@@ -421,10 +421,13 @@ export const TaskType = {
 export type TaskType = (typeof TaskType)[keyof typeof TaskType];
 export type UpdateMyTaskInput = {
     closedAt: InputMaybe<Scalars['DateTime']>;
+    expenseIdsToDelete: InputMaybe<Array<Scalars['String']>>;
+    expenses: InputMaybe<Array<ExpenseInput>>;
     id: Scalars['String'];
+    imageIdsToDelete: InputMaybe<Array<Scalars['String']>>;
     imageKeys: InputMaybe<Array<Scalars['String']>>;
     observations: InputMaybe<Scalars['String']>;
-    workOrderNumber: Scalars['String'];
+    workOrderNumber: InputMaybe<Scalars['String']>;
 };
 
 export type User = {
@@ -677,6 +680,28 @@ export type UpdateMyAssignedTaskMutation = {
             workOrderNumber: number | null;
             observations: string | null;
             closedAt: any | null;
+            expenses: Array<{
+                __typename?: 'Expense';
+                id: string;
+                amount: number;
+                paySource: ExpensePaySource;
+                expenseType: ExpenseType;
+                createdAt: any;
+                status: ExpenseStatus;
+                image: {
+                    __typename?: 'Image';
+                    id: string;
+                    url: string;
+                    urlExpire: any | null;
+                    key: string;
+                };
+                doneBy: {
+                    __typename?: 'User';
+                    id: string;
+                    email: string;
+                    fullName: string;
+                };
+            }>;
             images: Array<{ __typename?: 'Image'; id: string; url: string }>;
         } | null;
     };
@@ -1946,6 +1971,130 @@ export const UpdateMyAssignedTaskDocument = {
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'closedAt' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'expenses' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'amount',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'paySource',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'expenseType',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'createdAt',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'image',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'id',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'url',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'urlExpire',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'key',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'status',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'doneBy',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'id',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'email',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'fullName',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
                                             },
                                             {
                                                 kind: 'Field',

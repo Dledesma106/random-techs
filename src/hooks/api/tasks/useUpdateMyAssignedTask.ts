@@ -10,6 +10,7 @@ import {
     UpdateMyAssignedTaskMutation,
     UpdateMyAssignedTaskMutationVariables,
 } from '@/api/graphql';
+import Toast from 'react-native-root-toast';
 
 export const useUpdateMyAssignedTask = () => {
     const client = useQueryClient();
@@ -22,7 +23,15 @@ export const useUpdateMyAssignedTask = () => {
             return fetchGraphql(UpdateMyAssignedTaskDocument, data);
         },
         onError: (error) => console.log(error),
-        onSuccess: (data, variables) => {
+        onSuccess: (data, { input: { id, imageIdsToDelete, expenseIdsToDelete } }) => {
+            if (!data.updateMyAssignedTask.success) {
+                Toast.show(data.updateMyAssignedTask.message ?? 'Ocurrio un error', {
+                    duration: Toast.durations.LONG,
+                    position: Toast.positions.BOTTOM,
+                });
+                return;
+            }
+
             const task = data.updateMyAssignedTask.task;
             if (!task) {
                 return;
@@ -36,7 +45,7 @@ export const useUpdateMyAssignedTask = () => {
                 const newData: MyAssignedTasksQuery = {
                     ...oldData,
                     myAssignedTasks: oldData.myAssignedTasks.map((someTask) => {
-                        if (someTask.id !== variables.input.id) {
+                        if (someTask.id !== id) {
                             return someTask;
                         }
 
@@ -45,7 +54,12 @@ export const useUpdateMyAssignedTask = () => {
                             status: task.status,
                             observations: task.observations,
                             closedAt: task.closedAt,
-                            images: task.images,
+                            images: task.images.filter(
+                                (image) => !imageIdsToDelete?.includes(image.id),
+                            ),
+                            expenses: task.expenses.filter(
+                                (expense) => !expenseIdsToDelete?.includes(expense.id),
+                            ),
                             workOrderNumber: task.workOrderNumber,
                         };
                     }),
@@ -54,27 +68,28 @@ export const useUpdateMyAssignedTask = () => {
                 return newData;
             });
 
-            client.setQueryData<TaskByIdQuery>(
-                TASK_BY_ID_QUERY_KEY(variables.input.id),
-                (oldData) => {
-                    if (!oldData || !oldData.myAssignedTaskById) {
-                        return oldData;
-                    }
+            client.setQueryData<TaskByIdQuery>(TASK_BY_ID_QUERY_KEY(id), (oldData) => {
+                if (!oldData || !oldData.myAssignedTaskById) {
+                    return oldData;
+                }
 
-                    const newData: TaskByIdQuery = {
-                        ...oldData,
-                        myAssignedTaskById: {
-                            ...oldData.myAssignedTaskById,
-                            status: task.status,
-                            // TODO: Take into account the unsaved images
-                            images: task.images,
-                            workOrderNumber: task.workOrderNumber,
-                        },
-                    };
+                const newData: TaskByIdQuery = {
+                    ...oldData,
+                    myAssignedTaskById: {
+                        ...oldData.myAssignedTaskById,
+                        status: task.status,
+                        images: task.images.filter(
+                            (image) => !imageIdsToDelete?.includes(image.id),
+                        ),
+                        expenses: task.expenses.filter(
+                            (expense) => !expenseIdsToDelete?.includes(expense.id),
+                        ),
+                        workOrderNumber: task.workOrderNumber,
+                    },
+                };
 
-                    return newData;
-                },
-            );
+                return newData;
+            });
             client.invalidateQueries({
                 queryKey: ['tasks', 'detail', task.id],
             });
