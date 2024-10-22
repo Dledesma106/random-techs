@@ -76,7 +76,6 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
         formState: { isDirty },
     } = formMethods;
     const { pickImage } = useImagePicker();
-    const { mutateAsync: deleteImage } = useDeleteImageById();
     const { mutateAsync: updateTask, isPending: isUpdatePending } =
         useUpdateMyAssignedTask();
 
@@ -97,6 +96,11 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
         setValue('images', [...currentImages, { key: '', uri, unsaved: true }]);
         const key = String(await uploadPhoto(uri));
         setValue('images', [...currentImages, { key, uri, unsaved: false }]);
+    };
+
+    const selectImage = async () => {
+        const uri = await pickImage();
+        if (uri) addPictureToTask(uri);
     };
 
     const addExpenseToTask = (expense: ExpenseInput) => {
@@ -200,11 +204,6 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
         }
         setFullScreenImage(null);
         return;
-    };
-
-    const selectImage = async () => {
-        const uri = await pickImage();
-        if (uri) addPictureToTask(uri);
     };
 
     if (fullScreenImage)
@@ -333,7 +332,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                                     new Date(task.closedAt),
                                                     'dd/MM/yyyy',
                                                 )
-                                              : 'Pendiente'}
+                                              : 'Fecha de cierre'}
                                     </TextInput>
                                 </TouchableOpacity>
                                 <DateTimePickerModal
@@ -486,7 +485,8 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
 
                         <View>
                             <Label className="mb-1.5">
-                                Imágenes ({imagesAmount} de {MAX_IMAGE_AMOUNT})
+                                Imágenes de comprobante de trabajo({imagesAmount} de{' '}
+                                {MAX_IMAGE_AMOUNT})
                             </Label>
 
                             <View className="flex flex-row space-x-4">

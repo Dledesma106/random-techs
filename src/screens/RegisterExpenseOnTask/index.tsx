@@ -23,6 +23,7 @@ import { RegisterExpenseOnTaskScreenRouteProp } from '@/navigation/types';
 import { addFullScreenCameraListener } from '@/screens/FullScreenCamera';
 import { useCreateExpenseOnTask } from '@/hooks/api/expense/useCreateExpenseOnTask';
 import { deletePhoto, stringifyObject, uploadPhoto } from '@/lib/utils';
+import useImagePicker from '@/hooks/useImagePicker';
 
 const EVENT_NAME = 'expense-registered-on-task-event';
 
@@ -57,7 +58,7 @@ const RegisterExpenseOnTask = ({
     navigation,
 }: RegisterExpenseOnTaskScreenRouteProp) => {
     const { taskId } = route.params;
-
+    const { pickImage } = useImagePicker();
     const {
         control,
         setValue,
@@ -128,6 +129,11 @@ const RegisterExpenseOnTask = ({
         setValue('image', { key, uri, unsaved: false });
     };
 
+    const selectImage = async () => {
+        const uri = await pickImage();
+        if (uri) addPictureToExpense(uri);
+    };
+
     const goToCameraScreen = () => {
         addFullScreenCameraListener(addPictureToExpense);
         navigation.navigate('FullScreenCamera');
@@ -154,13 +160,16 @@ const RegisterExpenseOnTask = ({
                     </TouchableOpacity>
                 </View>
 
-                <ScrollView className="py-4 flex-1">
+                <ScrollView className="flex-1">
                     {process.env.NODE_ENV === 'development' && (
                         <>
                             <Text>form {stringifyObject(watch())}</Text>
                         </>
                     )}
                     <View className="w-full mb-4 px-4">
+                        <Text className="mb-2 text-gray-800">
+                            Recorda no tirar el comprobante fisico del gasto
+                        </Text>
                         <Text className="mb-2 text-gray-800 font-bold">Monto</Text>
                         <Controller
                             control={control}
@@ -253,18 +262,30 @@ const RegisterExpenseOnTask = ({
                     )}
 
                     {!watch('image') && (
-                        <View className="pt-8 px-4">
-                            <TouchableOpacity
-                                onPress={goToCameraScreen}
-                                className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
-                            >
-                                <Text className="font-semibold text-white">
-                                    Añadir Imagen
-                                </Text>
+                        <>
+                            <View className="flex flex-row gap-4 pt-4 px-4">
+                                <TouchableOpacity
+                                    onPress={goToCameraScreen}
+                                    className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
+                                >
+                                    <Text className="font-semibold text-white">
+                                        Añadir Imagen
+                                    </Text>
 
-                                <EvilIcons name="camera" size={22} color="white" />
-                            </TouchableOpacity>
-                        </View>
+                                    <EvilIcons name="camera" size={22} color="white" />
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={selectImage}
+                                    className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
+                                >
+                                    <Text className="font-semibold text-white">
+                                        Elegir Imagen
+                                    </Text>
+
+                                    <EvilIcons name="image" size={22} color="white" />
+                                </TouchableOpacity>
+                            </View>
+                        </>
                     )}
                 </ScrollView>
             </View>
