@@ -5,7 +5,7 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
     ...config,
     name: 'Tecnicos Random',
     slug: 'random-techs',
-    version: '1.0.0',
+    version: '0.1.1',
     orientation: 'portrait',
     icon: './assets/images/icon.png',
     scheme: 'myapp',
