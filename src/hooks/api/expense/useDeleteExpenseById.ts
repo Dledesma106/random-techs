@@ -5,6 +5,7 @@ import {
     DeleteExpenseDocument,
     DeleteExpenseMutation,
     DeleteExpenseMutationVariables,
+    MyExpensesQuery,
 } from '@/api/graphql';
 import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from '../tasks/useGetMyAssignedTaskById';
 import Toast from 'react-native-root-toast';
@@ -16,28 +17,45 @@ export const useDeleteExpenseById = (id: string) => {
         onSuccess: (data, { id, taskId }) => {
             if (!data) return;
 
-            client.setQueryData<TaskByIdQuery>(
-                TASK_BY_ID_QUERY_KEY(taskId),
-                (oldData) => {
-                    if (!oldData || !oldData.myAssignedTaskById) {
-                        return oldData;
-                    }
-                    const {
-                        deleteExpense: { expense: newExpense },
-                    } = data;
+            const {
+                deleteExpense: { expense: newExpense },
+            } = data;
+
+            if (taskId) {
+                client.setQueryData<TaskByIdQuery>(
+                    TASK_BY_ID_QUERY_KEY(taskId),
+                    (oldData) => {
+                        if (!oldData || !oldData.myAssignedTaskById) {
+                            return oldData;
+                        }
+                        if (!newExpense) return oldData;
+                        const newData: TaskByIdQuery = {
+                            ...oldData,
+                            myAssignedTaskById: {
+                                ...oldData.myAssignedTaskById,
+                                expenses: oldData.myAssignedTaskById.expenses.filter(
+                                    (expense) => expense.id !== newExpense.id,
+                                ),
+                            },
+                        };
+                        return newData;
+                    },
+                );
+            } else {
+                client.setQueryData<MyExpensesQuery>(['expenses'], (oldData) => {
+                    if (!oldData || !oldData.myExpenses) return oldData;
                     if (!newExpense) return oldData;
-                    const newData: TaskByIdQuery = {
+                    const newData: MyExpensesQuery = {
                         ...oldData,
-                        myAssignedTaskById: {
-                            ...oldData.myAssignedTaskById,
-                            expenses: oldData.myAssignedTaskById.expenses.filter(
+                        myExpenses: [
+                            ...oldData.myExpenses.filter(
                                 (expense) => expense.id !== newExpense.id,
                             ),
-                        },
+                        ],
                     };
                     return newData;
-                },
-            );
+                });
+            }
             Toast.show('Gasto Eliminado', {
                 duration: Toast.durations.LONG,
                 position: Toast.positions.BOTTOM,

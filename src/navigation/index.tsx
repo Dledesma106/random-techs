@@ -10,7 +10,7 @@ import LinkingConfiguration from './LinkingConfiguration';
 import { RootStackParamList, RootTabParamList } from './types';
 
 import AccountSettings from '@/screens/AccountSettings';
-import ExpenseOnTask from '@/screens/ExpenseOnTask';
+import Expense from '@/screens/Expense';
 import FullScreenCameraScreen from '@/screens/FullScreenCamera';
 import FullScreenImageScreen from '@/screens/FullScreenImage';
 import ProfileScreen from '@/screens/Profile';
@@ -27,6 +27,8 @@ import NotFoundScreen from '../screens/NotFoundScreen';
 import Task from '../screens/Task';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import ExpenseOnTaskForm from '@/screens/ExpenseOnTaskForm';
+import ExpensesList from '@/screens/ExpensesList';
+import RegisterExpense from '@/screens/RegisterExpense';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
     return (
@@ -86,8 +88,8 @@ function RootNavigator() {
             />
 
             <Stack.Screen
-                name="ExpenseOnTask"
-                component={ExpenseOnTask}
+                name="Expense"
+                component={Expense}
                 options={{ title: 'Gasto' }}
             />
 
@@ -126,6 +128,12 @@ function RootNavigator() {
                     title: 'Tipo de tarea',
                 }}
             />
+            <Stack.Screen name="Task" component={Task} options={{ title: 'Tarea' }} />
+            <Stack.Screen
+                name="RegisterExpense"
+                component={RegisterExpense}
+                options={{ headerShown: false }}
+            />
         </Stack.Navigator>
     );
 }
@@ -145,20 +153,34 @@ function DrawerNavigator() {
         >
             <Drawer.Screen
                 name="Home"
-                component={BottomTabNavigator}
-                options={{ title: 'Random', headerTitleAlign: 'center' }}
+                component={Home}
+                options={{ title: 'Tareas Asignadas', headerTitleAlign: 'center' }}
             />
 
-            {/*             <Drawer.Screen
+            <Drawer.Screen
+                name="ExpensesList"
+                component={ExpensesList}
+                options={{ title: 'Mis gastos', headerTitleAlign: 'center' }}
+            />
+
+            {/* <Drawer.Screen
                 name="RegisterTask"
                 component={RegisterTask}
                 options={{ title: 'Registrar una tarea' }}
             /> */}
+            <Drawer.Screen
+                name="Profile"
+                component={ProfileScreen}
+                options={() => ({
+                    tabBarIcon: () => <Entypo name="user" size={24} color="black" />,
+                    title: 'Mi perfil',
+                })}
+            />
         </Drawer.Navigator>
     );
 }
 
-const BottomTab = createBottomTabNavigator<RootTabParamList>();
+/* const BottomTab = createBottomTabNavigator<RootTabParamList>();
 
 export const BottomTabNavigator = () => (
     <BottomTab.Navigator initialRouteName="Main">
@@ -173,12 +195,6 @@ export const BottomTabNavigator = () => (
         />
 
         <BottomTab.Screen
-            name="Task"
-            component={Task}
-            options={{ tabBarItemStyle: { display: 'none' }, headerShown: false }}
-        />
-
-        <BottomTab.Screen
             name="Profile"
             component={ProfileScreen}
             options={() => ({
@@ -188,3 +204,4 @@ export const BottomTabNavigator = () => (
         />
     </BottomTab.Navigator>
 );
+ */

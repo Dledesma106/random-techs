@@ -11,6 +11,8 @@ export type RootStackParamList = {
     Drawer: undefined;
     NotFound: undefined;
     Home: undefined;
+    RegisterExpense: undefined;
+    ExpensesList: undefined;
     Login: undefined;
     Task: {
         id: string;
@@ -18,9 +20,8 @@ export type RootStackParamList = {
     RegisterExpenseOnTask: {
         taskId: string;
     };
-    ExpenseOnTask: {
+    Expense: {
         expenseId: string;
-        taskId: string;
     };
     ExpenseOnTaskForm: {
         expense: ExpenseInput;
@@ -51,12 +52,10 @@ export type RootStackScreenProps<T extends keyof RootStackParamList> = StackScre
     T
 >;
 
-export type HomeTabScreenProp = CompositeScreenProps<
-    BottomTabScreenProps<RootTabParamList, 'Main'>,
-    RootStackScreenProps<'Home'>
->;
+export type HomeTabScreenProp = RootStackScreenProps<'Home'>;
 
 export type RegisterTaskScreenProp = RootStackScreenProps<'RegisterTask'>;
+export type ExpensesListScreenProp = RootStackScreenProps<'ExpensesList'>;
 export type FullScreenCameraProps = RootStackScreenProps<'FullScreenCamera'>;
 
 export type TaskScreenRouteProp = NativeStackScreenProps<RootStackParamList, 'Task'>;
@@ -68,10 +67,14 @@ export type RegisterExpenseOnTaskScreenRouteProp = NativeStackScreenProps<
     RootStackParamList,
     'RegisterExpenseOnTask'
 >;
-
-export type ExpenseOnTaskScreenRouteProp = NativeStackScreenProps<
+export type RegisterExpenseScreenRouteProp = NativeStackScreenProps<
     RootStackParamList,
-    'ExpenseOnTask'
+    'RegisterExpense'
+>;
+
+export type ExpenseScreenRouteProp = NativeStackScreenProps<
+    RootStackParamList,
+    'Expense'
 >;
 
 export type ExpenseOnTaskFormScreenRouteProp = NativeStackScreenProps<

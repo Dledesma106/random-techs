@@ -85,6 +85,7 @@ export type Expense = {
     image: Image;
     paySource: ExpensePaySource;
     status: ExpenseStatus;
+    task: Task;
 };
 
 export type ExpenseCrudResult = {
@@ -144,7 +145,7 @@ export type Mutation = {
     __typename?: 'Mutation';
     createBranch: BranchCrudResult;
     createCity: CityCrudResult;
-    createExpenseOnTask: ExpenseCrudResult;
+    createExpense: ExpenseCrudResult;
     createPreventive: PreventiveCrudResult;
     createTask: TaskCrudResult;
     createUser: UserCrudPothosRef;
@@ -173,9 +174,9 @@ export type MutationCreateCityArgs = {
     input: CityInput;
 };
 
-export type MutationCreateExpenseOnTaskArgs = {
+export type MutationCreateExpenseArgs = {
     expenseData: ExpenseInput;
-    taskId: Scalars['String'];
+    taskId: InputMaybe<Scalars['String']>;
 };
 
 export type MutationCreatePreventiveArgs = {
@@ -314,8 +315,9 @@ export type Query = {
     cities: Array<City>;
     images: Array<Image>;
     myAssignedTaskById: Maybe<Task>;
-    myAssignedTaskExpenseById: Maybe<Expense>;
     myAssignedTasks: Array<Task>;
+    myExpenseById: Maybe<Expense>;
+    myExpenses: Maybe<Array<Expense>>;
     preventives: Array<Preventive>;
     provinces: Array<Province>;
     taskById: Maybe<Task>;
@@ -338,7 +340,7 @@ export type QueryMyAssignedTaskByIdArgs = {
     id: Scalars['String'];
 };
 
-export type QueryMyAssignedTaskExpenseByIdArgs = {
+export type QueryMyExpenseByIdArgs = {
     id: Scalars['String'];
 };
 
@@ -509,13 +511,13 @@ export type BusinessesQuery = {
     businesses: Array<{ __typename?: 'Business'; id: string; name: string }>;
 };
 
-export type MyAssignedTaskExpenseByIdQueryVariables = Exact<{
+export type MyExpenseByIdQueryVariables = Exact<{
     id: Scalars['String'];
 }>;
 
-export type MyAssignedTaskExpenseByIdQuery = {
+export type MyExpenseByIdQuery = {
     __typename?: 'Query';
-    myAssignedTaskExpenseById: {
+    myExpenseById: {
         __typename?: 'Expense';
         id: string;
         amount: number;
@@ -528,20 +530,25 @@ export type MyAssignedTaskExpenseByIdQuery = {
     } | null;
 };
 
-export type CreateExpenseOnTaskMutationVariables = Exact<{
-    taskId: Scalars['String'];
+export type CreateExpenseMutationVariables = Exact<{
+    taskId: InputMaybe<Scalars['String']>;
     expenseData: ExpenseInput;
 }>;
 
-export type CreateExpenseOnTaskMutation = {
+export type CreateExpenseMutation = {
     __typename?: 'Mutation';
-    createExpenseOnTask: {
+    createExpense: {
         __typename?: 'ExpenseCrudResult';
         success: boolean;
         message: string | null;
         expense: {
             __typename?: 'Expense';
+            amount: number;
+            createdAt: any;
+            expenseType: ExpenseType;
             id: string;
+            paySource: ExpensePaySource;
+            status: ExpenseStatus;
             image: { __typename?: 'Image'; id: string; url: string; key: string };
         } | null;
     };
@@ -560,6 +567,22 @@ export type DeleteExpenseMutation = {
         message: string | null;
         expense: { __typename?: 'Expense'; id: string } | null;
     };
+};
+
+export type MyExpensesQueryVariables = Exact<{ [key: string]: never }>;
+
+export type MyExpensesQuery = {
+    __typename?: 'Query';
+    myExpenses: Array<{
+        __typename?: 'Expense';
+        amount: number;
+        createdAt: any;
+        expenseType: ExpenseType;
+        id: string;
+        paySource: ExpensePaySource;
+        status: ExpenseStatus;
+        image: { __typename?: 'Image'; id: string; url: string; key: string };
+    }> | null;
 };
 
 export type MyAssignedTasksQueryVariables = Exact<{ [key: string]: never }>;
@@ -997,13 +1020,13 @@ export const BusinessesDocument = {
         },
     ],
 } as unknown as DocumentNode<BusinessesQuery, BusinessesQueryVariables>;
-export const MyAssignedTaskExpenseByIdDocument = {
+export const MyExpenseByIdDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'query',
-            name: { kind: 'Name', value: 'myAssignedTaskExpenseById' },
+            name: { kind: 'Name', value: 'myExpenseById' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
@@ -1022,7 +1045,7 @@ export const MyAssignedTaskExpenseByIdDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'myAssignedTaskExpenseById' },
+                        name: { kind: 'Name', value: 'myExpenseById' },
                         arguments: [
                             {
                                 kind: 'Argument',
@@ -1098,17 +1121,14 @@ export const MyAssignedTaskExpenseByIdDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<
-    MyAssignedTaskExpenseByIdQuery,
-    MyAssignedTaskExpenseByIdQueryVariables
->;
-export const CreateExpenseOnTaskDocument = {
+} as unknown as DocumentNode<MyExpenseByIdQuery, MyExpenseByIdQueryVariables>;
+export const CreateExpenseDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'mutation',
-            name: { kind: 'Name', value: 'createExpenseOnTask' },
+            name: { kind: 'Name', value: 'createExpense' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
@@ -1116,13 +1136,7 @@ export const CreateExpenseOnTaskDocument = {
                         kind: 'Variable',
                         name: { kind: 'Name', value: 'taskId' },
                     },
-                    type: {
-                        kind: 'NonNullType',
-                        type: {
-                            kind: 'NamedType',
-                            name: { kind: 'Name', value: 'String' },
-                        },
-                    },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
                 },
                 {
                     kind: 'VariableDefinition',
@@ -1144,7 +1158,7 @@ export const CreateExpenseOnTaskDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'createExpenseOnTask' },
+                        name: { kind: 'Name', value: 'createExpense' },
                         arguments: [
                             {
                                 kind: 'Argument',
@@ -1182,6 +1196,24 @@ export const CreateExpenseOnTaskDocument = {
                                         selections: [
                                             {
                                                 kind: 'Field',
+                                                name: { kind: 'Name', value: 'amount' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'createdAt',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'expenseType',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: { kind: 'Name', value: 'id' },
                                             },
                                             {
@@ -1214,6 +1246,17 @@ export const CreateExpenseOnTaskDocument = {
                                                     ],
                                                 },
                                             },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'paySource',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'status' },
+                                            },
                                         ],
                                     },
                                 },
@@ -1224,10 +1267,7 @@ export const CreateExpenseOnTaskDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<
-    CreateExpenseOnTaskMutation,
-    CreateExpenseOnTaskMutationVariables
->;
+} as unknown as DocumentNode<CreateExpenseMutation, CreateExpenseMutationVariables>;
 export const DeleteExpenseDocument = {
     kind: 'Document',
     definitions: [
@@ -1318,6 +1358,72 @@ export const DeleteExpenseDocument = {
         },
     ],
 } as unknown as DocumentNode<DeleteExpenseMutation, DeleteExpenseMutationVariables>;
+export const MyExpensesDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'MyExpenses' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'myExpenses' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'amount' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'createdAt' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'expenseType' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'image' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'url' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'key' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'paySource' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'status' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<MyExpensesQuery, MyExpensesQueryVariables>;
 export const MyAssignedTasksDocument = {
     kind: 'Document',
     definitions: [

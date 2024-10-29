@@ -8,7 +8,7 @@ import {
     DeviceEventEmitter,
 } from 'react-native';
 
-import { ExpenseOnTaskScreenRouteProp } from '@/navigation/types';
+import { ExpenseScreenRouteProp } from '@/navigation/types';
 import { useGetExpenseById } from '@/hooks/api/expense/useGetExpenseById';
 import { format } from 'date-fns';
 import { EvilIcons } from '@expo/vector-icons';
@@ -30,7 +30,7 @@ const emitDeleteExpenseByIdEvent = (expenseId: string) => {
     DeviceEventEmitter.emit(EVENT_NAME, expenseId);
 };
 
-const ExpenseOnTask = ({ navigation, route }: ExpenseOnTaskScreenRouteProp) => {
+const Expense = ({ navigation, route }: ExpenseScreenRouteProp) => {
     const { expenseId } = route.params;
     const {
         data: expenseData,
@@ -51,7 +51,7 @@ const ExpenseOnTask = ({ navigation, route }: ExpenseOnTaskScreenRouteProp) => {
     };
 
     if (expenseData) {
-        const expense = expenseData.myAssignedTaskExpenseById;
+        const expense = expenseData.myExpenseById;
 
         if (!expense) {
             return (
@@ -83,7 +83,7 @@ const ExpenseOnTask = ({ navigation, route }: ExpenseOnTaskScreenRouteProp) => {
                     <View className="mb-4">
                         <Text className="mb-2 text-gray-800 font-bold">Monto</Text>
                         <Text className="text-gray-600">
-                            ${expense.amount.toLocaleString()}
+                            ${expense.amount.toLocaleString('es-AR')}
                         </Text>
                     </View>
 
@@ -181,4 +181,4 @@ const ExpenseOnTask = ({ navigation, route }: ExpenseOnTaskScreenRouteProp) => {
     );
 };
 
-export default ExpenseOnTask;
+export default Expense;
