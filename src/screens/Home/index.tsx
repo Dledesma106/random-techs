@@ -13,7 +13,7 @@ const Home = ({ navigation }: HomeTabScreenProp) => {
         <ScrollView
             refreshControl={
                 <RefreshControl
-                    refreshing={tasksQuery.fetchStatus === 'fetching'}
+                    refreshing={tasksQuery.isFetching}
                     onRefresh={tasksQuery.refetch}
                 />
             }

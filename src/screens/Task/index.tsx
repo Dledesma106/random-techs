@@ -37,7 +37,7 @@ import Toast from 'react-native-root-toast';
 import { ExpenseType } from '@/api/graphql';
 import { addRegisterExpenseOnTaskListener } from '../RegisterExpenseOnTask';
 import { addDeleteExpenseOnTaskListener } from '../ExpenseOnTaskForm';
-import { addDeleteExpenseByIdListener } from '../ExpenseOnTask';
+import { addDeleteExpenseByIdListener } from '../Expense';
 const MAX_IMAGE_AMOUNT = 5;
 interface InputImage {
     key: string;
@@ -138,7 +138,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
 
     function navigateToExpense(expenseId: string) {
         addDeleteExpenseByIdListener(deleteExpenseById);
-        navigation.navigate('ExpenseOnTask', { expenseId, taskId: id });
+        navigation.navigate('Expense', { expenseId });
     }
 
     function navigateToExpenseOnTaskForm(expense: ExpenseInput) {
@@ -430,7 +430,10 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                             variant="outline"
                                         >
                                             <ButtonText>
-                                                {expense.expenseType} - ${expense.amount}
+                                                {expense.expenseType} - $
+                                                {Number(expense.amount).toLocaleString(
+                                                    'es-AR',
+                                                )}
                                             </ButtonText>
 
                                             <AntDesign
@@ -452,7 +455,10 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                             variant="outline"
                                         >
                                             <ButtonText>
-                                                {expense.expenseType} - ${expense.amount}
+                                                {expense.expenseType} - $
+                                                {Number(expense.amount).toLocaleString(
+                                                    'es-AR',
+                                                )}
                                             </ButtonText>
 
                                             <AntDesign

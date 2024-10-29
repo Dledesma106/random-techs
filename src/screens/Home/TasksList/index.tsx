@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 
-import Header from './Header';
+import Header from '@/components/ui/Header';
 import Item from './Item';
 
 import { TaskStatus } from '@/api/graphql';
@@ -24,12 +24,9 @@ const TasksList = ({ navigation, tasksQuery }: TaskListProps) => {
 
         return task.status === taskStatus;
     });
-    console.log(tasksQuery.error);
     if (tasksQuery.data) {
         return (
             <View className="py-4 flex-1">
-                <Text className="text-lg font-bold px-4 mb-2">Tareas</Text>
-
                 <View className="mb-4 flex flex-row divide-x divide-gray-100 px-4 space-x-3">
                     <Button
                         onPress={() => {

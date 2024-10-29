@@ -18,26 +18,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import RHFDropdown from './Dropdown';
 
 import { ExpenseType, PaySource, expenseTypes, paySources } from '@/models/types';
-import { RegisterExpenseOnTaskScreenRouteProp } from '@/navigation/types';
+import { RegisterExpenseScreenRouteProp } from '@/navigation/types';
 import { addFullScreenCameraListener } from '@/screens/FullScreenCamera';
 import { deletePhoto, stringifyObject, uploadPhoto } from '@/lib/utils';
 import useImagePicker from '@/hooks/useImagePicker';
+import { useCreateExpense } from '@/hooks/api/expense/useCreateExpense';
+import { ExpenseInput } from '@/api/graphql';
 
-const EVENT_NAME = 'expense-registered-on-task-event';
-
-export const addRegisterExpenseOnTaskListener = (
-    callback: (expense: FormValues) => void,
-) => {
-    DeviceEventEmitter.addListener(EVENT_NAME, callback);
-};
-
-const removeRegisterExpenseOnTaskListener = () => {
-    DeviceEventEmitter.removeAllListeners(EVENT_NAME);
-};
-
-const emitRegisterExpenseOnTaskEvent = (expense: FormValues) => {
-    DeviceEventEmitter.emit(EVENT_NAME, expense);
-};
 interface InputImage {
     key: string;
     uri: string;
@@ -51,11 +38,7 @@ type FormValues = {
     image?: InputImage;
 };
 
-const RegisterExpenseOnTask = ({
-    route,
-    navigation,
-}: RegisterExpenseOnTaskScreenRouteProp) => {
-    const { taskId } = route.params;
+const RegisterExpense = ({ route, navigation }: RegisterExpenseScreenRouteProp) => {
     const { pickImage } = useImagePicker();
     const {
         control,
@@ -65,12 +48,7 @@ const RegisterExpenseOnTask = ({
         formState: { errors },
         reset,
     } = useForm<FormValues>();
-
-    useEffect(() => {
-        return () => {
-            removeRegisterExpenseOnTaskListener();
-        };
-    }, []);
+    const { mutateAsync: createExpense } = useCreateExpense();
 
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
         if (!data.amount) {
@@ -110,7 +88,14 @@ const RegisterExpenseOnTask = ({
             return;
         }
 
-        emitRegisterExpenseOnTaskEvent(data);
+        const expenseData: ExpenseInput = {
+            amount: Number(data.amount),
+            paySource: data.paySource,
+            expenseType: data.expenseType,
+            imageKey: data.image.key,
+        };
+
+        await createExpense({ taskId: '', expenseData });
         navigation.goBack();
         reset();
     };
@@ -291,4 +276,4 @@ const RegisterExpenseOnTask = ({
     );
 };
 
-export default RegisterExpenseOnTask;
+export default RegisterExpense;

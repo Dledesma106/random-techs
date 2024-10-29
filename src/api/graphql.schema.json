@@ -666,6 +666,22 @@
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
+                    },
+                    {
+                        "name": "task",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "OBJECT",
+                                "name": "Task",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
                     }
                 ],
                 "inputFields": null,
@@ -1162,7 +1178,7 @@
                         "deprecationReason": null
                     },
                     {
-                        "name": "createExpenseOnTask",
+                        "name": "createExpense",
                         "description": null,
                         "args": [
                             {
@@ -1185,13 +1201,9 @@
                                 "name": "taskId",
                                 "description": null,
                                 "type": {
-                                    "kind": "NON_NULL",
-                                    "name": null,
-                                    "ofType": {
-                                        "kind": "SCALAR",
-                                        "name": "String",
-                                        "ofType": null
-                                    }
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
                                 },
                                 "defaultValue": null,
                                 "isDeprecated": false,
@@ -2680,7 +2692,31 @@
                         "deprecationReason": null
                     },
                     {
-                        "name": "myAssignedTaskExpenseById",
+                        "name": "myAssignedTasks",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "LIST",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "OBJECT",
+                                        "name": "Task",
+                                        "ofType": null
+                                    }
+                                }
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "myExpenseById",
                         "description": null,
                         "args": [
                             {
@@ -2709,23 +2745,19 @@
                         "deprecationReason": null
                     },
                     {
-                        "name": "myAssignedTasks",
+                        "name": "myExpenses",
                         "description": null,
                         "args": [],
                         "type": {
-                            "kind": "NON_NULL",
+                            "kind": "LIST",
                             "name": null,
                             "ofType": {
-                                "kind": "LIST",
+                                "kind": "NON_NULL",
                                 "name": null,
                                 "ofType": {
-                                    "kind": "NON_NULL",
-                                    "name": null,
-                                    "ofType": {
-                                        "kind": "OBJECT",
-                                        "name": "Task",
-                                        "ofType": null
-                                    }
+                                    "kind": "OBJECT",
+                                    "name": "Expense",
+                                    "ofType": null
                                 }
                             }
                         },

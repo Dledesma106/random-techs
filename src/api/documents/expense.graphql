@@ -1,5 +1,5 @@
-query myAssignedTaskExpenseById($id: String!) {
-    myAssignedTaskExpenseById(id: $id) {
+query myExpenseById($id: String!) {
+    myExpenseById(id: $id) {
         id
         amount
         expenseType
@@ -17,17 +17,22 @@ query myAssignedTaskExpenseById($id: String!) {
     }
 }
 
-mutation createExpenseOnTask($taskId: String!, $expenseData: ExpenseInput!) {
-    createExpenseOnTask(taskId: $taskId, expenseData: $expenseData) {
+mutation createExpense($taskId: String, $expenseData: ExpenseInput!) {
+    createExpense(taskId: $taskId, expenseData: $expenseData) {
         success
         message
         expense {
+            amount
+            createdAt
+            expenseType
             id
             image {
                 id
                 url
                 key
             }
+            paySource
+            status
         }
     }
 }
@@ -39,5 +44,21 @@ mutation deleteExpense($id: String!, $taskId: String!) {
         expense {
             id
         }
+    }
+}
+
+query MyExpenses {
+    myExpenses {
+        amount
+        createdAt
+        expenseType
+        id
+        image {
+            id
+            url
+            key
+        }
+        paySource
+        status
     }
 }
