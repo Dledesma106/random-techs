@@ -17,11 +17,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import RHFDropdown from './Dropdown';
 
+import useImagePicker from '@/hooks/useImagePicker';
+import { deletePhoto, stringifyObject, uploadPhoto } from '@/lib/utils';
 import { ExpenseType, PaySource, expenseTypes, paySources } from '@/models/types';
 import { RegisterExpenseOnTaskScreenRouteProp } from '@/navigation/types';
 import { addFullScreenCameraListener } from '@/screens/FullScreenCamera';
-import { deletePhoto, stringifyObject, uploadPhoto } from '@/lib/utils';
-import useImagePicker from '@/hooks/useImagePicker';
 
 const EVENT_NAME = 'expense-registered-on-task-event';
 
@@ -51,11 +51,7 @@ type FormValues = {
     image?: InputImage;
 };
 
-const RegisterExpenseOnTask = ({
-    route,
-    navigation,
-}: RegisterExpenseOnTaskScreenRouteProp) => {
-    const { taskId } = route.params;
+const RegisterExpenseOnTask = ({ navigation }: RegisterExpenseOnTaskScreenRouteProp) => {
     const { pickImage } = useImagePicker();
     const {
         control,
@@ -137,7 +133,6 @@ const RegisterExpenseOnTask = ({
         navigation.navigate('FullScreenCamera');
     };
 
-    const imageURI = watch('image.uri');
     return (
         <SafeAreaView className="flex-1">
             <View className="flex-1 bg-white">
