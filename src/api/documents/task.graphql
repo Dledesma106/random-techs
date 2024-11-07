@@ -98,10 +98,64 @@ query myAssignedTaskById($id: String!) {
     }
 }
 
-mutation createTask($input: TaskInput!) {
-    createTask(input: $input) {
+mutation createMyTask($input: MyTaskInput!) {
+    createMyTask(input: $input) {
         task {
             id
+            status
+            workOrderNumber
+            observations
+            createdAt
+            description
+            business {
+                id
+                name
+            }
+            branch {
+                id
+                number
+                city {
+                    id
+                    name
+                    province {
+                        id
+                        name
+                    }
+                }
+                client {
+                    id
+                    name
+                }
+            }
+            assigned {
+                id
+                fullName
+            }
+            taskType
+            closedAt
+            expenses {
+                id
+                amount
+                paySource
+                expenseType
+                createdAt
+                image {
+                    id
+                    url
+                    urlExpire
+                    key
+                }
+                status
+                doneBy {
+                    id
+                    email
+                    fullName
+                }
+            }
+            images {
+                id
+                url
+            }
         }
         success
         message
@@ -159,4 +213,8 @@ mutation DeleteImage($taskId: String!, $imageId: String!) {
             }
         }
     }
+}
+
+query TaskTypes {
+    taskTypes
 }
