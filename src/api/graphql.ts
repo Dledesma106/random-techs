@@ -70,6 +70,7 @@ export type CityInput = {
 
 export type Client = {
     __typename?: 'Client';
+    branches: Array<Branch>;
     id: Scalars['ID'];
     name: Scalars['String'];
 };
@@ -146,6 +147,7 @@ export type Mutation = {
     createBranch: BranchCrudResult;
     createCity: CityCrudResult;
     createExpense: ExpenseCrudResult;
+    createMyTask: TaskCrudResult;
     createPreventive: PreventiveCrudResult;
     createTask: TaskCrudResult;
     createUser: UserCrudPothosRef;
@@ -177,6 +179,10 @@ export type MutationCreateCityArgs = {
 export type MutationCreateExpenseArgs = {
     expenseData: ExpenseInput;
     taskId: InputMaybe<Scalars['String']>;
+};
+
+export type MutationCreateMyTaskArgs = {
+    input: MyTaskInput;
 };
 
 export type MutationCreatePreventiveArgs = {
@@ -260,6 +266,18 @@ export type MutationUpdateUserArgs = {
     input: UserInput;
 };
 
+export type MyTaskInput = {
+    assigned: InputMaybe<Array<Scalars['String']>>;
+    branch: Scalars['String'];
+    business: Scalars['String'];
+    closedAt: InputMaybe<Scalars['DateTime']>;
+    expenses: InputMaybe<Array<ExpenseInput>>;
+    imageKeys: InputMaybe<Array<Scalars['String']>>;
+    observations: InputMaybe<Scalars['String']>;
+    taskType: TaskType;
+    workOrderNumber: InputMaybe<Scalars['String']>;
+};
+
 export type Preventive = {
     __typename?: 'Preventive';
     assigned: Array<User>;
@@ -309,10 +327,11 @@ export type Province = {
 
 export type Query = {
     __typename?: 'Query';
+    branchBusinesses: Array<Business>;
     branches: Array<Branch>;
-    branchesOfClient: Array<Branch>;
-    businesses: Array<Business>;
     cities: Array<City>;
+    clientBranches: Array<Branch>;
+    clients: Array<Client>;
     images: Array<Image>;
     myAssignedTaskById: Maybe<Task>;
     myAssignedTasks: Array<Task>;
@@ -321,19 +340,20 @@ export type Query = {
     preventives: Array<Preventive>;
     provinces: Array<Province>;
     taskById: Maybe<Task>;
+    taskTypes: Array<TaskType>;
     tasks: Array<Task>;
     users: Array<User>;
 };
 
-export type QueryBranchesOfClientArgs = {
+export type QueryBranchBusinessesArgs = {
+    branch: InputMaybe<Scalars['String']>;
+};
+
+export type QueryClientBranchesArgs = {
     businessId: InputMaybe<Scalars['String']>;
     cityId: InputMaybe<Scalars['String']>;
     clientId: Scalars['String'];
     provinceId: InputMaybe<Scalars['String']>;
-};
-
-export type QueryBusinessesArgs = {
-    branch: InputMaybe<Scalars['String']>;
 };
 
 export type QueryMyAssignedTaskByIdArgs = {
@@ -483,32 +503,21 @@ export type LoginMutation = {
     };
 };
 
-export type BranchesQueryVariables = Exact<{ [key: string]: never }>;
+export type ClientsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type BranchesQuery = {
+export type ClientsQuery = {
     __typename?: 'Query';
-    branches: Array<{
-        __typename?: 'Branch';
+    clients: Array<{
+        __typename?: 'Client';
         id: string;
-        number: number;
-        client: { __typename?: 'Client'; name: string };
-        city: {
-            __typename?: 'City';
+        name: string;
+        branches: Array<{
+            __typename?: 'Branch';
             id: string;
-            name: string;
-            province: { __typename?: 'Province'; id: string; name: string };
-        };
-        businesses: Array<{ __typename?: 'Business'; id: string; name: string }>;
+            number: number;
+            businesses: Array<{ __typename?: 'Business'; id: string; name: string }>;
+        }>;
     }>;
-};
-
-export type BusinessesQueryVariables = Exact<{
-    branch: InputMaybe<Scalars['String']>;
-}>;
-
-export type BusinessesQuery = {
-    __typename?: 'Query';
-    businesses: Array<{ __typename?: 'Business'; id: string; name: string }>;
 };
 
 export type MyExpenseByIdQueryVariables = Exact<{
@@ -672,17 +681,64 @@ export type MyAssignedTaskByIdQuery = {
     } | null;
 };
 
-export type CreateTaskMutationVariables = Exact<{
-    input: TaskInput;
+export type CreateMyTaskMutationVariables = Exact<{
+    input: MyTaskInput;
 }>;
 
-export type CreateTaskMutation = {
+export type CreateMyTaskMutation = {
     __typename?: 'Mutation';
-    createTask: {
+    createMyTask: {
         __typename?: 'TaskCrudResult';
         success: boolean;
         message: string | null;
-        task: { __typename?: 'Task'; id: string } | null;
+        task: {
+            __typename?: 'Task';
+            id: string;
+            status: TaskStatus;
+            workOrderNumber: number | null;
+            observations: string | null;
+            createdAt: any;
+            description: string;
+            taskType: TaskType;
+            closedAt: any | null;
+            business: { __typename?: 'Business'; id: string; name: string };
+            branch: {
+                __typename?: 'Branch';
+                id: string;
+                number: number;
+                city: {
+                    __typename?: 'City';
+                    id: string;
+                    name: string;
+                    province: { __typename?: 'Province'; id: string; name: string };
+                };
+                client: { __typename?: 'Client'; id: string; name: string };
+            };
+            assigned: Array<{ __typename?: 'User'; id: string; fullName: string }>;
+            expenses: Array<{
+                __typename?: 'Expense';
+                id: string;
+                amount: number;
+                paySource: ExpensePaySource;
+                expenseType: ExpenseType;
+                createdAt: any;
+                status: ExpenseStatus;
+                image: {
+                    __typename?: 'Image';
+                    id: string;
+                    url: string;
+                    urlExpire: any | null;
+                    key: string;
+                };
+                doneBy: {
+                    __typename?: 'User';
+                    id: string;
+                    email: string;
+                    fullName: string;
+                };
+            }>;
+            images: Array<{ __typename?: 'Image'; id: string; url: string }>;
+        } | null;
     };
 };
 
@@ -750,6 +806,10 @@ export type DeleteImageMutation = {
         } | null;
     };
 };
+
+export type TaskTypesQueryVariables = Exact<{ [key: string]: never }>;
+
+export type TaskTypesQuery = { __typename?: 'Query'; taskTypes: Array<TaskType> };
 
 export const LoginDocument = {
     kind: 'Document',
@@ -875,43 +935,27 @@ export const LoginDocument = {
         },
     ],
 } as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;
-export const BranchesDocument = {
+export const ClientsDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'query',
-            name: { kind: 'Name', value: 'branches' },
+            name: { kind: 'Name', value: 'clients' },
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'branches' },
+                        name: { kind: 'Name', value: 'clients' },
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
                                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'number' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'client' },
-                                    selectionSet: {
-                                        kind: 'SelectionSet',
-                                        selections: [
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'name' },
-                                            },
-                                        ],
-                                    },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'city' },
+                                    name: { kind: 'Name', value: 'branches' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -921,11 +965,14 @@ export const BranchesDocument = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'name' },
+                                                name: { kind: 'Name', value: 'number' },
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'province' },
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'businesses',
+                                                },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
                                                     selections: [
@@ -949,23 +996,6 @@ export const BranchesDocument = {
                                         ],
                                     },
                                 },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'businesses' },
-                                    selectionSet: {
-                                        kind: 'SelectionSet',
-                                        selections: [
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'id' },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'name' },
-                                            },
-                                        ],
-                                    },
-                                },
                             ],
                         },
                     },
@@ -973,53 +1003,7 @@ export const BranchesDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<BranchesQuery, BranchesQueryVariables>;
-export const BusinessesDocument = {
-    kind: 'Document',
-    definitions: [
-        {
-            kind: 'OperationDefinition',
-            operation: 'query',
-            name: { kind: 'Name', value: 'businesses' },
-            variableDefinitions: [
-                {
-                    kind: 'VariableDefinition',
-                    variable: {
-                        kind: 'Variable',
-                        name: { kind: 'Name', value: 'branch' },
-                    },
-                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
-                },
-            ],
-            selectionSet: {
-                kind: 'SelectionSet',
-                selections: [
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'businesses' },
-                        arguments: [
-                            {
-                                kind: 'Argument',
-                                name: { kind: 'Name', value: 'branch' },
-                                value: {
-                                    kind: 'Variable',
-                                    name: { kind: 'Name', value: 'branch' },
-                                },
-                            },
-                        ],
-                        selectionSet: {
-                            kind: 'SelectionSet',
-                            selections: [
-                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                            ],
-                        },
-                    },
-                ],
-            },
-        },
-    ],
-} as unknown as DocumentNode<BusinessesQuery, BusinessesQueryVariables>;
+} as unknown as DocumentNode<ClientsQuery, ClientsQueryVariables>;
 export const MyExpenseByIdDocument = {
     kind: 'Document',
     definitions: [
@@ -1933,13 +1917,13 @@ export const MyAssignedTaskByIdDocument = {
         },
     ],
 } as unknown as DocumentNode<MyAssignedTaskByIdQuery, MyAssignedTaskByIdQueryVariables>;
-export const CreateTaskDocument = {
+export const CreateMyTaskDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'mutation',
-            name: { kind: 'Name', value: 'createTask' },
+            name: { kind: 'Name', value: 'createMyTask' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
@@ -1951,7 +1935,7 @@ export const CreateTaskDocument = {
                         kind: 'NonNullType',
                         type: {
                             kind: 'NamedType',
-                            name: { kind: 'Name', value: 'TaskInput' },
+                            name: { kind: 'Name', value: 'MyTaskInput' },
                         },
                     },
                 },
@@ -1961,7 +1945,7 @@ export const CreateTaskDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'createTask' },
+                        name: { kind: 'Name', value: 'createMyTask' },
                         arguments: [
                             {
                                 kind: 'Argument',
@@ -1985,6 +1969,340 @@ export const CreateTaskDocument = {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'id' },
                                             },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'status' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'workOrderNumber',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'observations',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'createdAt',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'description',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'business' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'branch' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'number',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'city',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'id',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'province',
+                                                                        },
+                                                                        selectionSet: {
+                                                                            kind: 'SelectionSet',
+                                                                            selections: [
+                                                                                {
+                                                                                    kind: 'Field',
+                                                                                    name: {
+                                                                                        kind: 'Name',
+                                                                                        value: 'id',
+                                                                                    },
+                                                                                },
+                                                                                {
+                                                                                    kind: 'Field',
+                                                                                    name: {
+                                                                                        kind: 'Name',
+                                                                                        value: 'name',
+                                                                                    },
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'client',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'id',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'assigned' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'fullName',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'taskType' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'closedAt' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'expenses' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'amount',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'paySource',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'expenseType',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'createdAt',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'image',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'id',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'url',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'urlExpire',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'key',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'status',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'doneBy',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'id',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'email',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'fullName',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'images' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'url',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
                                         ],
                                     },
                                 },
@@ -2003,7 +2321,7 @@ export const CreateTaskDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<CreateTaskMutation, CreateTaskMutationVariables>;
+} as unknown as DocumentNode<CreateMyTaskMutation, CreateMyTaskMutationVariables>;
 export const UpdateMyAssignedTaskDocument = {
     kind: 'Document',
     definitions: [
@@ -2374,3 +2692,19 @@ export const DeleteImageDocument = {
         },
     ],
 } as unknown as DocumentNode<DeleteImageMutation, DeleteImageMutationVariables>;
+export const TaskTypesDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'TaskTypes' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'taskTypes' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<TaskTypesQuery, TaskTypesQueryVariables>;

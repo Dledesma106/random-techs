@@ -11,8 +11,8 @@ import {
     TouchableOpacity,
 } from 'react-native';
 
-import AddImage from './AddImage';
-import ImageThumbnail, { ThumbnailImage } from './ImageThumbnail';
+import AddImage from '@/components/AddImage';
+import ImageThumbnail, { ThumbnailImage } from '@/components/ImageThumbnail';
 
 import { Badge, BadgeText } from '@/components/ui/badge';
 import { Button, ButtonText } from '@/components/ui/button';
@@ -32,7 +32,6 @@ import { useEffect, useState } from 'react';
 import { Zoomable } from '@likashefqet/react-native-image-zoom';
 import { Image } from 'expo-image';
 import ConfirmButton from '@/components/ConfirmButton';
-import { useDeleteImageById } from '@/hooks/api/tasks/useDeleteImageById';
 import Toast from 'react-native-root-toast';
 import { ExpenseType } from '@/api/graphql';
 import { addRegisterExpenseOnTaskListener } from '../RegisterExpenseOnTask';
@@ -133,7 +132,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
 
     function navigateToRegisterExpense() {
         addRegisterExpenseOnTaskListener(addExpenseToTask);
-        navigation.navigate('RegisterExpenseOnTask', { taskId: id });
+        navigation.navigate('RegisterExpenseOnTask');
     }
 
     function navigateToExpense(expenseId: string) {
@@ -162,7 +161,6 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
             expenseType: expense.expenseType,
             imageKey: expense.image?.key ?? '',
         }));
-        console.log('expenses for input: ', formatedExpenses);
         const imageKeys = images ? images.map((image) => image.key) : [];
         try {
             await updateTask({

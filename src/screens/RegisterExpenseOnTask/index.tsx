@@ -51,11 +51,7 @@ type FormValues = {
     image?: InputImage;
 };
 
-const RegisterExpenseOnTask = ({
-    route,
-    navigation,
-}: RegisterExpenseOnTaskScreenRouteProp) => {
-    const { taskId } = route.params;
+const RegisterExpenseOnTask = ({ navigation }: RegisterExpenseOnTaskScreenRouteProp) => {
     const { pickImage } = useImagePicker();
     const {
         control,
