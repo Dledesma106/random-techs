@@ -4,7 +4,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { StackScreenProps } from '@react-navigation/stack';
 
 import { ExpenseInput } from '@/screens/Task';
-import { BranchesQuery, BusinessesQuery, TaskType } from '@/api/graphql';
 
 export type RootStackParamList = {
     Root: undefined;
@@ -17,9 +16,7 @@ export type RootStackParamList = {
     Task: {
         id: string;
     };
-    RegisterExpenseOnTask: {
-        taskId: string;
-    };
+    RegisterExpenseOnTask: undefined;
     Expense: {
         expenseId: string;
     };
@@ -28,21 +25,7 @@ export type RootStackParamList = {
     };
     FullScreenCamera: undefined;
     FullScreenImage: { uri: string };
-    RegisterTask: {
-        branch?: BranchesQuery['branches'][0] | null;
-        business?: BusinessesQuery['businesses'][0] | null;
-        type?: TaskType | null;
-    };
-    RegisterTaskBranchFieldScreen: {
-        value: string | null;
-    };
-    RegisterTaskBusinessFieldScreen: {
-        branchId: string;
-        value: string | null;
-    };
-    RegisterTaskTypeFieldScreen: {
-        value: TaskType | null;
-    };
+    RegisterTask: undefined;
     AccountSettings: undefined;
     Profile: undefined;
 };
@@ -59,6 +42,10 @@ export type ExpensesListScreenProp = RootStackScreenProps<'ExpensesList'>;
 export type FullScreenCameraProps = RootStackScreenProps<'FullScreenCamera'>;
 
 export type TaskScreenRouteProp = NativeStackScreenProps<RootStackParamList, 'Task'>;
+export type RegisterTaskScreenRouteProp = NativeStackScreenProps<
+    RootStackParamList,
+    'RegisterTask'
+>;
 export type FullScreenImageProp = NativeStackScreenProps<
     RootStackParamList,
     'FullScreenImage'
@@ -86,19 +73,6 @@ export type HomeScreenRouteProp = NativeStackScreenProps<RootStackParamList, 'Ho
 export type ProfileScreenRouteProp = CompositeScreenProps<
     RootStackScreenProps<'Profile'>,
     NativeStackScreenProps<RootTabParamList, 'Profile'>
->;
-
-export type RegisterTaskBranchFieldScreenRouteProp = NativeStackScreenProps<
-    RootStackParamList,
-    'RegisterTaskBranchFieldScreen'
->;
-export type RegisterTaskBusinessFieldScreenRouteProps = NativeStackScreenProps<
-    RootStackParamList,
-    'RegisterTaskBusinessFieldScreen'
->;
-export type RegisterTaskTypeFieldScreenRouteProps = NativeStackScreenProps<
-    RootStackParamList,
-    'RegisterTaskTypeFieldScreen'
 >;
 
 export type AccountSettingsScreenRouteProps = NativeStackScreenProps<

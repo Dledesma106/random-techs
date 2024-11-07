@@ -16,9 +16,6 @@ import FullScreenImageScreen from '@/screens/FullScreenImage';
 import ProfileScreen from '@/screens/Profile';
 import RegisterExpenseOnTask from '@/screens/RegisterExpenseOnTask';
 import RegisterTask from '@/screens/RegisterTask';
-import RegisterTaskBranchFieldScreen from '@/screens/RegisterTask/RegisterTaskBranchFieldScreen';
-import RegisterTaskBusinessFieldScreen from '@/screens/RegisterTask/RegisterTaskBusinessFieldScreen';
-import RegisterTaskTypeFieldScreen from '@/screens/RegisterTask/RegisterTaskTypeFieldScreen';
 
 import { useUserContext } from '../context/userContext/useUser';
 import Home from '../screens/Home';
@@ -100,33 +97,9 @@ function RootNavigator() {
             />
 
             <Stack.Screen
-                name="RegisterTaskBranchFieldScreen"
-                component={RegisterTaskBranchFieldScreen}
-                options={{
-                    title: 'Sucursales',
-                }}
-            />
-
-            <Stack.Screen
                 name="AccountSettings"
                 component={AccountSettings}
                 options={{ title: 'Cuenta' }}
-            />
-
-            <Stack.Screen
-                name="RegisterTaskBusinessFieldScreen"
-                component={RegisterTaskBusinessFieldScreen}
-                options={{
-                    title: 'Empresas',
-                }}
-            />
-
-            <Stack.Screen
-                name="RegisterTaskTypeFieldScreen"
-                component={RegisterTaskTypeFieldScreen}
-                options={{
-                    title: 'Tipo de tarea',
-                }}
             />
             <Stack.Screen name="Task" component={Task} options={{ title: 'Tarea' }} />
             <Stack.Screen
@@ -163,16 +136,15 @@ function DrawerNavigator() {
                 options={{ title: 'Mis gastos', headerTitleAlign: 'center' }}
             />
 
-            {/* <Drawer.Screen
+            <Drawer.Screen
                 name="RegisterTask"
                 component={RegisterTask}
                 options={{ title: 'Registrar una tarea' }}
-            /> */}
+            />
             <Drawer.Screen
                 name="Profile"
                 component={ProfileScreen}
                 options={() => ({
-                    tabBarIcon: () => <Entypo name="user" size={24} color="black" />,
                     title: 'Mi perfil',
                 })}
             />
