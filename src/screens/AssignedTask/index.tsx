@@ -1,5 +1,8 @@
 import { AntDesign, EvilIcons } from '@expo/vector-icons';
+import { Zoomable } from '@likashefqet/react-native-image-zoom';
 import { format } from 'date-fns';
+import { Image } from 'expo-image';
+import { useEffect, useState } from 'react';
 import ContentLoader, { Rect } from 'react-content-loader/native';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import {
@@ -10,10 +13,13 @@ import {
     ActivityIndicator,
     TouchableOpacity,
 } from 'react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import Toast from 'react-native-root-toast';
 
+import { ExpenseInput } from '@/api/graphql';
 import AddImage from '@/components/AddImage';
+import ConfirmButton from '@/components/ConfirmButton';
 import ImageThumbnail, { ThumbnailImage } from '@/components/ImageThumbnail';
-
 import { Badge, BadgeText } from '@/components/ui/badge';
 import { Button, ButtonText } from '@/components/ui/button';
 import { Form, FormField } from '@/components/ui/form';
@@ -23,20 +29,13 @@ import { useGetMyAssignedTaskById } from '@/hooks/api/tasks/useGetMyAssignedTask
 import { useUpdateMyAssignedTask } from '@/hooks/api/tasks/useUpdateMyAssignedTask';
 import useImagePicker from '@/hooks/useImagePicker';
 import { stringifyObject, uploadPhoto, cn, deletePhoto } from '@/lib/utils';
-import { PaySource, TaskStatus } from '@/models/types';
-import { TaskScreenRouteProp } from '@/navigation/types';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import { TaskStatus } from '@/models/types';
+import { AssignedTaskScreenRouteProp } from '@/navigation/types';
 
-import { addFullScreenCameraListener } from '../FullScreenCamera';
-import { useEffect, useState } from 'react';
-import { Zoomable } from '@likashefqet/react-native-image-zoom';
-import { Image } from 'expo-image';
-import ConfirmButton from '@/components/ConfirmButton';
-import Toast from 'react-native-root-toast';
-import { ExpenseType } from '@/api/graphql';
-import { addRegisterExpenseOnTaskListener } from '../RegisterExpenseOnTask';
-import { addDeleteExpenseOnTaskListener } from '../ExpenseOnTaskForm';
 import { addDeleteExpenseByIdListener } from '../Expense';
+import { addDeleteExpenseOnTaskListener } from '../ExpenseOnTaskForm';
+import { addFullScreenCameraListener } from '../FullScreenCamera';
+import { addRegisterExpenseOnTaskListener } from '../RegisterExpenseOnTask';
 const MAX_IMAGE_AMOUNT = 5;
 interface InputImage {
     key: string;
@@ -44,12 +43,6 @@ interface InputImage {
     unsaved: boolean;
 }
 
-export type ExpenseInput = {
-    amount: string;
-    paySource: PaySource;
-    expenseType: ExpenseType;
-    image?: InputImage;
-};
 interface FormInputs {
     workOrderNumber: string;
     observations: string;
@@ -60,7 +53,7 @@ interface FormInputs {
     closedAt: Date;
 }
 
-const Task = ({ route, navigation }: TaskScreenRouteProp) => {
+const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
     const { id } = route.params;
     const { data, isPending, refetch, error } = useGetMyAssignedTaskById(id);
     const [fullScreenImage, setFullScreenImage] = useState<ThumbnailImage | null>(null);
@@ -111,7 +104,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
         const currentExpenses = watch('expenses') ?? [];
         setValue(
             'expenses',
-            currentExpenses.filter((expense) => expense.image?.key !== expenseImageKey),
+            currentExpenses.filter((expense) => expense.imageKey !== expenseImageKey),
         );
     };
 
@@ -155,12 +148,6 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
             imageIdsToDelete,
             expenseIdsToDelete,
         } = formData;
-        const formatedExpenses = expenses?.map((expense) => ({
-            amount: parseInt(expense.amount),
-            paySource: expense.paySource,
-            expenseType: expense.expenseType,
-            imageKey: expense.image?.key ?? '',
-        }));
         const imageKeys = images ? images.map((image) => image.key) : [];
         try {
             await updateTask({
@@ -170,7 +157,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                     workOrderNumber,
                     imageKeys,
                     closedAt,
-                    expenses: formatedExpenses,
+                    expenses,
                     imageIdsToDelete,
                     expenseIdsToDelete,
                 },
@@ -445,7 +432,7 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
                                 {watch('expenses') &&
                                     watch('expenses').map((expense) => (
                                         <Button
-                                            key={expense.image?.key}
+                                            key={expense.imageKey}
                                             onPress={() =>
                                                 navigateToExpenseOnTaskForm(expense)
                                             }
@@ -618,4 +605,4 @@ const Task = ({ route, navigation }: TaskScreenRouteProp) => {
     );
 };
 
-export default Task;
+export default AssignedTask;

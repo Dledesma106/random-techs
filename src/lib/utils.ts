@@ -5,7 +5,6 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { type ClassValue, clsx } from 'clsx';
-import { ImageResult, SaveFormat, manipulateAsync } from 'expo-image-manipulator';
 import { twMerge } from 'tailwind-merge';
 
 import s3Client, { S3Credentials } from './s3Client';

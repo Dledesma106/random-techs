@@ -1,0 +1,6 @@
+query Technicians {
+  technicians {
+    id
+    fullName
+  }
+}

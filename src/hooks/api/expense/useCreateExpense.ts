@@ -1,7 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-
-import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from '../tasks/useGetMyAssignedTaskById';
-import { TASKS_LIST_QUERY_KEY } from '../tasks/useGetMyAssignedTasks';
+import Toast from 'react-native-root-toast';
 
 import { fetchGraphql } from '@/api/fetch-graphql';
 import {
@@ -11,7 +9,8 @@ import {
     ExpenseStatus,
     MyExpensesQuery,
 } from '@/api/graphql';
-import Toast from 'react-native-root-toast';
+
+import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from '../tasks/useGetMyAssignedTaskById';
 
 export const useCreateExpense = () => {
     const client = useQueryClient();
@@ -40,7 +39,7 @@ export const useCreateExpense = () => {
                                     {
                                         amount: expenseData.amount,
                                         createdAt: new Date().toISOString(),
-                                        doneBy: {
+                                        registeredBy: {
                                             id: 'me',
                                             email: 'me',
                                             fullName: 'me',
@@ -55,6 +54,9 @@ export const useCreateExpense = () => {
                                             key: newExpense.image.key,
                                             urlExpire: new Date().toISOString(),
                                         },
+                                        paySourceBank: newExpense.paySourceBank,
+                                        doneBy: newExpense.doneBy,
+                                        observations: newExpense.observations,
                                     },
                                 ],
                             },

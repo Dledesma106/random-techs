@@ -3,14 +3,16 @@ import RNPickerSelect, { Item } from 'react-native-picker-select';
 type Props = {
     items: Item[];
     placeholder: string;
+    value?: string;
     onValueChange: (value: string | null) => void;
 };
-const Dropdown: React.FC<Props> = ({ items, placeholder, onValueChange }) => {
+const Dropdown: React.FC<Props> = ({ items, placeholder, onValueChange, value }) => {
     return (
         <RNPickerSelect
             onValueChange={onValueChange}
             items={items}
             style={pickerSelectStyles}
+            value={value}
             placeholder={{ label: placeholder, value: null }}
         />
     );

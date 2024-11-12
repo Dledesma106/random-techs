@@ -1,9 +1,9 @@
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+//import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { StackScreenProps } from '@react-navigation/stack';
 
-import { ExpenseInput } from '@/screens/Task';
+import { ExpenseInput } from '@/api/graphql';
 
 export type RootStackParamList = {
     Root: undefined;
@@ -13,7 +13,7 @@ export type RootStackParamList = {
     RegisterExpense: undefined;
     ExpensesList: undefined;
     Login: undefined;
-    Task: {
+    AssignedTask: {
         id: string;
     };
     RegisterExpenseOnTask: undefined;
@@ -41,7 +41,10 @@ export type RegisterTaskScreenProp = RootStackScreenProps<'RegisterTask'>;
 export type ExpensesListScreenProp = RootStackScreenProps<'ExpensesList'>;
 export type FullScreenCameraProps = RootStackScreenProps<'FullScreenCamera'>;
 
-export type TaskScreenRouteProp = NativeStackScreenProps<RootStackParamList, 'Task'>;
+export type AssignedTaskScreenRouteProp = NativeStackScreenProps<
+    RootStackParamList,
+    'AssignedTask'
+>;
 export type RegisterTaskScreenRouteProp = NativeStackScreenProps<
     RootStackParamList,
     'RegisterTask'
@@ -83,7 +86,7 @@ export type AccountSettingsScreenRouteProps = NativeStackScreenProps<
 export type RootTabParamList = {
     Profile: undefined;
     Main: RootStackParamList['Home'];
-    Task: RootStackParamList['Task'];
+    AssignedTask: RootStackParamList['AssignedTask'];
     RegisterExpenseOnTask: RootStackParamList['RegisterExpenseOnTask'];
     AccountSettings: undefined;
 };
