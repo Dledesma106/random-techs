@@ -38,7 +38,6 @@ export async function fetchGraphql<T, V>(
             ...options,
         };
         const response = await fetch(url, fetchConfig);
-
         if (!response.ok) {
             throw response;
         }

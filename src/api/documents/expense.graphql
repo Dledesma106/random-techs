@@ -4,7 +4,10 @@ query myExpenseById($id: String!) {
         amount
         expenseType
         paySource
+        paySourceBank
         status
+        doneBy
+        observations
         image {
             id
             url
@@ -26,12 +29,15 @@ mutation createExpense($taskId: String, $expenseData: ExpenseInput!) {
             createdAt
             expenseType
             id
+            doneBy
+            observations
             image {
                 id
                 url
                 key
             }
             paySource
+            paySourceBank
             status
         }
     }

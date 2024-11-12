@@ -29,7 +29,7 @@ const Item = ({ task, navigation, style }: ItemProps) => {
                 isPressed && 'bg-accent',
             )}
             onPress={() => {
-                navigation.navigate('Task', {
+                navigation.navigate('AssignedTask', {
                     id: task.id,
                 });
             }}

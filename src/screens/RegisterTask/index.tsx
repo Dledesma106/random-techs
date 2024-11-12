@@ -1,5 +1,8 @@
 import { AntDesign, EvilIcons } from '@expo/vector-icons';
+import { Zoomable } from '@likashefqet/react-native-image-zoom';
 import { format } from 'date-fns';
+import { Image } from 'expo-image';
+import { useState } from 'react';
 import ContentLoader, { Rect } from 'react-content-loader/native';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import {
@@ -10,38 +13,29 @@ import {
     ActivityIndicator,
     TouchableOpacity,
 } from 'react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import Toast from 'react-native-root-toast';
 
+import { ExpenseInput, TaskType } from '@/api/graphql';
 import AddImage from '@/components/AddImage';
+import ConfirmButton from '@/components/ConfirmButton';
 import ImageThumbnail, { ThumbnailImage } from '@/components/ImageThumbnail';
-
-import { Badge, BadgeText } from '@/components/ui/badge';
 import { Button, ButtonText } from '@/components/ui/button';
+import Dropdown from '@/components/ui/Dropdown';
 import { Form, FormField } from '@/components/ui/form';
 import { TextInput } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
-import { useGetMyAssignedTaskById } from '@/hooks/api/tasks/useGetMyAssignedTaskById';
-import { useUpdateMyAssignedTask } from '@/hooks/api/tasks/useUpdateMyAssignedTask';
+import { useUserContext } from '@/context/userContext/useUser';
+import { useGetClients } from '@/hooks/api/configs/useGetClients';
+import { useCreateMyTask } from '@/hooks/api/tasks/useCreateMyTask';
 import useImagePicker from '@/hooks/useImagePicker';
 import { stringifyObject, uploadPhoto, cn, deletePhoto } from '@/lib/utils';
-import { PaySource, TaskStatus } from '@/models/types';
 import { RegisterTaskScreenRouteProp } from '@/navigation/types';
-import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
-import { addFullScreenCameraListener } from '../FullScreenCamera';
-import { useEffect, useState } from 'react';
-import { Zoomable } from '@likashefqet/react-native-image-zoom';
-import { Image } from 'expo-image';
-import ConfirmButton from '@/components/ConfirmButton';
-import Toast from 'react-native-root-toast';
-import { ExpenseType, TaskType } from '@/api/graphql';
-import { addRegisterExpenseOnTaskListener } from '../RegisterExpenseOnTask';
 import { addDeleteExpenseOnTaskListener } from '../ExpenseOnTaskForm';
-import { addDeleteExpenseByIdListener } from '../Expense';
-import { useCreateMyTask } from '@/hooks/api/tasks/useCreateMyTask';
-import { useGetClients } from '@/hooks/api/configs/useGetClients';
-import { useGetTaskTypes } from '@/hooks/api/configs/useGetTaskTypes';
-import { useUserContext } from '@/context/userContext/useUser';
-import Dropdown from '@/components/ui/Dropdown';
+import { addFullScreenCameraListener } from '../FullScreenCamera';
+import { addRegisterExpenseOnTaskListener } from '../RegisterExpenseOnTask';
+
 const MAX_IMAGE_AMOUNT = 5;
 interface InputImage {
     key: string;
@@ -49,12 +43,6 @@ interface InputImage {
     unsaved: boolean;
 }
 
-export type ExpenseInput = {
-    amount: string;
-    paySource: PaySource;
-    expenseType: ExpenseType;
-    image?: InputImage;
-};
 interface FormInputs {
     workOrderNumber: string;
     observations: string;
@@ -131,7 +119,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
         const currentExpenses = watch('expenses') ?? [];
         setValue(
             'expenses',
-            currentExpenses.filter((expense) => expense.image?.key !== expenseImageKey),
+            currentExpenses.filter((expense) => expense.imageKey !== expenseImageKey),
         );
     };
 
@@ -161,12 +149,6 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
             businessId,
             taskType,
         } = formData;
-        const formatedExpenses = expenses?.map((expense) => ({
-            amount: parseInt(expense.amount),
-            paySource: expense.paySource,
-            expenseType: expense.expenseType,
-            imageKey: expense.image?.key ?? '',
-        }));
         const { user } = userContext;
         const imageKeys = images ? images.map((image) => image.key) : [];
         try {
@@ -180,9 +162,10 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                     workOrderNumber,
                     imageKeys,
                     closedAt,
-                    expenses: formatedExpenses,
+                    expenses,
                 },
             });
+            navigation.goBack();
         } catch (error) {}
         reset();
     };
@@ -255,6 +238,9 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                         </>
                     )}
                     <View className="px-4 pt-4 pb-24 space-y-4">
+                        <Label className="mb-1.5">
+                            Recorda que esta opcion es solo para casos de emergencia
+                        </Label>
                         <View>
                             <Label className="mb-1.5">Cliente</Label>
                             <Dropdown
@@ -289,7 +275,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                         <View>
                             <Label className="mb-1.5">Tipo de tarea</Label>
                             <Dropdown
-                                items={mappedBranches}
+                                items={mappedTaskTypes}
                                 placeholder="Selecciona el tipo de tarea"
                                 onValueChange={(value) =>
                                     setValue('taskType', value as TaskType)
@@ -379,7 +365,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                                 {watch('expenses') &&
                                     watch('expenses').map((expense) => (
                                         <Button
-                                            key={expense.image?.key}
+                                            key={expense.imageKey}
                                             onPress={() =>
                                                 navigateToExpenseOnTaskForm(expense)
                                             }
@@ -414,7 +400,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
 
                         <View>
                             <Label className="mb-1.5">
-                                Imágenes de comprobante de trabajo({imagesAmount} de{' '}
+                                Imágenes de comprobante de trabajo ({imagesAmount} de{' '}
                                 {MAX_IMAGE_AMOUNT})
                             </Label>
 

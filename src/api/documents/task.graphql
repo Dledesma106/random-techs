@@ -78,6 +78,7 @@ query myAssignedTaskById($id: String!) {
             id
             amount
             paySource
+            paySourceBank
             expenseType
             createdAt
             image {
@@ -87,7 +88,9 @@ query myAssignedTaskById($id: String!) {
                 key
             }
             status
-            doneBy {
+            doneBy
+            observations
+            registeredBy {
                 id
                 email
                 fullName
@@ -137,6 +140,7 @@ mutation createMyTask($input: MyTaskInput!) {
                 id
                 amount
                 paySource
+                paySourceBank
                 expenseType
                 createdAt
                 image {
@@ -146,7 +150,9 @@ mutation createMyTask($input: MyTaskInput!) {
                     key
                 }
                 status
-                doneBy {
+                doneBy
+                observations
+                registeredBy {
                     id
                     email
                     fullName
@@ -174,6 +180,7 @@ mutation updateMyAssignedTask($input: UpdateMyTaskInput!) {
                 id
                 amount
                 paySource
+                paySourceBank
                 expenseType
                 createdAt
                 image {
@@ -183,7 +190,9 @@ mutation updateMyAssignedTask($input: UpdateMyTaskInput!) {
                     key
                 }
                 status
-                doneBy {
+                doneBy
+                observations
+                registeredBy {
                     id
                     email
                     fullName
@@ -213,8 +222,4 @@ mutation DeleteImage($taskId: String!, $imageId: String!) {
             }
         }
     }
-}
-
-query TaskTypes {
-    taskTypes
 }

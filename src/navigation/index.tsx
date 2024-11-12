@@ -1,31 +1,29 @@
-import { Entypo } from '@expo/vector-icons';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ColorSchemeName } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { ColorSchemeName } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import LinkingConfiguration from './LinkingConfiguration';
-import { RootStackParamList, RootTabParamList } from './types';
+import { RootStackParamList } from './types';
 
 import AccountSettings from '@/screens/AccountSettings';
 import Expense from '@/screens/Expense';
+import ExpenseOnTaskForm from '@/screens/ExpenseOnTaskForm';
+import ExpensesList from '@/screens/ExpensesList';
 import FullScreenCameraScreen from '@/screens/FullScreenCamera';
 import FullScreenImageScreen from '@/screens/FullScreenImage';
 import ProfileScreen from '@/screens/Profile';
+import RegisterExpense from '@/screens/RegisterExpense';
 import RegisterExpenseOnTask from '@/screens/RegisterExpenseOnTask';
 import RegisterTask from '@/screens/RegisterTask';
 
 import { useUserContext } from '../context/userContext/useUser';
+import AssignedTask from '../screens/AssignedTask';
 import Home from '../screens/Home';
 import Login from '../screens/Login';
 import NotFoundScreen from '../screens/NotFoundScreen';
-import Task from '../screens/Task';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import ExpenseOnTaskForm from '@/screens/ExpenseOnTaskForm';
-import ExpensesList from '@/screens/ExpensesList';
-import RegisterExpense from '@/screens/RegisterExpense';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
     return (
@@ -101,7 +99,11 @@ function RootNavigator() {
                 component={AccountSettings}
                 options={{ title: 'Cuenta' }}
             />
-            <Stack.Screen name="Task" component={Task} options={{ title: 'Tarea' }} />
+            <Stack.Screen
+                name="AssignedTask"
+                component={AssignedTask}
+                options={{ title: 'Tarea Asignada' }}
+            />
             <Stack.Screen
                 name="RegisterExpense"
                 component={RegisterExpense}
