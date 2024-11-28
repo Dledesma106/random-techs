@@ -73,3 +73,9 @@ export const getS3SignedUrl = async (key: string) => {
     const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
     return url;
 };
+
+export function pascalCaseToSpaces(input: string): string {
+    return input
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
+}

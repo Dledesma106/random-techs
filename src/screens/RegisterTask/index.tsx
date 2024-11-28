@@ -21,6 +21,7 @@ import AddImage from '@/components/AddImage';
 import ConfirmButton from '@/components/ConfirmButton';
 import ImageThumbnail, { ThumbnailImage } from '@/components/ImageThumbnail';
 import { Button, ButtonText } from '@/components/ui/button';
+import Chip from '@/components/ui/Chip';
 import Dropdown from '@/components/ui/Dropdown';
 import { Form, FormField } from '@/components/ui/form';
 import { TextInput } from '@/components/ui/Input';
@@ -28,8 +29,15 @@ import { Label } from '@/components/ui/label';
 import { useUserContext } from '@/context/userContext/useUser';
 import { useGetClients } from '@/hooks/api/configs/useGetClients';
 import { useCreateMyTask } from '@/hooks/api/tasks/useCreateMyTask';
+import { useGetTechnicians } from '@/hooks/api/useGetTechnicians';
 import useImagePicker from '@/hooks/useImagePicker';
-import { stringifyObject, uploadPhoto, cn, deletePhoto } from '@/lib/utils';
+import {
+    stringifyObject,
+    uploadPhoto,
+    cn,
+    deletePhoto,
+    pascalCaseToSpaces,
+} from '@/lib/utils';
 import { RegisterTaskScreenRouteProp } from '@/navigation/types';
 
 import { addDeleteExpenseOnTaskListener } from '../ExpenseOnTaskForm';
@@ -44,11 +52,12 @@ interface InputImage {
 }
 
 interface FormInputs {
-    workOrderNumber: string;
+    actNumber: string;
     observations: string;
     clientId: string;
     branchId: string;
     businessId: string;
+    assigned: string[];
     images: InputImage[];
     expenses: ExpenseInput[];
     closedAt: Date;
@@ -59,7 +68,6 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
     const [fullScreenImage, setFullScreenImage] = useState<ThumbnailImage | null>(null);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const formMethods = useForm<FormInputs>();
-    const userContext = useUserContext();
     const {
         control,
         setValue,
@@ -69,8 +77,21 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
         formState: { isDirty },
     } = formMethods;
     const { pickImage } = useImagePicker();
-    const { data: clientsData, error, isPending, refetch } = useGetClients();
+    const {
+        data: clientsData,
+        error: clientsError,
+        isLoading: isClientsLoading,
+        refetch: clientsRefetch,
+    } = useGetClients();
+    const {
+        data: technicians,
+        error: techsError,
+        isLoading: isTechsLoading,
+        refetch: techsRefetch,
+    } = useGetTechnicians();
+    const { user } = useUserContext();
     const { mutateAsync: createMyTask, isPending: isUpdatePending } = useCreateMyTask();
+    const error = clientsError || techsError;
     const clients = clientsData?.clients;
     const mappedClients =
         clients?.map((client) => ({
@@ -82,7 +103,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
         : undefined;
     const mappedBranches =
         selectedClient?.branches.map((branch) => ({
-            label: String(branch.number),
+            label: `${branch.number}, ${branch.city.name}`,
             value: branch.id,
         })) ?? [];
     const selectedBranch = watch('branchId')
@@ -93,9 +114,20 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
             label: business.name,
             value: business.id,
         })) ?? [];
+    const mappedTechs =
+        technicians?.technicians
+            .filter((tech) => tech.id !== user?.id)
+            .filter((tech) => !watch('assigned')?.includes(tech.id))
+            .map((tech) => ({
+                label: tech.fullName,
+                value: tech.id,
+            })) ?? [];
+    const selectedTechs = technicians?.technicians.filter((tech) =>
+        watch('assigned')?.includes(tech.id),
+    );
     const taskTypes = Object.values(TaskType);
     const mappedTaskTypes = taskTypes?.map((taskType) => ({
-        label: taskType,
+        label: pascalCaseToSpaces(taskType),
         value: taskType,
     }));
     const addPictureToTask = async (uri: string) => {
@@ -138,9 +170,16 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
         navigation.navigate('ExpenseOnTaskForm', { expense });
     }
 
+    const refetch = () => {
+        clientsRefetch();
+        techsRefetch();
+    };
+
+    const isLoading = isClientsLoading || isTechsLoading || isUpdatePending;
+
     const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
         const {
-            workOrderNumber,
+            actNumber,
             images,
             observations,
             closedAt,
@@ -148,18 +187,18 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
             branchId,
             businessId,
             taskType,
+            assigned,
         } = formData;
-        const { user } = userContext;
         const imageKeys = images ? images.map((image) => image.key) : [];
         try {
             await createMyTask({
                 input: {
                     branch: branchId,
                     business: businessId,
-                    assigned: [user?.id ?? ''],
+                    assigned: [user?.id ?? '', ...assigned],
                     taskType,
                     observations,
-                    workOrderNumber,
+                    actNumber,
                     imageKeys,
                     closedAt,
                     expenses,
@@ -229,7 +268,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                 <ScrollView
                     className="flex-1"
                     refreshControl={
-                        <RefreshControl refreshing={isPending} onRefresh={refetch} />
+                        <RefreshControl refreshing={isLoading} onRefresh={refetch} />
                     }
                 >
                     {process.env.EXPO_PUBLIC_ENVIRONMENT === 'development' && (
@@ -284,6 +323,39 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                         </View>
 
                         <View>
+                            <Label className="mb-1.5">Tecnicos</Label>
+                            <Dropdown
+                                items={mappedTechs}
+                                placeholder="Selecciona los tecnicos participantes"
+                                value="Selecciona los tecnicos participantes"
+                                onValueChange={(value) =>
+                                    value &&
+                                    setValue('assigned', [
+                                        ...(watch('assigned') ?? []),
+                                        value,
+                                    ])
+                                }
+                            />
+                        </View>
+                        <View className="flex-row flex-wrap">
+                            {selectedTechs &&
+                                selectedTechs.map((tech) => (
+                                    <Chip
+                                        key={tech.id}
+                                        label={tech.firstName}
+                                        onCrossPress={() =>
+                                            setValue(
+                                                'assigned',
+                                                watch('assigned').filter(
+                                                    (techId) => tech.id !== techId,
+                                                ),
+                                            )
+                                        }
+                                    />
+                                ))}
+                        </View>
+
+                        <View>
                             <Label className="mb-1.5">Fecha de cierre</Label>
 
                             <View>
@@ -316,11 +388,11 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                             </View>
                         </View>
                         <View>
-                            <Label className="mb-1.5">Orden de Trabajo</Label>
+                            <Label className="mb-1.5">Numero de Acta</Label>
 
                             <Form {...formMethods}>
                                 <FormField
-                                    name="workOrderNumber"
+                                    name="actNumber"
                                     control={control}
                                     render={({ field: { onChange, onBlur, value } }) => (
                                         <TextInput
@@ -329,7 +401,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                                                 onChange(val);
                                             }}
                                             value={value?.toString()}
-                                            placeholder="Orden de Trabajo"
+                                            placeholder="Numero de Acta"
                                             keyboardType="numeric"
                                         />
                                     )}
@@ -350,6 +422,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                                             onChangeText={(val) => {
                                                 onChange(val);
                                             }}
+                                            multiline
                                             value={String(value)}
                                             placeholder="Observaciones"
                                         />
@@ -457,7 +530,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
             <View className="flex-1 bg-white">
                 <ScrollView
                     refreshControl={
-                        <RefreshControl refreshing={isPending} onRefresh={refetch} />
+                        <RefreshControl refreshing={isLoading} onRefresh={refetch} />
                     }
                     className="flex-1 bg-white"
                     contentContainerStyle={{ flex: 1 }}

@@ -54,7 +54,7 @@ query myAssignedTaskById($id: String!) {
         auditor {
             fullName
         }
-        workOrderNumber
+        actNumber
         branch {
             number
             city {
@@ -90,6 +90,8 @@ query myAssignedTaskById($id: String!) {
             status
             doneBy
             observations
+            installments
+            expenseDate
             registeredBy {
                 id
                 email
@@ -106,7 +108,7 @@ mutation createMyTask($input: MyTaskInput!) {
         task {
             id
             status
-            workOrderNumber
+            actNumber
             observations
             createdAt
             description
@@ -173,7 +175,7 @@ mutation updateMyAssignedTask($input: UpdateMyTaskInput!) {
         task {
             id
             status
-            workOrderNumber
+            actNumber
             observations
             closedAt
             expenses {
@@ -215,7 +217,7 @@ mutation DeleteImage($taskId: String!, $imageId: String!) {
         task {
             id
             status
-            workOrderNumber
+            actNumber
             images {
                 id
                 url

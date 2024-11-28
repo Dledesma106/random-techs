@@ -16,6 +16,8 @@ query myExpenseById($id: String!) {
             id
             fullName
         }
+        installments
+        expenseDate
         createdAt
     }
 }
@@ -38,6 +40,8 @@ mutation createExpense($taskId: String, $expenseData: ExpenseInput!) {
             }
             paySource
             paySourceBank
+            installments
+            expenseDate
             status
         }
     }

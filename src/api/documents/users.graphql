@@ -2,5 +2,7 @@ query Technicians {
   technicians {
     id
     fullName
+    firstName
+    lastName
   }
 }

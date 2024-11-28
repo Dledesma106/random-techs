@@ -28,7 +28,13 @@ import { Label } from '@/components/ui/label';
 import { useGetMyAssignedTaskById } from '@/hooks/api/tasks/useGetMyAssignedTaskById';
 import { useUpdateMyAssignedTask } from '@/hooks/api/tasks/useUpdateMyAssignedTask';
 import useImagePicker from '@/hooks/useImagePicker';
-import { stringifyObject, uploadPhoto, cn, deletePhoto } from '@/lib/utils';
+import {
+    stringifyObject,
+    uploadPhoto,
+    cn,
+    deletePhoto,
+    pascalCaseToSpaces,
+} from '@/lib/utils';
 import { TaskStatus } from '@/models/types';
 import { AssignedTaskScreenRouteProp } from '@/navigation/types';
 
@@ -44,7 +50,7 @@ interface InputImage {
 }
 
 interface FormInputs {
-    workOrderNumber: string;
+    actNumber: string;
     observations: string;
     images: InputImage[];
     expenses: ExpenseInput[];
@@ -75,7 +81,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
         const task = data?.myAssignedTaskById;
         if (!task) return;
         reset({
-            workOrderNumber: task.workOrderNumber ? String(task.workOrderNumber) : '',
+            actNumber: task.actNumber ? String(task.actNumber) : '',
             observations: task.observations ?? '',
             closedAt: task.closedAt ? new Date(task.closedAt) : undefined,
             images: undefined,
@@ -140,7 +146,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
 
     const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
         const {
-            workOrderNumber,
+            actNumber,
             images,
             observations,
             closedAt,
@@ -154,7 +160,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                 input: {
                     observations,
                     id,
-                    workOrderNumber,
+                    actNumber,
                     imageKeys,
                     closedAt,
                     expenses,
@@ -253,7 +259,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                     <View className="px-4 pt-4 pb-24 space-y-4">
                         <View className="items-start">
                             <Badge className="mb-4">
-                                <BadgeText>{task.taskType}</BadgeText>
+                                <BadgeText>{pascalCaseToSpaces(task.taskType)}</BadgeText>
                             </Badge>
 
                             <Text className="text-muted-foreground">
@@ -333,13 +339,13 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                             </View>
                         </View>
                         <View>
-                            <Label className="mb-1.5">Orden de Trabajo</Label>
+                            <Label className="mb-1.5">Numero de Acta</Label>
                             {task.status !== TaskStatus.Aprobada ? (
                                 <Form {...formMethods}>
                                     <FormField
-                                        name="workOrderNumber"
+                                        name="actNumber"
                                         control={control}
-                                        defaultValue={String(task.workOrderNumber ?? '')}
+                                        defaultValue={String(task.actNumber ?? '')}
                                         render={({
                                             field: { onChange, onBlur, value },
                                         }) => (
@@ -350,8 +356,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                                 }}
                                                 value={value?.toString()}
                                                 placeholder={String(
-                                                    task.workOrderNumber ??
-                                                        'Orden de Trabajo',
+                                                    task.actNumber ?? 'Numero de Acta',
                                                 )}
                                                 keyboardType="numeric"
                                             />
@@ -360,7 +365,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                 </Form>
                             ) : (
                                 <Text className="text-muted-foreground">
-                                    {task.workOrderNumber || 'No especificado'}
+                                    {task.actNumber || 'No especificado'}
                                 </Text>
                             )}
                         </View>
@@ -381,6 +386,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                                 onChangeText={(val) => {
                                                     onChange(val);
                                                 }}
+                                                multiline
                                                 value={String(value)}
                                                 placeholder={
                                                     task.observations ?? 'Observaciones'
@@ -391,7 +397,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                 </Form>
                             ) : (
                                 <Text className="text-muted-foreground">
-                                    {task.workOrderNumber || 'No especificado'}
+                                    {task.actNumber || 'No especificado'}
                                 </Text>
                             )}
                         </View>

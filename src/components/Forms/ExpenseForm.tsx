@@ -1,17 +1,18 @@
 import { AntDesign, EvilIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import clsx from 'clsx';
-import { useEffect } from 'react';
+import { format } from 'date-fns';
+import { useEffect, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import {
     Text,
     View,
     ScrollView,
     TouchableOpacity,
-    TextInput,
     Image,
     ActivityIndicator,
 } from 'react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Toast from 'react-native-root-toast';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -22,6 +23,7 @@ import {
     ExpenseType,
 } from '@/api/graphql';
 import Dropdown from '@/components/ui/Dropdown';
+import { TextInput } from '@/components/ui/Input';
 import { useUserContext } from '@/context/userContext/useUser';
 import { useGetTechnicians } from '@/hooks/api/useGetTechnicians';
 import useImagePicker from '@/hooks/useImagePicker';
@@ -45,6 +47,8 @@ export type ExpenseFormValues = {
     observations: string;
     expenseType: ExpenseType;
     image?: InputImage;
+    installments?: number;
+    expenseDate: Date;
 };
 
 interface Props {
@@ -62,6 +66,7 @@ const ExpenseForm = ({ onFinish }: Props) => {
         formState: { errors },
         reset,
     } = useForm<ExpenseFormValues>();
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const { data: techniciansData, isLoading } = useGetTechnicians();
     const { user } = useUserContext();
     const techniciansOptions = [
@@ -129,11 +134,21 @@ const ExpenseForm = ({ onFinish }: Props) => {
             return;
         }
 
+        if (!data.expenseDate) {
+            Toast.show('Especifique la fecha de compra', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+            });
+            return;
+        }
+
         const parsedAmount = parseFloat(data.amount.replace(',', '.'));
 
         const expenseData: ExpenseInput = {
             amount: parsedAmount,
             paySource: data.paySource,
+            installments: Number(data.installments ?? 1),
+            expenseDate: data.expenseDate,
             paySourceBank: data.paySourceBank,
             doneBy: data.doneBy,
             observations: data.observations ?? '',
@@ -223,7 +238,6 @@ const ExpenseForm = ({ onFinish }: Props) => {
                                     value={value}
                                     keyboardType="number-pad"
                                     placeholder="Monto"
-                                    className="bg-white rounded-lg px-4 py-3 border border-gray-300"
                                 />
                             )}
                             name="amount"
@@ -267,6 +281,53 @@ const ExpenseForm = ({ onFinish }: Props) => {
                             />
                         )}
                     </View>
+                    {watch('paySource') === 'Credito' && (
+                        <View className="py-2">
+                            <Text className="mb-2 text-gray-800 font-bold">
+                                Cantidad de cuotas
+                            </Text>
+                            <Controller
+                                name="installments"
+                                control={control}
+                                render={({ field: { onChange, onBlur, value } }) => (
+                                    <TextInput
+                                        onBlur={onBlur}
+                                        onChangeText={onChange}
+                                        value={String(value ?? 1)}
+                                        placeholder="Cuotas"
+                                        keyboardType="numeric"
+                                    />
+                                )}
+                            />
+                        </View>
+                    )}
+                    <View className="py-2">
+                        <Text className="mb-2 text-gray-800 font-bold">
+                            Fecha del gasto
+                        </Text>
+
+                        <TouchableOpacity onPress={() => setDatePickerVisibility(true)}>
+                            <TextInput
+                                inputStyle={{ color: 'black' }}
+                                editable={false}
+                                icon={<EvilIcons name="calendar" size={24} />}
+                            >
+                                {watch('expenseDate')
+                                    ? format(new Date(watch('expenseDate')), 'dd/MM/yyyy')
+                                    : 'Fecha del gasto'}
+                            </TextInput>
+                        </TouchableOpacity>
+                        <DateTimePickerModal
+                            isVisible={isDatePickerVisible}
+                            mode="date"
+                            onConfirm={(date) => {
+                                setValue('expenseDate', date);
+                                setDatePickerVisibility(false);
+                            }}
+                            onCancel={() => setDatePickerVisibility(false)}
+                            date={watch('expenseDate') || new Date()}
+                        />
+                    </View>
                     <Text className="mb-2 text-gray-800 font-bold">Pagado por</Text>
                     <Dropdown
                         items={techniciansOptions}
@@ -303,10 +364,10 @@ const ExpenseForm = ({ onFinish }: Props) => {
                         render={({ field: { onChange, onBlur, value } }) => (
                             <TextInput
                                 onBlur={onBlur}
+                                multiline
                                 onChangeText={onChange}
                                 value={value}
                                 placeholder="Observaciones"
-                                className="bg-white rounded-lg px-4 py-3 border border-gray-300"
                             />
                         )}
                         name="observations"
