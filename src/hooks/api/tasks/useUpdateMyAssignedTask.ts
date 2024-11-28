@@ -60,7 +60,7 @@ export const useUpdateMyAssignedTask = () => {
                             expenses: task.expenses.filter(
                                 (expense) => !expenseIdsToDelete?.includes(expense.id),
                             ),
-                            workOrderNumber: task.workOrderNumber,
+                            actNumber: task.actNumber,
                         };
                     }),
                 };
@@ -84,7 +84,7 @@ export const useUpdateMyAssignedTask = () => {
                         expenses: task.expenses.filter(
                             (expense) => !expenseIdsToDelete?.includes(expense.id),
                         ),
-                        workOrderNumber: task.workOrderNumber,
+                        actNumber: task.actNumber,
                     },
                 };
 

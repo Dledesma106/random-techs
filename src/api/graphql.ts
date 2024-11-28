@@ -81,9 +81,11 @@ export type Expense = {
     auditor: Maybe<User>;
     createdAt: Scalars['DateTime'];
     doneBy: Scalars['String'];
+    expenseDate: Maybe<Scalars['DateTime']>;
     expenseType: ExpenseType;
     id: Scalars['ID'];
     image: Image;
+    installments: Maybe<Scalars['Int']>;
     observations: Maybe<Scalars['String']>;
     paySource: ExpensePaySource;
     paySourceBank: Maybe<ExpensePaySourceBank>;
@@ -102,8 +104,10 @@ export type ExpenseCrudResult = {
 export type ExpenseInput = {
     amount: Scalars['Float'];
     doneBy: Scalars['String'];
+    expenseDate: InputMaybe<Scalars['DateTime']>;
     expenseType: ExpenseType;
     imageKey: Scalars['String'];
+    installments: Scalars['Int'];
     observations: InputMaybe<Scalars['String']>;
     paySource: ExpensePaySource;
     paySourceBank: InputMaybe<ExpensePaySourceBank>;
@@ -287,6 +291,7 @@ export type MutationUpdateUserArgs = {
 };
 
 export type MyTaskInput = {
+    actNumber: InputMaybe<Scalars['String']>;
     assigned: InputMaybe<Array<Scalars['String']>>;
     branch: Scalars['String'];
     business: Scalars['String'];
@@ -295,7 +300,6 @@ export type MyTaskInput = {
     imageKeys: InputMaybe<Array<Scalars['String']>>;
     observations: InputMaybe<Scalars['String']>;
     taskType: TaskType;
-    workOrderNumber: InputMaybe<Scalars['String']>;
 };
 
 export type Preventive = {
@@ -408,6 +412,7 @@ export const Role = {
 export type Role = (typeof Role)[keyof typeof Role];
 export type Task = {
     __typename?: 'Task';
+    actNumber: Maybe<Scalars['Int']>;
     assigned: Array<User>;
     auditor: Maybe<User>;
     branch: Branch;
@@ -423,7 +428,6 @@ export type Task = {
     observations: Maybe<Scalars['String']>;
     status: TaskStatus;
     taskType: TaskType;
-    workOrderNumber: Maybe<Scalars['Int']>;
 };
 
 export type TaskCrudResult = {
@@ -434,6 +438,7 @@ export type TaskCrudResult = {
 };
 
 export type TaskInput = {
+    actNumber: InputMaybe<Scalars['Int']>;
     assigned: Array<Scalars['String']>;
     auditor: InputMaybe<Scalars['String']>;
     branch: Scalars['String'];
@@ -442,7 +447,6 @@ export type TaskInput = {
     movitecTicket: InputMaybe<Scalars['String']>;
     status: TaskStatus;
     taskType: TaskType;
-    workOrderNumber: InputMaybe<Scalars['Int']>;
 };
 
 export const TaskStatus = {
@@ -457,12 +461,14 @@ export const TaskType = {
     Actualizacion: 'Actualizacion',
     Correctivo: 'Correctivo',
     Desmonte: 'Desmonte',
+    InspeccionPolicial: 'InspeccionPolicial',
     Instalacion: 'Instalacion',
     Preventivo: 'Preventivo',
 } as const;
 
 export type TaskType = (typeof TaskType)[keyof typeof TaskType];
 export type UpdateMyTaskInput = {
+    actNumber: InputMaybe<Scalars['String']>;
     closedAt: InputMaybe<Scalars['DateTime']>;
     expenseIdsToDelete: InputMaybe<Array<Scalars['String']>>;
     expenses: InputMaybe<Array<ExpenseInput>>;
@@ -470,7 +476,6 @@ export type UpdateMyTaskInput = {
     imageIdsToDelete: InputMaybe<Array<Scalars['String']>>;
     imageKeys: InputMaybe<Array<Scalars['String']>>;
     observations: InputMaybe<Scalars['String']>;
-    workOrderNumber: InputMaybe<Scalars['String']>;
 };
 
 export type User = {
@@ -536,6 +541,7 @@ export type ClientsQuery = {
             __typename?: 'Branch';
             id: string;
             number: number;
+            city: { __typename?: 'City'; name: string };
             businesses: Array<{ __typename?: 'Business'; id: string; name: string }>;
         }>;
     }>;
@@ -557,6 +563,8 @@ export type MyExpenseByIdQuery = {
         status: ExpenseStatus;
         doneBy: string;
         observations: string | null;
+        installments: number | null;
+        expenseDate: any | null;
         createdAt: any;
         image: { __typename?: 'Image'; id: string; url: string };
         auditor: { __typename?: 'User'; id: string; fullName: string } | null;
@@ -584,6 +592,8 @@ export type CreateExpenseMutation = {
             observations: string | null;
             paySource: ExpensePaySource;
             paySourceBank: ExpensePaySourceBank | null;
+            installments: number | null;
+            expenseDate: any | null;
             status: ExpenseStatus;
             image: { __typename?: 'Image'; id: string; url: string; key: string };
         } | null;
@@ -664,7 +674,7 @@ export type MyAssignedTaskByIdQuery = {
         closedAt: any | null;
         description: string;
         observations: string | null;
-        workOrderNumber: number | null;
+        actNumber: number | null;
         taskType: TaskType;
         status: TaskStatus;
         business: { __typename?: 'Business'; id: string; name: string };
@@ -699,6 +709,8 @@ export type MyAssignedTaskByIdQuery = {
             status: ExpenseStatus;
             doneBy: string;
             observations: string | null;
+            installments: number | null;
+            expenseDate: any | null;
             image: {
                 __typename?: 'Image';
                 id: string;
@@ -730,7 +742,7 @@ export type CreateMyTaskMutation = {
             __typename?: 'Task';
             id: string;
             status: TaskStatus;
-            workOrderNumber: number | null;
+            actNumber: number | null;
             observations: string | null;
             createdAt: any;
             description: string;
@@ -794,7 +806,7 @@ export type UpdateMyAssignedTaskMutation = {
             __typename?: 'Task';
             id: string;
             status: TaskStatus;
-            workOrderNumber: number | null;
+            actNumber: number | null;
             observations: string | null;
             closedAt: any | null;
             expenses: Array<{
@@ -842,7 +854,7 @@ export type DeleteImageMutation = {
             __typename?: 'Task';
             id: string;
             status: TaskStatus;
-            workOrderNumber: number | null;
+            actNumber: number | null;
             images: Array<{ __typename?: 'Image'; id: string; url: string }>;
         } | null;
     };
@@ -852,7 +864,13 @@ export type TechniciansQueryVariables = Exact<{ [key: string]: never }>;
 
 export type TechniciansQuery = {
     __typename?: 'Query';
-    technicians: Array<{ __typename?: 'User'; id: string; fullName: string }>;
+    technicians: Array<{
+        __typename?: 'User';
+        id: string;
+        fullName: string;
+        firstName: string;
+        lastName: string;
+    }>;
 };
 
 export const LoginDocument = {
@@ -1013,6 +1031,22 @@ export const ClientsDocument = {
                                             },
                                             {
                                                 kind: 'Field',
+                                                name: { kind: 'Name', value: 'city' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
                                                     value: 'businesses',
@@ -1149,6 +1183,14 @@ export const MyExpenseByIdDocument = {
                                             },
                                         ],
                                     },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'installments' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'expenseDate' },
                                 },
                                 {
                                     kind: 'Field',
@@ -1309,6 +1351,20 @@ export const CreateExpenseDocument = {
                                                 name: {
                                                     kind: 'Name',
                                                     value: 'paySourceBank',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'installments',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'expenseDate',
                                                 },
                                             },
                                             {
@@ -1768,7 +1824,7 @@ export const MyAssignedTaskByIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'workOrderNumber' },
+                                    name: { kind: 'Name', value: 'actNumber' },
                                 },
                                 {
                                     kind: 'Field',
@@ -1964,6 +2020,20 @@ export const MyAssignedTaskByIdDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
+                                                    value: 'installments',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'expenseDate',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
                                                     value: 'registeredBy',
                                                 },
                                                 selectionSet: {
@@ -2072,7 +2142,7 @@ export const CreateMyTaskDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'workOrderNumber',
+                                                    value: 'actNumber',
                                                 },
                                             },
                                             {
@@ -2498,7 +2568,7 @@ export const UpdateMyAssignedTaskDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'workOrderNumber',
+                                                    value: 'actNumber',
                                                 },
                                             },
                                             {
@@ -2792,7 +2862,7 @@ export const DeleteImageDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'workOrderNumber',
+                                                    value: 'actNumber',
                                                 },
                                             },
                                             {
@@ -2849,6 +2919,14 @@ export const TechniciansDocument = {
                                 {
                                     kind: 'Field',
                                     name: { kind: 'Name', value: 'fullName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'firstName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'lastName' },
                                 },
                             ],
                         },

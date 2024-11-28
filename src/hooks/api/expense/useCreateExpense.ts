@@ -9,6 +9,7 @@ import {
     ExpenseStatus,
     MyExpensesQuery,
 } from '@/api/graphql';
+import { stringifyObject } from '@/lib/utils';
 
 import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from '../tasks/useGetMyAssignedTaskById';
 
@@ -55,6 +56,8 @@ export const useCreateExpense = () => {
                                             urlExpire: new Date().toISOString(),
                                         },
                                         paySourceBank: newExpense.paySourceBank,
+                                        installments: newExpense.installments,
+                                        expenseDate: newExpense.expenseDate,
                                         doneBy: newExpense.doneBy,
                                         observations: newExpense.observations,
                                     },
@@ -81,7 +84,8 @@ export const useCreateExpense = () => {
             });
         },
         onError: (error) => {
-            Toast.show(`Ocurrió un error: ${error}`, {
+            console.log(stringifyObject(error));
+            Toast.show(`Ocurrió un error: ${stringifyObject(error)}`, {
                 duration: Toast.durations.LONG,
                 position: Toast.positions.BOTTOM,
             });

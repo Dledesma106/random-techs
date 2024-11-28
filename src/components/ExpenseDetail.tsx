@@ -18,6 +18,8 @@ interface ExpenseDetail {
     observations: string | null;
     image?: { url: string };
     imageKey?: string;
+    installments: number | null;
+    expenseDate: Date;
 }
 
 interface ExpenseDetailProps {
@@ -71,6 +73,13 @@ const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
                     <Text className="text-gray-600">{expense.paySource}</Text>
                 </View>
 
+                {expense.paySource === 'Credito' && (
+                    <View className="mb-4">
+                        <Text className="mb-2 text-gray-800 font-bold">Cuotas</Text>
+                        <Text className="text-gray-600">{expense.installments}</Text>
+                    </View>
+                )}
+
                 {['Credito', 'Debito'].includes(expense.paySource) && (
                     <View className="mb-4">
                         <Text className="mb-2 text-gray-800 font-bold">Banco emisor</Text>
@@ -84,10 +93,24 @@ const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
                 </View>
 
                 <View className="mb-4">
-                    <Text className="mb-2 text-gray-800 font-bold">Fecha</Text>
+                    <Text className="mb-2 text-gray-800 font-bold">
+                        Fecha de Registrado
+                    </Text>
                     <Text className="text-gray-600">
                         {format(
                             expense.createdAt ? new Date(expense.createdAt) : new Date(),
+                            'dd/MM/yyyy',
+                        )}
+                    </Text>
+                </View>
+
+                <View className="mb-4">
+                    <Text className="mb-2 text-gray-800 font-bold">Fecha de Compra</Text>
+                    <Text className="text-gray-600">
+                        {format(
+                            expense.expenseDate
+                                ? new Date(expense.expenseDate)
+                                : new Date(),
                             'dd/MM/yyyy',
                         )}
                     </Text>

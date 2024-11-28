@@ -67,7 +67,7 @@ export interface ITask {
     activity?: IActivity | types.ID;
     operatorName?: string;
     image: { url: string; _id: string }[];
-    workOrderNumber?: number;
+    actNumber?: number;
     closedAt?: Date;
     deleted: boolean;
 }

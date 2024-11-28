@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Text, View, Pressable, ViewProps } from 'react-native';
 
 import { Badge, BadgeText } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { cn, pascalCaseToSpaces } from '@/lib/utils';
 
 import { TaskListProps } from '.';
 
@@ -53,8 +53,11 @@ const Item = ({ task, navigation, style }: ItemProps) => {
                         })}
                     </Text>
                 </View>
-
-                <Text className="text-xs font-medium">{client.name}</Text>
+                <View className="flex flex-row items-center mb-1">
+                    <Text className="text-xs font-medium">
+                        {client.name} {branch.number}, {branch.city.name}
+                    </Text>
+                </View>
             </View>
 
             <Text numberOfLines={2} className="text-xs text-muted-foreground mb-2">
@@ -62,7 +65,7 @@ const Item = ({ task, navigation, style }: ItemProps) => {
             </Text>
 
             <Badge>
-                <BadgeText>{task.taskType}</BadgeText>
+                <BadgeText>{pascalCaseToSpaces(task.taskType)}</BadgeText>
             </Badge>
         </Pressable>
     );
