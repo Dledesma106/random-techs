@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import Toast from 'react-native-root-toast';
 
 import { fetchGraphql } from '@/api/fetch-graphql';
 import {
@@ -7,14 +8,14 @@ import {
     DeleteExpenseMutationVariables,
     MyExpensesQuery,
 } from '@/api/graphql';
+
 import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from '../tasks/useGetMyAssignedTaskById';
-import Toast from 'react-native-root-toast';
 
 export const useDeleteExpenseById = (id: string) => {
     const client = useQueryClient();
     return useMutation<DeleteExpenseMutation, Error, DeleteExpenseMutationVariables>({
         mutationFn: () => fetchGraphql(DeleteExpenseDocument, { id, taskId: '' }),
-        onSuccess: (data, { id, taskId }) => {
+        onSuccess: (data, { taskId }) => {
             if (!data) return;
 
             const {
