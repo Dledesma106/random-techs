@@ -185,6 +185,8 @@ mutation updateMyAssignedTask($input: UpdateMyTaskInput!) {
                 paySourceBank
                 expenseType
                 createdAt
+                installments
+                expenseDate
                 image {
                     id
                     url

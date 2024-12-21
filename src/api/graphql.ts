@@ -82,6 +82,7 @@ export type Expense = {
     createdAt: Scalars['DateTime'];
     doneBy: Scalars['String'];
     expenseDate: Maybe<Scalars['DateTime']>;
+    expenseNumber: Scalars['String'];
     expenseType: ExpenseType;
     id: Scalars['ID'];
     image: Image;
@@ -91,7 +92,7 @@ export type Expense = {
     paySourceBank: Maybe<ExpensePaySourceBank>;
     registeredBy: User;
     status: ExpenseStatus;
-    task: Task;
+    task: Maybe<Task>;
 };
 
 export type ExpenseCrudResult = {
@@ -103,6 +104,7 @@ export type ExpenseCrudResult = {
 
 export type ExpenseInput = {
     amount: Scalars['Float'];
+    cityName: Scalars['String'];
     doneBy: Scalars['String'];
     expenseDate: InputMaybe<Scalars['DateTime']>;
     expenseType: ExpenseType;
@@ -181,14 +183,17 @@ export type Mutation = {
     deleteImage: TaskCrudResult;
     deletePreventive: PreventiveCrudResult;
     deleteTask: TaskCrudResult;
+    generateApprovedExpensesReport: Scalars['String'];
+    generateApprovedTasksReport: Scalars['String'];
     login: LoginUserResult;
     sendNewUserRandomPassword: UserCrudPothosRef;
     updateBranch: BranchCrudResult;
     updateCity: CityCrudResult;
+    updateExpenseStatus: ExpenseCrudResult;
     updateMyAssignedTask: TaskCrudResult;
     updatePreventive: PreventiveCrudResult;
     updateTask: TaskCrudResult;
-    updateTaskExpenseStatus: TaskCrudResult;
+    updateTaskStatus: TaskCrudResult;
     updateUser: UserCrudPothosRef;
 };
 
@@ -247,6 +252,18 @@ export type MutationDeleteTaskArgs = {
     id: Scalars['String'];
 };
 
+export type MutationGenerateApprovedExpensesReportArgs = {
+    endDate: Scalars['String'];
+    filters: InputMaybe<Scalars['JSON']>;
+    startDate: Scalars['String'];
+};
+
+export type MutationGenerateApprovedTasksReportArgs = {
+    endDate: Scalars['String'];
+    filters: InputMaybe<Array<TaskReportFilterInput>>;
+    startDate: Scalars['String'];
+};
+
 export type MutationLoginArgs = {
     email: Scalars['String'];
     password: Scalars['String'];
@@ -266,6 +283,11 @@ export type MutationUpdateCityArgs = {
     input: CityInput;
 };
 
+export type MutationUpdateExpenseStatusArgs = {
+    expenseId: Scalars['String'];
+    status: ExpenseStatus;
+};
+
 export type MutationUpdateMyAssignedTaskArgs = {
     input: UpdateMyTaskInput;
 };
@@ -280,9 +302,9 @@ export type MutationUpdateTaskArgs = {
     input: TaskInput;
 };
 
-export type MutationUpdateTaskExpenseStatusArgs = {
-    expenseId: Scalars['String'];
-    status: ExpenseStatus;
+export type MutationUpdateTaskStatusArgs = {
+    id: Scalars['String'];
+    status: TaskStatus;
 };
 
 export type MutationUpdateUserArgs = {
@@ -293,12 +315,15 @@ export type MutationUpdateUserArgs = {
 export type MyTaskInput = {
     actNumber: InputMaybe<Scalars['String']>;
     assigned: InputMaybe<Array<Scalars['String']>>;
-    branch: Scalars['String'];
-    business: Scalars['String'];
+    branch: InputMaybe<Scalars['String']>;
+    business: InputMaybe<Scalars['String']>;
+    businessName: InputMaybe<Scalars['String']>;
+    clientName: InputMaybe<Scalars['String']>;
     closedAt: InputMaybe<Scalars['DateTime']>;
     expenses: InputMaybe<Array<ExpenseInput>>;
     imageKeys: InputMaybe<Array<Scalars['String']>>;
     observations: InputMaybe<Scalars['String']>;
+    startedAt: InputMaybe<Scalars['DateTime']>;
     taskType: TaskType;
 };
 
@@ -356,6 +381,8 @@ export type Query = {
     cities: Array<City>;
     clientBranches: Array<Branch>;
     clients: Array<Client>;
+    expenseById: Maybe<Expense>;
+    expenses: Maybe<Array<Expense>>;
     images: Array<Image>;
     myAssignedTaskById: Maybe<Task>;
     myAssignedTasks: Array<Task>;
@@ -379,6 +406,16 @@ export type QueryClientBranchesArgs = {
     cityId: InputMaybe<Scalars['String']>;
     clientId: Scalars['String'];
     provinceId: InputMaybe<Scalars['String']>;
+};
+
+export type QueryExpenseByIdArgs = {
+    id: Scalars['String'];
+};
+
+export type QueryExpensesArgs = {
+    expenseType: InputMaybe<ExpenseType>;
+    registeredBy: InputMaybe<Array<Scalars['String']>>;
+    status: InputMaybe<ExpenseStatus>;
 };
 
 export type QueryMyAssignedTaskByIdArgs = {
@@ -415,10 +452,14 @@ export type Task = {
     actNumber: Maybe<Scalars['Int']>;
     assigned: Array<User>;
     auditor: Maybe<User>;
-    branch: Branch;
-    business: Business;
+    branch: Maybe<Branch>;
+    business: Maybe<Business>;
+    businessName: Maybe<Scalars['String']>;
+    clientName: Maybe<Scalars['String']>;
     closedAt: Maybe<Scalars['DateTime']>;
     createdAt: Scalars['DateTime'];
+    deleted: Scalars['Boolean'];
+    deletedAt: Maybe<Scalars['DateTime']>;
     description: Scalars['String'];
     expenses: Array<Expense>;
     id: Scalars['ID'];
@@ -426,8 +467,11 @@ export type Task = {
     imagesIDs: Array<Scalars['String']>;
     movitecTicket: Maybe<Scalars['String']>;
     observations: Maybe<Scalars['String']>;
+    openedAt: Scalars['DateTime'];
     status: TaskStatus;
+    taskNumber: Scalars['Int'];
     taskType: TaskType;
+    updatedAt: Scalars['DateTime'];
 };
 
 export type TaskCrudResult = {
@@ -441,12 +485,18 @@ export type TaskInput = {
     actNumber: InputMaybe<Scalars['Int']>;
     assigned: Array<Scalars['String']>;
     auditor: InputMaybe<Scalars['String']>;
-    branch: Scalars['String'];
-    business: Scalars['String'];
+    branch: InputMaybe<Scalars['String']>;
+    business: InputMaybe<Scalars['String']>;
+    businessName: InputMaybe<Scalars['String']>;
+    clientName: InputMaybe<Scalars['String']>;
     description: Scalars['String'];
     movitecTicket: InputMaybe<Scalars['String']>;
-    status: TaskStatus;
     taskType: TaskType;
+};
+
+export type TaskReportFilterInput = {
+    id: Scalars['String'];
+    value: Scalars['JSON'];
 };
 
 export const TaskStatus = {
@@ -476,6 +526,7 @@ export type UpdateMyTaskInput = {
     imageIdsToDelete: InputMaybe<Array<Scalars['String']>>;
     imageKeys: InputMaybe<Array<Scalars['String']>>;
     observations: InputMaybe<Scalars['String']>;
+    startedAt: InputMaybe<Scalars['DateTime']>;
 };
 
 export type User = {
@@ -643,7 +694,7 @@ export type MyAssignedTasksQuery = {
         description: string;
         taskType: TaskType;
         status: TaskStatus;
-        business: { __typename?: 'Business'; id: string; name: string };
+        business: { __typename?: 'Business'; id: string; name: string } | null;
         branch: {
             __typename?: 'Branch';
             id: string;
@@ -655,7 +706,7 @@ export type MyAssignedTasksQuery = {
                 province: { __typename?: 'Province'; id: string; name: string };
             };
             client: { __typename?: 'Client'; id: string; name: string };
-        };
+        } | null;
         assigned: Array<{ __typename?: 'User'; id: string; fullName: string }>;
         expenses: Array<{ __typename?: 'Expense'; amount: number }>;
     }>;
@@ -677,7 +728,7 @@ export type MyAssignedTaskByIdQuery = {
         actNumber: number | null;
         taskType: TaskType;
         status: TaskStatus;
-        business: { __typename?: 'Business'; id: string; name: string };
+        business: { __typename?: 'Business'; id: string; name: string } | null;
         images: Array<{ __typename?: 'Image'; id: string; url: string }>;
         auditor: { __typename?: 'User'; fullName: string } | null;
         branch: {
@@ -689,7 +740,7 @@ export type MyAssignedTaskByIdQuery = {
                 province: { __typename?: 'Province'; name: string };
             };
             client: { __typename?: 'Client'; name: string };
-        };
+        } | null;
         assigned: Array<{
             __typename?: 'User';
             id: string;
@@ -748,7 +799,7 @@ export type CreateMyTaskMutation = {
             description: string;
             taskType: TaskType;
             closedAt: any | null;
-            business: { __typename?: 'Business'; id: string; name: string };
+            business: { __typename?: 'Business'; id: string; name: string } | null;
             branch: {
                 __typename?: 'Branch';
                 id: string;
@@ -760,7 +811,7 @@ export type CreateMyTaskMutation = {
                     province: { __typename?: 'Province'; id: string; name: string };
                 };
                 client: { __typename?: 'Client'; id: string; name: string };
-            };
+            } | null;
             assigned: Array<{ __typename?: 'User'; id: string; fullName: string }>;
             expenses: Array<{
                 __typename?: 'Expense';
@@ -817,6 +868,8 @@ export type UpdateMyAssignedTaskMutation = {
                 paySourceBank: ExpensePaySourceBank | null;
                 expenseType: ExpenseType;
                 createdAt: any;
+                installments: number | null;
+                expenseDate: any | null;
                 status: ExpenseStatus;
                 doneBy: string;
                 observations: string | null;
@@ -2628,6 +2681,20 @@ export const UpdateMyAssignedTaskDocument = {
                                                             name: {
                                                                 kind: 'Name',
                                                                 value: 'createdAt',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'installments',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'expenseDate',
                                                             },
                                                         },
                                                         {
