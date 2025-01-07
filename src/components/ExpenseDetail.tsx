@@ -20,6 +20,8 @@ interface ExpenseDetail {
     imageKey?: string;
     installments: number | null;
     expenseDate: Date;
+    cityName: string | null;
+    expenseNumber?: string;
 }
 
 interface ExpenseDetailProps {
@@ -56,6 +58,12 @@ const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
                 </>
             )}
             <View className="px-4 py-4">
+                {expense.expenseNumber && (
+                    <View className="mb-4">
+                        <Text className="mb-2 text-gray-800 font-bold">ID de gasto</Text>
+                        <Text className="text-gray-600">#{expense.expenseNumber}</Text>
+                    </View>
+                )}
                 <View className="mb-4">
                     <Text className="mb-2 text-gray-800 font-bold">Monto</Text>
                     <Text className="text-gray-600">
@@ -91,6 +99,13 @@ const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
                     <Text className="mb-2 text-gray-800 font-bold">Pagado por</Text>
                     <Text className="text-gray-600">{expense.doneBy}</Text>
                 </View>
+
+                {expense.cityName && (
+                    <View className="mb-4">
+                        <Text className="mb-2 text-gray-800 font-bold">Ciudad</Text>
+                        <Text className="text-gray-600">{expense.cityName}</Text>
+                    </View>
+                )}
 
                 <View className="mb-4">
                     <Text className="mb-2 text-gray-800 font-bold">

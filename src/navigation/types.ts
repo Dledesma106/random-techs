@@ -16,7 +16,9 @@ export type RootStackParamList = {
     AssignedTask: {
         id: string;
     };
-    RegisterExpenseOnTask: undefined;
+    RegisterExpenseOnTask: {
+        taskId: string;
+    };
     Expense: {
         expenseId: string;
     };

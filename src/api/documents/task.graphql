@@ -1,6 +1,7 @@
 query myAssignedTasks {
     myAssignedTasks {
         id
+        taskNumber
         createdAt
         closedAt
         description
@@ -8,6 +9,8 @@ query myAssignedTasks {
             id
             name
         }
+        businessName
+        clientName
         branch {
             id
             number
@@ -39,10 +42,14 @@ query myAssignedTasks {
 query myAssignedTaskById($id: String!) {
     myAssignedTaskById(id: $id) {
         id
+        taskNumber
         createdAt
         closedAt
+        startedAt
         description
         observations
+        businessName
+        clientName
         business {
             id
             name
@@ -103,15 +110,26 @@ query myAssignedTaskById($id: String!) {
     }
 }
 
+query branchBusinesses($branch: String!) {
+    branchBusinesses(branch: $branch) {
+        id
+        name
+    }
+}
+
 mutation createMyTask($input: MyTaskInput!) {
     createMyTask(input: $input) {
         task {
             id
+            taskNumber
             status
             actNumber
             observations
             createdAt
+            startedAt
             description
+            businessName
+            clientName
             business {
                 id
                 name
@@ -145,6 +163,8 @@ mutation createMyTask($input: MyTaskInput!) {
                 paySourceBank
                 expenseType
                 createdAt
+                installments
+                expenseDate
                 image {
                     id
                     url
@@ -178,6 +198,9 @@ mutation updateMyAssignedTask($input: UpdateMyTaskInput!) {
             actNumber
             observations
             closedAt
+            startedAt
+            businessName
+            clientName
             expenses {
                 id
                 amount

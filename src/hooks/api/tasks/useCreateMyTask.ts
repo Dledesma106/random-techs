@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import Toast from 'react-native-root-toast';
 
 import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from './useGetMyAssignedTaskById';
 import { TASKS_LIST_QUERY_KEY } from './useGetMyAssignedTasks';
@@ -10,7 +11,6 @@ import {
     CreateMyTaskMutation,
     CreateMyTaskMutationVariables,
 } from '@/api/graphql';
-import Toast from 'react-native-root-toast';
 
 export const useCreateMyTask = () => {
     const client = useQueryClient();
@@ -19,8 +19,9 @@ export const useCreateMyTask = () => {
             return fetchGraphql(CreateMyTaskDocument, data);
         },
         onError: (error) => console.log(error),
-        onSuccess: (data, { input }) => {
+        onSuccess: (data) => {
             if (!data.createMyTask.success) {
+                console.log(data.createMyTask.message);
                 Toast.show(data.createMyTask.message ?? 'Ocurrio un error', {
                     duration: Toast.durations.LONG,
                     position: Toast.positions.BOTTOM,

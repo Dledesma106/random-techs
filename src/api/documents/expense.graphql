@@ -3,8 +3,11 @@ query myExpenseById($id: String!) {
         id
         amount
         expenseType
+        cityName
+        expenseNumber
         paySource
         paySourceBank
+        cityName
         status
         doneBy
         observations
@@ -30,7 +33,9 @@ mutation createExpense($taskId: String, $expenseData: ExpenseInput!) {
             amount
             createdAt
             expenseType
+            expenseNumber
             id
+            cityName
             doneBy
             observations
             image {
@@ -62,6 +67,8 @@ query MyExpenses {
         amount
         createdAt
         expenseType
+        cityName
+        expenseNumber
         id
         image {
             id

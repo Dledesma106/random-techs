@@ -18,7 +18,6 @@ type ItemProps = {
 
 const Item = ({ task, navigation, style }: ItemProps) => {
     const branch = task.branch;
-    const client = branch.client;
 
     const [isPressed, setIsPressed] = useState(false);
 
@@ -44,7 +43,10 @@ const Item = ({ task, navigation, style }: ItemProps) => {
             <View className="flex w-full flex-col mb-2">
                 <View className="flex flex-row items-center mb-1">
                     <View className="flex flex-row items-center">
-                        <Text className="font-semibold">{task.business.name}</Text>
+                        <Text className="font-semibold">
+                            #{task.taskNumber} -{' '}
+                            {task.business?.name ?? task.businessName}
+                        </Text>
                     </View>
                     <Text className={cn('ml-auto text-xs', 'text-muted-foreground')}>
                         hace{' '}
@@ -55,7 +57,9 @@ const Item = ({ task, navigation, style }: ItemProps) => {
                 </View>
                 <View className="flex flex-row items-center mb-1">
                     <Text className="text-xs font-medium">
-                        {client.name} {branch.number}, {branch.city.name}
+                        {branch !== null
+                            ? `${branch?.client?.name} ${branch?.number}, ${branch?.city?.name}`
+                            : `${task.clientName}`}
                     </Text>
                 </View>
             </View>

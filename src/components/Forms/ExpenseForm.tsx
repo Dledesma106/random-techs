@@ -49,6 +49,8 @@ export type ExpenseFormValues = {
     image?: InputImage;
     installments?: number;
     expenseDate: Date;
+    cityName: string;
+    selectedCity?: string;
 };
 
 interface Props {
@@ -84,6 +86,15 @@ const ExpenseForm = ({ onFinish }: Props) => {
     const paySource = watch('paySource');
     const needsBank = ['Debito', 'Credito'].includes(paySource);
     const isOtherTechnician = watch('selectedDoneBy') === 'Otro';
+    const cityOptions = [
+        { label: 'Trelew', value: 'Trelew' },
+        { label: 'Rawson', value: 'Rawson' },
+        { label: 'Esquel', value: 'Esquel' },
+        { label: 'Madryn', value: 'Madryn' },
+        { label: 'Comodoro', value: 'Comodoro' },
+        { label: 'Otro', value: 'Otro' },
+    ];
+    const isOtherCity = watch('selectedCity') === 'Otro';
 
     useEffect(() => {
         setValue('doneBy', user?.fullName ?? '');
@@ -154,6 +165,7 @@ const ExpenseForm = ({ onFinish }: Props) => {
             observations: data.observations ?? '',
             expenseType: data.expenseType,
             imageKey: data.image.key,
+            cityName: data.cityName,
         };
         try {
             await onFinish(expenseData);
@@ -326,6 +338,7 @@ const ExpenseForm = ({ onFinish }: Props) => {
                             }}
                             onCancel={() => setDatePickerVisibility(false)}
                             date={watch('expenseDate') || new Date()}
+                            maximumDate={new Date()}
                         />
                     </View>
                     <Text className="mb-2 text-gray-800 font-bold">Pagado por</Text>
@@ -351,13 +364,48 @@ const ExpenseForm = ({ onFinish }: Props) => {
                                         onChangeText={onChange}
                                         value={value}
                                         placeholder="Comprador"
-                                        className="bg-white rounded-lg px-4 py-3 border border-gray-300"
                                     />
                                 )}
                                 name="doneBy"
                             />
                         </View>
                     )}
+                    <View>
+                        <Text className="mb-2 text-gray-800 font-bold">
+                            Ciudad donde se registra el gasto
+                        </Text>
+                        <Dropdown
+                            items={cityOptions}
+                            placeholder="Selecciona la ciudad"
+                            value={watch('selectedCity')}
+                            onValueChange={(value) => {
+                                setValue(
+                                    'cityName',
+                                    value === 'Otros' ? '' : (value ?? ''),
+                                );
+                                setValue('selectedCity', value ?? '');
+                            }}
+                        />
+                        {isOtherCity && (
+                            <View className="py-4">
+                                <Text className="mb-2 text-gray-800 font-bold">
+                                    Nombre de la ciudad
+                                </Text>
+                                <Controller
+                                    control={control}
+                                    render={({ field: { onChange, onBlur, value } }) => (
+                                        <TextInput
+                                            onBlur={onBlur}
+                                            onChangeText={onChange}
+                                            value={value}
+                                            placeholder="Ciudad"
+                                        />
+                                    )}
+                                    name="cityName"
+                                />
+                            </View>
+                        )}
+                    </View>
                     <Text className="mb-2 text-gray-800 font-bold">Observaciones</Text>
                     <Controller
                         control={control}

@@ -57,13 +57,15 @@ interface FormInputs {
     imageIdsToDelete: string[];
     expenseIdsToDelete: string[];
     closedAt: Date;
+    startedAt: Date;
 }
 
 const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
     const { id } = route.params;
     const { data, isPending, refetch, error } = useGetMyAssignedTaskById(id);
     const [fullScreenImage, setFullScreenImage] = useState<ThumbnailImage | null>(null);
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    const [isStartDatePickerVisible, setStartDatePickerVisibility] = useState(false);
+    const [isCloseDatePickerVisible, setCloseDatePickerVisibility] = useState(false);
     const formMethods = useForm<FormInputs>();
     const {
         control,
@@ -84,6 +86,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
             actNumber: task.actNumber ? String(task.actNumber) : '',
             observations: task.observations ?? '',
             closedAt: task.closedAt ? new Date(task.closedAt) : undefined,
+            startedAt: task.startedAt ? new Date(task.startedAt) : undefined,
             images: undefined,
             expenses: undefined,
         });
@@ -131,7 +134,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
 
     function navigateToRegisterExpense() {
         addRegisterExpenseOnTaskListener(addExpenseToTask);
-        navigation.navigate('RegisterExpenseOnTask');
+        navigation.navigate('RegisterExpenseOnTask', { taskId: id });
     }
 
     function navigateToExpense(expenseId: string) {
@@ -153,12 +156,14 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
             expenses,
             imageIdsToDelete,
             expenseIdsToDelete,
+            startedAt,
         } = formData;
         const imageKeys = images ? images.map((image) => image.key) : [];
         try {
             await updateTask({
                 input: {
                     observations,
+                    startedAt,
                     id,
                     actNumber,
                     imageKeys,
@@ -263,20 +268,29 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                             </Badge>
 
                             <Text className="text-muted-foreground">
-                                {task.business.name}
+                                {task.business?.name ?? task.businessName}
                             </Text>
 
                             <Text className="text-xl font-bold">
-                                {task.branch.client.name}
+                                {task.branch?.client?.name ?? task.clientName}
                             </Text>
                         </View>
 
                         <View>
-                            <Label>Sucursal</Label>
+                            <Label>ID de tarea</Label>
                             <Text className="text-muted-foreground">
-                                {task.branch.number}
+                                #{task.taskNumber}
                             </Text>
                         </View>
+
+                        {task.branch && (
+                            <View>
+                                <Label>Sucursal</Label>
+                                <Text className="text-muted-foreground">
+                                    {task.branch?.number}
+                                </Text>
+                            </View>
+                        )}
 
                         <View>
                             <Label className="mb-1.5">Fecha de asignación</Label>
@@ -284,6 +298,13 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                 {task.createdAt
                                     ? format(new Date(task.createdAt), 'dd/MM/yyyy')
                                     : 'N/A'}
+                            </Text>
+                        </View>
+
+                        <View>
+                            <Label className="mb-1.5">Tecnicos asignados</Label>
+                            <Text className="text-muted-foreground">
+                                {task.assigned.map((tech) => tech.fullName).join(', ')}
                             </Text>
                         </View>
 
@@ -302,11 +323,49 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                         </View>
 
                         <View>
+                            <Label className="mb-1.5">Fecha de inicio</Label>
+                            <View>
+                                <TouchableOpacity
+                                    onPress={() => setStartDatePickerVisibility(true)}
+                                >
+                                    <TextInput
+                                        inputStyle={{ color: 'black' }}
+                                        editable={false}
+                                        icon={<EvilIcons name="calendar" size={24} />}
+                                    >
+                                        {watch('startedAt')
+                                            ? format(
+                                                  new Date(watch('startedAt')),
+                                                  'dd/MM/yyyy HH:mm',
+                                              )
+                                            : task.startedAt
+                                              ? format(
+                                                    new Date(task.startedAt),
+                                                    'dd/MM/yyyy HH:mm',
+                                                )
+                                              : 'Fecha de inicio'}
+                                    </TextInput>
+                                </TouchableOpacity>
+                                <DateTimePickerModal
+                                    isVisible={isStartDatePickerVisible}
+                                    mode="datetime"
+                                    onConfirm={(date) => {
+                                        setValue('startedAt', date);
+                                        setStartDatePickerVisibility(false);
+                                    }}
+                                    onCancel={() => setStartDatePickerVisibility(false)}
+                                    date={watch('startedAt') || new Date()}
+                                    maximumDate={watch('closedAt') || undefined}
+                                />
+                            </View>
+                        </View>
+
+                        <View>
                             <Label className="mb-1.5">Fecha de cierre</Label>
 
                             <View>
                                 <TouchableOpacity
-                                    onPress={() => setDatePickerVisibility(true)}
+                                    onPress={() => setCloseDatePickerVisibility(true)}
                                 >
                                     <TextInput
                                         inputStyle={{ color: 'black' }}
@@ -316,25 +375,26 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                         {watch('closedAt')
                                             ? format(
                                                   new Date(watch('closedAt')),
-                                                  'dd/MM/yyyy',
+                                                  'dd/MM/yyyy HH:mm',
                                               )
                                             : task.closedAt
                                               ? format(
                                                     new Date(task.closedAt),
-                                                    'dd/MM/yyyy',
+                                                    'dd/MM/yyyy HH:mm',
                                                 )
                                               : 'Fecha de cierre'}
                                     </TextInput>
                                 </TouchableOpacity>
                                 <DateTimePickerModal
-                                    isVisible={isDatePickerVisible}
-                                    mode="date"
+                                    isVisible={isCloseDatePickerVisible}
+                                    mode="datetime"
                                     onConfirm={(date) => {
                                         setValue('closedAt', date);
-                                        setDatePickerVisibility(false);
+                                        setCloseDatePickerVisibility(false);
                                     }}
-                                    onCancel={() => setDatePickerVisibility(false)}
+                                    onCancel={() => setCloseDatePickerVisibility(false)}
                                     date={watch('closedAt') || new Date()}
+                                    minimumDate={watch('startedAt') || undefined}
                                 />
                             </View>
                         </View>

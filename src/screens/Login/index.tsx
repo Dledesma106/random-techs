@@ -1,4 +1,6 @@
+import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import {
     View,
@@ -9,18 +11,15 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
-    TouchableOpacity,
 } from 'react-native';
 
 import { ButtonWithSpinner } from '@/components/ButtonWithSpinner';
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { TextInput } from '@/components/ui/Input';
-import { RootStackParamList } from '@/navigation/types';
-import useLogin from '@/hooks/api/auth/useLogin';
-import { useState } from 'react';
-import { Feather } from '@expo/vector-icons';
 import { useUserContext } from '@/context/userContext/useUser';
+import useLogin from '@/hooks/api/auth/useLogin';
 import JWTTokenService from '@/lib/JWTTokenService';
+import { RootStackParamList } from '@/navigation/types';
 
 interface LoginForm {
     email: string;
@@ -154,7 +153,7 @@ const LoginScreen = ({ navigation }: Props) => {
 
                         {error && !isPending && (
                             <Text className="text-red-500 mt-4">
-                                {error && 'Error al iniciar sesión'}
+                                {error && `Error al iniciar sesión: ${error.message}`}
                             </Text>
                         )}
                     </View>

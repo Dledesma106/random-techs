@@ -29,6 +29,7 @@ import { Label } from '@/components/ui/label';
 import { useUserContext } from '@/context/userContext/useUser';
 import { useGetClients } from '@/hooks/api/configs/useGetClients';
 import { useCreateMyTask } from '@/hooks/api/tasks/useCreateMyTask';
+import { useGetBusinessesOptions } from '@/hooks/api/tasks/useGetBusinessesOptions';
 import { useGetTechnicians } from '@/hooks/api/useGetTechnicians';
 import useImagePicker from '@/hooks/useImagePicker';
 import {
@@ -55,18 +56,22 @@ interface FormInputs {
     actNumber: string;
     observations: string;
     clientId: string;
+    clientName: string;
     branchId: string;
     businessId: string;
+    businessName: string;
     assigned: string[];
     images: InputImage[];
     expenses: ExpenseInput[];
     closedAt: Date;
+    startedAt: Date;
     taskType: TaskType;
 }
 
 const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
     const [fullScreenImage, setFullScreenImage] = useState<ThumbnailImage | null>(null);
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+    const [isClosedDatePickerVisible, setClosedDatePickerVisibility] = useState(false);
+    const [isStartDatePickerVisible, setStartDatePickerVisibility] = useState(false);
     const formMethods = useForm<FormInputs>();
     const {
         control,
@@ -93,11 +98,13 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
     const { mutateAsync: createMyTask, isPending: isUpdatePending } = useCreateMyTask();
     const error = clientsError || techsError;
     const clients = clientsData?.clients;
-    const mappedClients =
-        clients?.map((client) => ({
+    const mappedClients = [
+        ...(clients?.map((client) => ({
             label: client.name,
             value: client.id,
-        })) ?? [];
+        })) ?? []),
+        { label: 'Otro', value: 'other' },
+    ];
     const selectedClient = watch('clientId')
         ? clients?.find((client) => client.id === watch('clientId'))
         : undefined;
@@ -109,11 +116,19 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
     const selectedBranch = watch('branchId')
         ? selectedClient?.branches.find((branch) => branch.id === watch('branchId'))
         : undefined;
-    const mappedBusinesses =
-        selectedBranch?.businesses.map((business) => ({
-            label: business.name,
-            value: business.id,
-        })) ?? [];
+    const businessOptions = useGetBusinessesOptions(watch('branchId'));
+    const mappedBusinesses = [
+        ...(selectedBranch
+            ? (selectedBranch.businesses.map((business) => ({
+                  label: business.name,
+                  value: business.id,
+              })) ?? [])
+            : (businessOptions?.data?.branchBusinesses.map((business) => ({
+                  label: business.name,
+                  value: business.id,
+              })) ?? [])),
+        { label: 'Otro', value: 'other' },
+    ];
     const mappedTechs =
         technicians?.technicians
             .filter((tech) => tech.id !== user?.id)
@@ -162,7 +177,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
 
     function navigateToRegisterExpense() {
         addRegisterExpenseOnTaskListener(addExpenseToTask);
-        navigation.navigate('RegisterExpenseOnTask');
+        navigation.navigate('RegisterExpenseOnTask', { taskId: '' });
     }
 
     function navigateToExpenseOnTaskForm(expense: ExpenseInput) {
@@ -186,28 +201,78 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
             expenses,
             branchId,
             businessId,
+            clientId,
+            clientName,
+            businessName,
+            startedAt,
             taskType,
             assigned,
         } = formData;
+
+        // Validación para cliente "Otro"
+        if (clientId === 'other' && !clientName?.trim()) {
+            Toast.show('Debe especificar el nombre del cliente', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+            });
+            return;
+        }
+
+        // Validación para empresa "Otro"
+        if (businessId === 'other' && !businessName?.trim()) {
+            Toast.show('Debe especificar el nombre de la empresa', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+            });
+            return;
+        }
+
+        // Validación de sucursal cuando el cliente no es "Otro"
+        if (clientId !== 'other' && !branchId) {
+            Toast.show('Debe seleccionar una sucursal', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+            });
+            return;
+        }
+
+        if (!taskType) {
+            Toast.show('Debe seleccionar un tipo de tarea', {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+            });
+            return;
+        }
+
         const imageKeys = images ? images.map((image) => image.key) : [];
         try {
             await createMyTask({
                 input: {
-                    branch: branchId,
-                    business: businessId,
-                    assigned: [user?.id ?? '', ...assigned],
+                    branch: clientId === 'other' ? null : branchId,
+                    business: businessId === 'other' ? null : businessId,
+                    assigned: [user?.id ?? '', ...(assigned ?? [])],
                     taskType,
                     observations,
                     actNumber,
                     imageKeys,
                     closedAt,
                     expenses,
+                    clientName,
+                    businessName,
+                    startedAt,
                 },
             });
             navigation.goBack();
-        } catch (error) {}
+        } catch (error) {
+            Toast.show(`Error al crear la tarea: ${error}`, {
+                duration: Toast.durations.LONG,
+                position: Toast.positions.BOTTOM,
+            });
+        }
         reset();
     };
+    const isOtherClient = watch('clientId') === 'other';
+    const isOtherBusiness = watch('businessId') === 'other';
 
     const handleDeleteImage = async (image: ThumbnailImage) => {
         if (image.key) {
@@ -285,30 +350,63 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                             <Dropdown
                                 items={mappedClients}
                                 placeholder="Selecciona un cliente"
-                                onValueChange={(value) =>
-                                    setValue('clientId', value ?? '')
-                                }
+                                onValueChange={(value) => {
+                                    setValue('clientId', value ?? '');
+                                    if (value !== 'other') {
+                                        setValue('clientName', '');
+                                    }
+                                    setValue('branchId', '');
+                                    setValue('businessId', '');
+                                    setValue('businessName', '');
+                                }}
                             />
+                            {isOtherClient && (
+                                <View className="mt-2">
+                                    <TextInput
+                                        placeholder="Nombre del cliente"
+                                        value={watch('clientName')}
+                                        onChangeText={(value) =>
+                                            setValue('clientName', value)
+                                        }
+                                    />
+                                </View>
+                            )}
                         </View>
-                        <View>
-                            <Label className="mb-1.5">Sucursal</Label>
-                            <Dropdown
-                                items={mappedBranches}
-                                placeholder="Selecciona una sucursal"
-                                onValueChange={(value) =>
-                                    setValue('branchId', value ?? '')
-                                }
-                            />
-                        </View>
+                        {!isOtherClient && (
+                            <View>
+                                <Label className="mb-1.5">Sucursal</Label>
+                                <Dropdown
+                                    items={mappedBranches}
+                                    placeholder="Selecciona una sucursal"
+                                    onValueChange={(value) =>
+                                        setValue('branchId', value ?? '')
+                                    }
+                                />
+                            </View>
+                        )}
                         <View>
                             <Label className="mb-1.5">Empresa</Label>
                             <Dropdown
                                 items={mappedBusinesses}
                                 placeholder="Selecciona una empresa"
-                                onValueChange={(value) =>
-                                    setValue('businessId', value ?? '')
-                                }
+                                onValueChange={(value) => {
+                                    setValue('businessId', value ?? '');
+                                    if (value !== 'other') {
+                                        setValue('businessName', '');
+                                    }
+                                }}
                             />
+                            {isOtherBusiness && (
+                                <View className="mt-2">
+                                    <TextInput
+                                        placeholder="Nombre de la empresa"
+                                        value={watch('businessName')}
+                                        onChangeText={(value) =>
+                                            setValue('businessName', value)
+                                        }
+                                    />
+                                </View>
+                            )}
                         </View>
 
                         <View>
@@ -356,11 +454,43 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                         </View>
 
                         <View>
-                            <Label className="mb-1.5">Fecha de cierre</Label>
-
+                            <Label className="mb-1.5">Fecha de inicio</Label>
                             <View>
                                 <TouchableOpacity
-                                    onPress={() => setDatePickerVisibility(true)}
+                                    onPress={() => setStartDatePickerVisibility(true)}
+                                >
+                                    <TextInput
+                                        inputStyle={{ color: 'black' }}
+                                        editable={false}
+                                        icon={<EvilIcons name="calendar" size={24} />}
+                                    >
+                                        {watch('startedAt')
+                                            ? format(
+                                                  new Date(watch('startedAt')),
+                                                  'dd/MM/yyyy HH:mm',
+                                              )
+                                            : 'Fecha de inicio'}
+                                    </TextInput>
+                                </TouchableOpacity>
+                                <DateTimePickerModal
+                                    isVisible={isStartDatePickerVisible}
+                                    mode="datetime"
+                                    onConfirm={(date) => {
+                                        setValue('startedAt', date);
+                                        setStartDatePickerVisibility(false);
+                                    }}
+                                    onCancel={() => setStartDatePickerVisibility(false)}
+                                    date={watch('startedAt') || new Date()}
+                                    maximumDate={watch('closedAt') || undefined}
+                                />
+                            </View>
+                        </View>
+
+                        <View>
+                            <Label className="mb-1.5">Fecha de cierre</Label>
+                            <View>
+                                <TouchableOpacity
+                                    onPress={() => setClosedDatePickerVisibility(true)}
                                 >
                                     <TextInput
                                         inputStyle={{ color: 'black' }}
@@ -370,23 +500,25 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                                         {watch('closedAt')
                                             ? format(
                                                   new Date(watch('closedAt')),
-                                                  'dd/MM/yyyy',
+                                                  'dd/MM/yyyy HH:mm',
                                               )
                                             : 'Fecha de cierre'}
                                     </TextInput>
                                 </TouchableOpacity>
                                 <DateTimePickerModal
-                                    isVisible={isDatePickerVisible}
-                                    mode="date"
+                                    isVisible={isClosedDatePickerVisible}
+                                    mode="datetime"
                                     onConfirm={(date) => {
                                         setValue('closedAt', date);
-                                        setDatePickerVisibility(false);
+                                        setClosedDatePickerVisibility(false);
                                     }}
-                                    onCancel={() => setDatePickerVisibility(false)}
+                                    onCancel={() => setClosedDatePickerVisibility(false)}
                                     date={watch('closedAt') || new Date()}
+                                    minimumDate={watch('startedAt') || undefined}
                                 />
                             </View>
                         </View>
+
                         <View>
                             <Label className="mb-1.5">Numero de Acta</Label>
 
