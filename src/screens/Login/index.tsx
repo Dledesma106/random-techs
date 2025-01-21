@@ -35,13 +35,6 @@ const LoginScreen = ({ navigation }: Props) => {
 
     const form = useForm<LoginForm>({
         reValidateMode: 'onSubmit',
-        defaultValues:
-            process.env.NODE_ENV === 'development'
-                ? {
-                      email: 'acosta.enzo@hotmail.com',
-                      password: '123qweasd',
-                  }
-                : undefined,
     });
 
     const onSubmit: SubmitHandler<LoginForm> = (data) => {

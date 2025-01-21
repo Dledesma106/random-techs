@@ -246,7 +246,8 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
             watch('expenses')?.length > 0 ||
             watch('expenseIdsToDelete')?.length > 0 ||
             watch('imageIdsToDelete')?.length > 0 ||
-            String(new Date(watch('closedAt'))) !== String(new Date(task.closedAt));
+            String(new Date(watch('closedAt'))) !== String(new Date(task.closedAt)) ||
+            String(new Date(watch('startedAt'))) !== String(new Date(task.startedAt));
         return (
             <View className="flex-1 bg-white">
                 <ScrollView
