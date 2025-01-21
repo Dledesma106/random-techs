@@ -2,7 +2,7 @@ import { AntDesign, EvilIcons } from '@expo/vector-icons';
 import { Zoomable } from '@likashefqet/react-native-image-zoom';
 import { format } from 'date-fns';
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ContentLoader, { Rect } from 'react-content-loader/native';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import {
@@ -263,13 +263,27 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                 },
             });
             navigation.goBack();
+            reset({
+                actNumber: '',
+                observations: '',
+                clientId: '',
+                clientName: '',
+                branchId: '',
+                businessId: '',
+                businessName: '',
+                assigned: [],
+                images: [],
+                expenses: [],
+                closedAt: undefined,
+                startedAt: undefined,
+                taskType: '' as TaskType,
+            });
         } catch (error) {
             Toast.show(`Error al crear la tarea: ${error}`, {
                 duration: Toast.durations.LONG,
                 position: Toast.positions.BOTTOM,
             });
         }
-        reset();
     };
     const isOtherClient = watch('clientId') === 'other';
     const isOtherBusiness = watch('businessId') === 'other';
@@ -297,6 +311,16 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
         setFullScreenImage(null);
         return;
     };
+
+    const scrollViewRef = useRef<ScrollView>(null);
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            scrollViewRef.current?.scrollTo({ y: 0, animated: false });
+        });
+
+        return unsubscribe;
+    }, [navigation]);
 
     if (fullScreenImage) {
         return (
@@ -331,6 +355,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
         return (
             <View className="flex-1 bg-white">
                 <ScrollView
+                    ref={scrollViewRef}
                     className="flex-1"
                     refreshControl={
                         <RefreshControl refreshing={isLoading} onRefresh={refetch} />
@@ -350,6 +375,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                             <Dropdown
                                 items={mappedClients}
                                 placeholder="Selecciona un cliente"
+                                value={watch('clientId')}
                                 onValueChange={(value) => {
                                     setValue('clientId', value ?? '');
                                     if (value !== 'other') {
@@ -377,6 +403,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                                 <Label className="mb-1.5">Sucursal</Label>
                                 <Dropdown
                                     items={mappedBranches}
+                                    value={watch('branchId')}
                                     placeholder="Selecciona una sucursal"
                                     onValueChange={(value) =>
                                         setValue('branchId', value ?? '')
@@ -389,6 +416,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                             <Dropdown
                                 items={mappedBusinesses}
                                 placeholder="Selecciona una empresa"
+                                value={watch('businessId')}
                                 onValueChange={(value) => {
                                     setValue('businessId', value ?? '');
                                     if (value !== 'other') {
@@ -414,6 +442,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                             <Dropdown
                                 items={mappedTaskTypes}
                                 placeholder="Selecciona el tipo de tarea"
+                                value={watch('taskType')}
                                 onValueChange={(value) =>
                                     setValue('taskType', value as TaskType)
                                 }
