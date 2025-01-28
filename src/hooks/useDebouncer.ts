@@ -5,12 +5,19 @@ export function useDebouncer<T extends (...args: any[]) => any>(
     delay: number,
 ) {
     const timeoutRef = useRef<NodeJS.Timeout>();
+    const isMountedRef = useRef(true);
+    const callbackRef = useRef(callback);
 
+    // Actualizar la referencia del callback cuando cambie
     useEffect(() => {
+        callbackRef.current = callback;
+    }, [callback]);
+
+    // Manejar el montaje/desmontaje
+    useEffect(() => {
+        isMountedRef.current = true;
         return () => {
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-            }
+            isMountedRef.current = false;
         };
     }, []);
 
@@ -19,8 +26,12 @@ export function useDebouncer<T extends (...args: any[]) => any>(
             clearTimeout(timeoutRef.current);
         }
 
-        timeoutRef.current = setTimeout(() => {
-            callback(...args);
+        timeoutRef.current = setTimeout(async () => {
+            try {
+                await callbackRef.current(...args);
+            } catch (error) {
+                console.error('Error in debounced function:', error);
+            }
         }, delay);
     };
 }

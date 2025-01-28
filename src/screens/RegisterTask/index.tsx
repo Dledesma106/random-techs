@@ -650,7 +650,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                                     isUpdatePending && 'opacity-0',
                                 )}
                             >
-                                Enviar tarea
+                                Crear tarea
                             </Text>
 
                             {isUpdatePending && (
