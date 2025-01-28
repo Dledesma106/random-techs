@@ -1,13 +1,13 @@
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { View, Text, TouchableWithoutFeedback } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import Toast from 'react-native-root-toast';
 
 import { usePasswordChange } from './mutations';
 
 import { ButtonWithSpinner } from '@/components/ButtonWithSpinner';
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { TextInput } from '@/components/ui/Input';
+import { showToast } from '@/lib/toast';
 import { AccountSettingsScreenRouteProps } from '@/navigation/types';
 
 interface UserForm {
@@ -28,7 +28,7 @@ function AccountSettings({ navigation }: AccountSettingsScreenRouteProps) {
             },
             {
                 onSuccess() {
-                    Toast.show('Contraseña cambiada correctamente');
+                    showToast('Contraseña cambiada correctamente');
                     navigation.goBack();
                 },
                 onError(error) {
@@ -39,7 +39,7 @@ function AccountSettings({ navigation }: AccountSettingsScreenRouteProps) {
                             message: 'La contraseña actual es incorrecta',
                         });
                     } else {
-                        Toast.show('Ocurrió un error al cambiar la contraseña');
+                        showToast('Ocurrió un error al cambiar la contraseña', 'error');
                     }
                 },
             },

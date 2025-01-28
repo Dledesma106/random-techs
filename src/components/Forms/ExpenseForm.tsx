@@ -13,7 +13,6 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import Toast from 'react-native-root-toast';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -27,6 +26,7 @@ import { TextInput } from '@/components/ui/Input';
 import { useUserContext } from '@/context/userContext/useUser';
 import { useGetTechnicians } from '@/hooks/api/useGetTechnicians';
 import useImagePicker from '@/hooks/useImagePicker';
+import { showToast } from '@/lib/toast';
 import { deletePhoto, stringifyObject, uploadPhoto } from '@/lib/utils';
 import { addFullScreenCameraListener } from '@/screens/FullScreenCamera';
 
@@ -102,54 +102,33 @@ const ExpenseForm = ({ onFinish }: Props) => {
     }, [user]);
     const onSubmit: SubmitHandler<ExpenseFormValues> = async (data) => {
         if (!data.amount) {
-            Toast.show('El monto es requerido', {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast('El monto es requerido', 'error');
             return;
         }
         if (!data.expenseType) {
-            Toast.show('El tipo de gasto es requerido', {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast('El tipo de gasto es requerido', 'error');
             return;
         }
         if (!data.paySource) {
-            Toast.show('La fuente de pago es requerida', {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast('La fuente de pago es requerida', 'error');
             return;
         }
         if (needsBank && !data.paySourceBank) {
-            Toast.show('Especifique el banco emisor', {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast('Especifique el banco emisor', 'error');
             return;
         }
         if (!data.image) {
-            Toast.show('La imagen es requerida', {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast('La imagen es requerida', 'error');
             return;
         }
 
         if (!data.image.key) {
-            Toast.show('Espere a que la imagen termine de subirse', {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast('Espere a que la imagen termine de subirse', 'error');
             return;
         }
 
         if (!data.expenseDate) {
-            Toast.show('Especifique la fecha de compra', {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast('Especifique la fecha de compra', 'error');
             return;
         }
 
@@ -172,10 +151,7 @@ const ExpenseForm = ({ onFinish }: Props) => {
             navigation.goBack();
             reset();
         } catch (error) {
-            Toast.show(`ocurrio un error: ${error}`, {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast(`ocurrio un error: ${error}`, 'error');
         }
     };
 

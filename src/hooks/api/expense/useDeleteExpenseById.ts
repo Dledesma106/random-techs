@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import Toast from 'react-native-root-toast';
 
 import { fetchGraphql } from '@/api/fetch-graphql';
 import {
@@ -8,6 +7,7 @@ import {
     DeleteExpenseMutationVariables,
     MyExpensesQuery,
 } from '@/api/graphql';
+import { showToast } from '@/lib/toast';
 
 import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from '../tasks/useGetMyAssignedTaskById';
 
@@ -57,16 +57,10 @@ export const useDeleteExpenseById = (id: string) => {
                     return newData;
                 });
             }
-            Toast.show('Gasto Eliminado', {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast('Gasto Eliminado', 'success');
         },
         onError: (error) => {
-            Toast.show(`Ocurrió un error: ${error}`, {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast(`Ocurrió un error: ${error}`, 'error');
         },
     });
 };
