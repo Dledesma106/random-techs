@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import Toast from 'react-native-root-toast';
 
 import { fetchGraphql } from '@/api/fetch-graphql';
 import {
@@ -9,6 +8,7 @@ import {
     ExpenseStatus,
     MyExpensesQuery,
 } from '@/api/graphql';
+import { showToast } from '@/lib/toast';
 import { stringifyObject } from '@/lib/utils';
 
 import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from '../tasks/useGetMyAssignedTaskById';
@@ -78,17 +78,11 @@ export const useCreateExpense = () => {
                     return newData;
                 });
             }
-            Toast.show('Gasto registrado', {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast('Gasto registrado', 'success');
         },
         onError: (error) => {
             console.log(stringifyObject(error));
-            Toast.show(`Ocurrió un error: ${stringifyObject(error)}`, {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast(`Ocurrió un error: ${stringifyObject(error)}`, 'error');
         },
     });
 };

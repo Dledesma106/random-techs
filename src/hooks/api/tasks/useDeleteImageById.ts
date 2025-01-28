@@ -1,13 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from './useGetMyAssignedTaskById';
+
 import { fetchGraphql } from '@/api/fetch-graphql';
 import {
     DeleteImageDocument,
     DeleteImageMutation,
     DeleteImageMutationVariables,
 } from '@/api/graphql';
-import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from './useGetMyAssignedTaskById';
-import Toast from 'react-native-root-toast';
+import { showToast } from '@/lib/toast';
 
 export const useDeleteImageById = () => {
     const client = useQueryClient();
@@ -39,16 +40,10 @@ export const useDeleteImageById = () => {
                     return newData;
                 },
             );
-            Toast.show('Imagen eliminada', {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast('Imagen eliminada', 'success');
         },
         onError: (error) => {
-            Toast.show(`Ocurrió un error: ${error}`, {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast(`Ocurrió un error: ${error}`, 'error');
         },
     });
 };

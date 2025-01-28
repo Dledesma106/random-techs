@@ -4,17 +4,9 @@ import { format } from 'date-fns';
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import ContentLoader, { Rect } from 'react-content-loader/native';
-import { SubmitHandler, useForm } from 'react-hook-form';
-import {
-    Text,
-    View,
-    ScrollView,
-    RefreshControl,
-    ActivityIndicator,
-    TouchableOpacity,
-} from 'react-native';
+import { useForm } from 'react-hook-form';
+import { Text, View, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import Toast from 'react-native-root-toast';
 
 import { ExpenseInput } from '@/api/graphql';
 import AddImage from '@/components/AddImage';
@@ -27,11 +19,12 @@ import { TextInput } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { useGetMyAssignedTaskById } from '@/hooks/api/tasks/useGetMyAssignedTaskById';
 import { useUpdateMyAssignedTask } from '@/hooks/api/tasks/useUpdateMyAssignedTask';
+import { useDebouncer } from '@/hooks/useDebouncer';
 import useImagePicker from '@/hooks/useImagePicker';
+import { showToast } from '@/lib/toast';
 import {
     stringifyObject,
     uploadPhoto,
-    cn,
     deletePhoto,
     pascalCaseToSpaces,
 } from '@/lib/utils';
@@ -71,13 +64,11 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
         control,
         setValue,
         watch,
-        handleSubmit,
         reset,
         formState: { isDirty },
     } = formMethods;
     const { pickImage } = useImagePicker();
-    const { mutateAsync: updateTask, isPending: isUpdatePending } =
-        useUpdateMyAssignedTask();
+    const { mutateAsync: updateTask } = useUpdateMyAssignedTask();
 
     useEffect(() => {
         const task = data?.myAssignedTaskById;
@@ -147,35 +138,35 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
         navigation.navigate('ExpenseOnTaskForm', { expense });
     }
 
-    const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
-        const {
-            actNumber,
-            images,
-            observations,
-            closedAt,
-            expenses,
-            imageIdsToDelete,
-            expenseIdsToDelete,
-            startedAt,
-        } = formData;
-        const imageKeys = images ? images.map((image) => image.key) : [];
-        try {
-            await updateTask({
-                input: {
-                    observations,
-                    startedAt,
-                    id,
-                    actNumber,
-                    imageKeys,
-                    closedAt,
-                    expenses,
-                    imageIdsToDelete,
-                    expenseIdsToDelete,
-                },
-            });
-        } catch (error) {}
-        reset();
-    };
+    // const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
+    //     const {
+    //         actNumber,
+    //         images,
+    //         observations,
+    //         closedAt,
+    //         expenses,
+    //         imageIdsToDelete,
+    //         expenseIdsToDelete,
+    //         startedAt,
+    //     } = formData;
+    //     const imageKeys = images ? images.map((image) => image.key) : [];
+    //     try {
+    //         await updateTask({
+    //             input: {
+    //                 observations,
+    //                 startedAt,
+    //                 id,
+    //                 actNumber,
+    //                 imageKeys,
+    //                 closedAt,
+    //                 expenses,
+    //                 imageIdsToDelete,
+    //                 expenseIdsToDelete,
+    //             },
+    //         });
+    //     } catch (error) {}
+    //     reset();
+    // };
 
     const handleDeleteImage = async (image: ThumbnailImage) => {
         if (image.id) deleteImageById(image.id);
@@ -187,20 +178,55 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                 );
                 setValue('images', filteredImages);
                 await deletePhoto(image.key);
-                Toast.show('Imagen eliminada', {
-                    duration: Toast.durations.LONG,
-                    position: Toast.positions.BOTTOM,
-                });
+                showToast('Imagen eliminada', 'success');
             } catch (error) {
-                Toast.show('Error al eliminar imagen', {
-                    duration: Toast.durations.LONG,
-                    position: Toast.positions.BOTTOM,
-                });
+                showToast('Error al eliminar imagen', 'error');
             }
         }
         setFullScreenImage(null);
         return;
     };
+
+    const debouncedSave = useDebouncer(async (formData: FormInputs) => {
+        try {
+            await updateTask({
+                input: {
+                    id,
+                    actNumber: formData.actNumber,
+                    observations: formData.observations,
+                    imageKeys: formData.images?.map((image) => image.key) ?? [],
+                    imageIdsToDelete: formData.imageIdsToDelete,
+                    expenseIdsToDelete: formData.expenseIdsToDelete,
+                    closedAt: formData.closedAt,
+                    startedAt: formData.startedAt,
+                    expenses: formData.expenses,
+                },
+            });
+            showToast('Cambios guardados', 'success');
+        } catch (error) {
+            showToast('Error al guardar los cambios', 'error');
+        }
+    }, 2500);
+
+    const isFormDirty =
+        isDirty ||
+        watch('images')?.length > 0 ||
+        watch('expenses')?.length > 0 ||
+        watch('expenseIdsToDelete')?.length > 0 ||
+        watch('imageIdsToDelete')?.length > 0 ||
+        String(new Date(watch('closedAt'))) !==
+            String(new Date(data?.myAssignedTaskById?.closedAt ?? '')) ||
+        String(new Date(watch('startedAt'))) !==
+            String(new Date(data?.myAssignedTaskById?.startedAt ?? ''));
+
+    useEffect(() => {
+        const subscription = watch((formData) => {
+            if (isFormDirty) {
+                debouncedSave(formData as FormInputs);
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, [watch, debouncedSave, isFormDirty]);
 
     if (fullScreenImage)
         return (
@@ -240,14 +266,6 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
             (task.images.length ?? 0) -
             (watch('imageIdsToDelete')?.length ?? 0) +
             (watch('images')?.length ?? 0);
-        const isFormDirty =
-            isDirty ||
-            watch('images')?.length > 0 ||
-            watch('expenses')?.length > 0 ||
-            watch('expenseIdsToDelete')?.length > 0 ||
-            watch('imageIdsToDelete')?.length > 0 ||
-            String(new Date(watch('closedAt'))) !== String(new Date(task.closedAt)) ||
-            String(new Date(watch('startedAt'))) !== String(new Date(task.startedAt));
         return (
             <View className="flex-1 bg-white">
                 <ScrollView
@@ -262,7 +280,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                             <Text>form: {stringifyObject(watch())} </Text>
                         </>
                     )}
-                    <View className="px-4 pt-4 pb-24 space-y-4">
+                    <View className="px-4 pt-4 space-y-4">
                         <View className="items-start">
                             <Badge className="mb-4">
                                 <BadgeText>{pascalCaseToSpaces(task.taskType)}</BadgeText>
@@ -416,9 +434,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                                     onChange(val);
                                                 }}
                                                 value={value?.toString()}
-                                                placeholder={String(
-                                                    task.actNumber ?? 'Numero de Acta',
-                                                )}
+                                                placeholder={String('Numero de Acta')}
                                                 keyboardType="numeric"
                                             />
                                         )}
@@ -449,9 +465,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                                 }}
                                                 multiline
                                                 value={String(value)}
-                                                placeholder={
-                                                    task.observations ?? 'Observaciones'
-                                                }
+                                                placeholder={'Observaciones'}
                                             />
                                         )}
                                     />
@@ -592,46 +606,6 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                         </View>
                     </View>
                 </ScrollView>
-
-                <View className="absolute bottom-4 inset-x-0 px-4 bg-transparent">
-                    {(task.status === TaskStatus.Pendiente || isFormDirty) && (
-                        <TouchableOpacity
-                            onPress={handleSubmit(onSubmit)}
-                            className="p-4 rounded-full bg-black justify-center items-center flex flex-row space-x-1 relative"
-                        >
-                            <Text
-                                className={cn(
-                                    'font-bold text-white',
-                                    isUpdatePending && 'opacity-0',
-                                )}
-                            >
-                                Enviar tarea
-                            </Text>
-
-                            {isUpdatePending && (
-                                <View className="absolute inset-x-0 inset-y-0 flex items-center justify-center">
-                                    <ActivityIndicator size="small" color="white" />
-                                </View>
-                            )}
-                        </TouchableOpacity>
-                    )}
-
-                    {task.status === TaskStatus.Finalizada && !isFormDirty && (
-                        <View className="border border-border p-4 rounded-full bg-white justify-center items-center flex flex-row space-x-1">
-                            <Text className="font-bold">Tarea Enviada</Text>
-
-                            <AntDesign name="checkcircleo" size={16} color="black" />
-                        </View>
-                    )}
-
-                    {task.status === TaskStatus.Aprobada && (
-                        <View className="border border-border p-4 rounded-full bg-white justify-center items-center flex flex-row space-x-1">
-                            <Text className="font-bold">Tarea aprobada</Text>
-
-                            <AntDesign name="checkcircleo" size={16} color="black" />
-                        </View>
-                    )}
-                </View>
             </View>
         );
     }

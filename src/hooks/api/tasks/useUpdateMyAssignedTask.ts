@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import Toast from 'react-native-root-toast';
 
 import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from './useGetMyAssignedTaskById';
 import { TASKS_LIST_QUERY_KEY } from './useGetMyAssignedTasks';
@@ -11,6 +10,7 @@ import {
     UpdateMyAssignedTaskMutation,
     UpdateMyAssignedTaskMutationVariables,
 } from '@/api/graphql';
+import { showToast } from '@/lib/toast';
 
 export const useUpdateMyAssignedTask = () => {
     const client = useQueryClient();
@@ -25,10 +25,10 @@ export const useUpdateMyAssignedTask = () => {
         onError: (error) => console.log(error),
         onSuccess: (data, { input: { id, imageIdsToDelete, expenseIdsToDelete } }) => {
             if (!data.updateMyAssignedTask.success) {
-                Toast.show(data.updateMyAssignedTask.message ?? 'Ocurrio un error', {
-                    duration: Toast.durations.LONG,
-                    position: Toast.positions.BOTTOM,
-                });
+                showToast(
+                    data.updateMyAssignedTask.message ?? 'Ocurrio un error',
+                    'error',
+                );
                 return;
             }
 

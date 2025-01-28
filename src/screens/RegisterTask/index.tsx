@@ -14,7 +14,6 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import Toast from 'react-native-root-toast';
 
 import { ExpenseInput, TaskType } from '@/api/graphql';
 import AddImage from '@/components/AddImage';
@@ -32,6 +31,7 @@ import { useCreateMyTask } from '@/hooks/api/tasks/useCreateMyTask';
 import { useGetBusinessesOptions } from '@/hooks/api/tasks/useGetBusinessesOptions';
 import { useGetTechnicians } from '@/hooks/api/useGetTechnicians';
 import useImagePicker from '@/hooks/useImagePicker';
+import { showToast } from '@/lib/toast';
 import {
     stringifyObject,
     uploadPhoto,
@@ -211,36 +211,24 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
 
         // Validación para cliente "Otro"
         if (clientId === 'other' && !clientName?.trim()) {
-            Toast.show('Debe especificar el nombre del cliente', {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast('Debe especificar el nombre del cliente', 'error');
             return;
         }
 
         // Validación para empresa "Otro"
         if (businessId === 'other' && !businessName?.trim()) {
-            Toast.show('Debe especificar el nombre de la empresa', {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast('Debe especificar el nombre de la empresa', 'error');
             return;
         }
 
         // Validación de sucursal cuando el cliente no es "Otro"
         if (clientId !== 'other' && !branchId) {
-            Toast.show('Debe seleccionar una sucursal', {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast('Debe seleccionar una sucursal', 'error');
             return;
         }
 
         if (!taskType) {
-            Toast.show('Debe seleccionar un tipo de tarea', {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast('Debe seleccionar un tipo de tarea', 'error');
             return;
         }
 
@@ -279,10 +267,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                 taskType: '' as TaskType,
             });
         } catch (error) {
-            Toast.show(`Error al crear la tarea: ${error}`, {
-                duration: Toast.durations.LONG,
-                position: Toast.positions.BOTTOM,
-            });
+            showToast(`Error al crear la tarea: ${error}`, 'error');
         }
     };
     const isOtherClient = watch('clientId') === 'other';
@@ -297,15 +282,9 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                 );
                 setValue('images', filteredImages);
                 await deletePhoto(image.key);
-                Toast.show('Imagen eliminada', {
-                    duration: Toast.durations.LONG,
-                    position: Toast.positions.BOTTOM,
-                });
+                showToast('Imagen eliminada', 'success');
             } catch (error) {
-                Toast.show('Error al eliminar imagen', {
-                    duration: Toast.durations.LONG,
-                    position: Toast.positions.BOTTOM,
-                });
+                showToast('Error al eliminar imagen', 'error');
             }
         }
         setFullScreenImage(null);
