@@ -850,6 +850,7 @@ export type MyExpenseByIdQuery = {
         file: {
             __typename?: 'File';
             id: string;
+            key: string;
             url: string;
             filename: string;
             mimeType: string;
@@ -1523,6 +1524,10 @@ export const MyExpenseByIdDocument = {
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'key' },
                                             },
                                             {
                                                 kind: 'Field',

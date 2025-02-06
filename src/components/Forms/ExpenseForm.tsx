@@ -22,13 +22,14 @@ import {
     ExpensePaySourceBank,
     ExpenseType,
 } from '@/api/graphql';
+import FileViewer from '@/components/FileViewer';
 import Dropdown from '@/components/ui/Dropdown';
 import { TextInput } from '@/components/ui/Input';
 import { useUserContext } from '@/context/userContext/useUser';
 import { useGetTechnicians } from '@/hooks/api/useGetTechnicians';
 import useImagePicker from '@/hooks/useImagePicker';
 import { showToast } from '@/lib/toast';
-import { deletePhoto, stringifyObject, uploadPhoto } from '@/lib/utils';
+import { deletePhoto, getFileSignedUrl, stringifyObject, uploadPhoto } from '@/lib/utils';
 import { addFullScreenCameraListener } from '@/screens/FullScreenCamera';
 
 import RHFDropdown from '../ui/RHFDropdown';
@@ -106,11 +107,19 @@ const ExpenseForm = ({ onFinish }: Props) => {
         { label: 'Otro', value: 'Otro' },
     ];
     const isOtherCity = watch('selectedCity') === 'Otro';
+    const [fileViewerUrl, setFileViewerUrl] = useState<string>('');
 
     useEffect(() => {
         setValue('doneBy', user?.fullName ?? '');
         setValue('selectedDoneBy', user?.fullName ?? '');
     }, [user]);
+
+    useEffect(() => {
+        if (watch('file')) {
+            getFileUrl().then((url) => setFileViewerUrl(url.url));
+        }
+    }, [watch('file')]);
+
     const onSubmit: SubmitHandler<ExpenseFormValues> = async (data) => {
         if (!data.amount) {
             showToast('El monto es requerido', 'error');
@@ -186,6 +195,9 @@ const ExpenseForm = ({ onFinish }: Props) => {
         if (uri) addPictureToExpense(uri);
     };
 
+    const getFileUrl = async () =>
+        await getFileSignedUrl(watch('file')?.key ?? '', watch('file')?.mimeType ?? '');
+
     const goToCameraScreen = () => {
         addFullScreenCameraListener(addPictureToExpense);
         navigation.navigate('FullScreenCamera');
@@ -245,7 +257,7 @@ const ExpenseForm = ({ onFinish }: Props) => {
 
     return (
         <SafeAreaView className="flex-1">
-            <View className="flex-1 bg-white">
+            <View className="flex-1 bg-white pb-4">
                 <View className="flex flex-row items-center justify-between px-4 py-2 border-b border-gray-200">
                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <AntDesign name="arrowleft" size={24} color="black" />
@@ -534,40 +546,13 @@ const ExpenseForm = ({ onFinish }: Props) => {
                     )}
 
                     {watch('file') && (
-                        <View className="px-4 pt-4">
-                            <View className="flex-1 relative p-4 border border-gray-200 rounded-lg">
-                                <Text className="font-bold">{watch('file')?.name}</Text>
-                                <Text className="text-sm text-gray-500">
-                                    {((watch('file')?.size ?? 0) / 1024 / 1024).toFixed(
-                                        2,
-                                    )}{' '}
-                                    MB
-                                </Text>
-
-                                <Text className="text-blue-500 underline mt-2">
-                                    Ver archivo
-                                </Text>
-
-                                {watch('file')?.unsaved && (
-                                    <View className="absolute inset-0 flex items-center justify-center bg-white/70">
-                                        <ActivityIndicator
-                                            className="mb-1"
-                                            size="small"
-                                            color="black"
-                                        />
-                                        <Text className="text-xs text-black">
-                                            Subiendo...
-                                        </Text>
-                                    </View>
-                                )}
-                                <TouchableOpacity
-                                    onPress={deleteFile}
-                                    className="flex flex-row items-center justify-center py-1 absolute rounded-full w-8 h-8 bg-black top-2 right-2"
-                                >
-                                    <AntDesign name="close" size={20} color="white" />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
+                        <FileViewer
+                            url={fileViewerUrl}
+                            name={watch('file')?.name ?? ''}
+                            size={watch('file')?.size}
+                            isUploading={watch('file')?.unsaved}
+                            onDelete={deleteFile}
+                        />
                     )}
                 </ScrollView>
             </View>
