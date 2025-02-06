@@ -2,33 +2,31 @@ import { EvilIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
-import { Text, View, ScrollView, Image, TouchableOpacity, Linking } from 'react-native';
+import { Text, View, ScrollView, Image, TouchableOpacity } from 'react-native';
 
-import { ExpensePaySource, ExpensePaySourceBank, ExpenseType } from '@/api/graphql';
+import { MyExpenseByIdQuery, ExpenseInput } from '@/api/graphql';
 import ConfirmButton from '@/components/ConfirmButton';
-import { showToast } from '@/lib/toast';
+import FileViewer from '@/components/FileViewer';
 import { getFileSignedUrl, getS3SignedUrl, stringifyObject } from '@/lib/utils';
 
-interface ExpenseDetail {
-    amount: number | string;
-    expenseType: ExpenseType;
-    paySource: ExpensePaySource;
-    paySourceBank: ExpensePaySourceBank | null;
-    doneBy: string;
-    createdAt?: Date;
-    observations: string | null;
-    image?: { url: string } | null;
-    imageKey?: string | null;
-    installments: number | null;
-    expenseDate: Date;
-    cityName: string | null;
-    expenseNumber?: string;
-    file?: { url: string; mimeType: string } | null;
-}
+// Unión de tipos para soportar tanto Expense como ExpenseInput
+export type ExpenseDetailType =
+    | (MyExpenseByIdQuery['myExpenseById'] &
+          Partial<
+              Pick<
+                  ExpenseInput,
+                  'imageKey' | 'fileKey' | 'filename' | 'mimeType' | 'size'
+              >
+          >)
+    | (ExpenseInput & {
+          image?: { url: string } | null;
+          file?: { url: string; filename?: string; size?: number } | null;
+          createdAt?: string;
+      });
 
 interface ExpenseDetailProps {
     onDelete: () => void;
-    expense: ExpenseDetail;
+    expense: ExpenseDetailType;
 }
 
 const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
@@ -37,22 +35,26 @@ const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
         onDelete();
     };
     const [isLoading, setIsLoading] = useState(true);
-    const [imageUrl, setImageUrl] = useState<string>(expense.image?.url ?? '');
-    const [fileUrl, setFileUrl] = useState<string>(expense.file?.url ?? '');
+    const [imageUrl, setImageUrl] = useState<string>(expense?.image?.url ?? '');
+    const [fileUrl, setFileUrl] = useState<string>(expense?.file?.url ?? '');
 
     useEffect(() => {
         const getImageOrFileUrl = async () => {
-            if (expense.image) {
+            if (expense?.image || expense?.imageKey) {
                 setImageUrl(
-                    expense.image.url ?? (await getS3SignedUrl(expense.imageKey ?? '')),
+                    expense.image?.url ?? (await getS3SignedUrl(expense.imageKey ?? '')),
                 );
             }
-            if (expense.file) {
-                const { url } = await getFileSignedUrl(
-                    expense.file.url,
-                    expense.file.mimeType,
+            if (expense?.file || expense?.fileKey) {
+                setFileUrl(
+                    expense.file?.url ??
+                        (
+                            await getFileSignedUrl(
+                                expense.fileKey ?? '',
+                                expense.mimeType ?? '',
+                            )
+                        ).url,
                 );
-                setFileUrl(url);
             }
             setIsLoading(false);
         };
@@ -60,7 +62,7 @@ const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
         getImageOrFileUrl();
     }, [expense]);
 
-    if (isLoading)
+    if (isLoading || !expense)
         return (
             <View className="flex-1 items-center justify-center">
                 <Text>Cargando...</Text>
@@ -71,21 +73,20 @@ const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
         <ScrollView className="bg-white h-screen">
             {process.env.NODE_ENV === 'development' && (
                 <>
-                    <Text>detalle {stringifyObject(expense)}</Text>
+                    <Text>detalle {stringifyObject(expense ?? {})}</Text>
                 </>
             )}
             <View className="px-4 pt-4 pb-20">
-                {expense.expenseNumber && (
+                {'expenseNumber' in expense && expense.expenseNumber && (
                     <View className="mb-4">
                         <Text className="mb-2 text-gray-800 font-bold">ID de gasto</Text>
-
                         <Text className="text-gray-600">#{expense.expenseNumber}</Text>
                     </View>
                 )}
                 <View className="mb-4">
                     <Text className="mb-2 text-gray-800 font-bold">Monto</Text>
                     <Text className="text-gray-600">
-                        ${expense.amount.toLocaleString('es-AR')}
+                        ${expense?.amount?.toLocaleString('es-AR')}
                     </Text>
                 </View>
 
@@ -194,24 +195,16 @@ const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
                     </View>
                 )}
 
-                {expense.file && (
+                {(expense.file || expense.fileKey) && (
                     <View className="mb-4">
                         <Text className="mb-2 text-gray-800 font-bold">
                             Archivo adjunto
                         </Text>
-                        <TouchableOpacity
-                            onPress={async () => {
-                                const supported = await Linking.canOpenURL(fileUrl);
-
-                                if (supported) {
-                                    await Linking.openURL(fileUrl);
-                                } else {
-                                    showToast('No se puede abrir el archivo', 'error');
-                                }
-                            }}
-                        >
-                            <Text className="text-blue-500 underline">Abrir archivo</Text>
-                        </TouchableOpacity>
+                        <FileViewer
+                            url={fileUrl}
+                            name={expense.file?.filename ?? expense.filename ?? ''}
+                            size={expense.file?.size ?? expense.size ?? 0}
+                        />
                     </View>
                 )}
             </View>

@@ -18,6 +18,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { ExpenseInput, TaskType } from '@/api/graphql';
 import AddImage from '@/components/AddImage';
 import ConfirmButton from '@/components/ConfirmButton';
+import { ExpenseDetailType } from '@/components/ExpenseDetail';
 import ImageThumbnail, { ThumbnailImage } from '@/components/ImageThumbnail';
 import { Button, ButtonText } from '@/components/ui/button';
 import Chip from '@/components/ui/Chip';
@@ -180,7 +181,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
         navigation.navigate('RegisterExpenseOnTask', { taskId: '' });
     }
 
-    function navigateToExpenseOnTaskForm(expense: ExpenseInput) {
+    function navigateToExpenseOnTaskForm(expense: ExpenseDetailType) {
         addDeleteExpenseOnTaskListener(removeExpenseOnForm);
         navigation.navigate('ExpenseOnTaskForm', { expense });
     }

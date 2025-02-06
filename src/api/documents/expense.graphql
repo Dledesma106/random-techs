@@ -17,6 +17,7 @@ query myExpenseById($id: String!) {
         }
         file {
             id
+            key
             url
             filename
             mimeType

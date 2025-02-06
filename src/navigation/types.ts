@@ -3,7 +3,7 @@ import { CompositeScreenProps } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { StackScreenProps } from '@react-navigation/stack';
 
-import { ExpenseInput } from '@/api/graphql';
+import { ExpenseDetailType } from '@/components/ExpenseDetail';
 
 export type RootStackParamList = {
     Root: undefined;
@@ -23,7 +23,7 @@ export type RootStackParamList = {
         expenseId: string;
     };
     ExpenseOnTaskForm: {
-        expense: ExpenseInput;
+        expense: ExpenseDetailType;
     };
     FullScreenCamera: undefined;
     FullScreenImage: { uri: string };
