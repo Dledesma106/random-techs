@@ -15,6 +15,13 @@ query myExpenseById($id: String!) {
             id
             url
         }
+        file {
+            id
+            url
+            filename
+            mimeType
+            size
+        }
         auditor {
             id
             fullName
@@ -43,6 +50,15 @@ mutation createExpense($taskId: String, $expenseData: ExpenseInput!) {
                 url
                 key
             }
+            file {
+                id
+                url
+                key
+                filename
+                mimeType
+                size
+            }
+
             paySource
             paySourceBank
             installments

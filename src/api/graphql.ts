@@ -20,6 +20,13 @@ export type Scalars = {
     JSON: any;
 };
 
+export type AuthResult = {
+    __typename?: 'AuthResult';
+    message: Maybe<Scalars['String']>;
+    success: Scalars['Boolean'];
+    user: Maybe<User>;
+};
+
 export type Branch = {
     __typename?: 'Branch';
     businesses: Array<Business>;
@@ -45,8 +52,28 @@ export type BranchInput = {
 
 export type Business = {
     __typename?: 'Business';
+    branchesIDs: Maybe<Array<Scalars['String']>>;
+    createdAt: Scalars['Date'];
+    deletedAt: Maybe<Scalars['Date']>;
     id: Scalars['ID'];
     name: Scalars['String'];
+    updatedAt: Scalars['Date'];
+};
+
+export type BusinessInput = {
+    name: Scalars['String'];
+};
+
+export type BusinessResult = {
+    __typename?: 'BusinessResult';
+    business: Maybe<Business>;
+    message: Maybe<Scalars['String']>;
+    success: Scalars['Boolean'];
+};
+
+export type ChangePasswordInput = {
+    currentPassword: Scalars['String'];
+    newPassword: Scalars['String'];
 };
 
 export type City = {
@@ -56,8 +83,8 @@ export type City = {
     province: Province;
 };
 
-export type CityCrudResult = {
-    __typename?: 'CityCrudResult';
+export type CityCrudRef = {
+    __typename?: 'CityCrudRef';
     city: Maybe<City>;
     message: Maybe<Scalars['String']>;
     success: Scalars['Boolean'];
@@ -71,8 +98,22 @@ export type CityInput = {
 export type Client = {
     __typename?: 'Client';
     branches: Array<Branch>;
+    createdAt: Scalars['Date'];
+    deletedAt: Maybe<Scalars['Date']>;
     id: Scalars['ID'];
     name: Scalars['String'];
+    updatedAt: Scalars['Date'];
+};
+
+export type ClientInput = {
+    name: Scalars['String'];
+};
+
+export type ClientResult = {
+    __typename?: 'ClientResult';
+    client: Maybe<Client>;
+    message: Maybe<Scalars['String']>;
+    success: Scalars['Boolean'];
 };
 
 export type Expense = {
@@ -85,8 +126,9 @@ export type Expense = {
     expenseDate: Maybe<Scalars['DateTime']>;
     expenseNumber: Scalars['String'];
     expenseType: ExpenseType;
+    file: Maybe<File>;
     id: Scalars['ID'];
-    image: Image;
+    image: Maybe<Image>;
     installments: Maybe<Scalars['Int']>;
     observations: Maybe<Scalars['String']>;
     paySource: ExpensePaySource;
@@ -109,11 +151,15 @@ export type ExpenseInput = {
     doneBy: Scalars['String'];
     expenseDate: InputMaybe<Scalars['DateTime']>;
     expenseType: ExpenseType;
-    imageKey: Scalars['String'];
+    fileKey: InputMaybe<Scalars['String']>;
+    filename: InputMaybe<Scalars['String']>;
+    imageKey: InputMaybe<Scalars['String']>;
     installments: Scalars['Int'];
+    mimeType: InputMaybe<Scalars['String']>;
     observations: InputMaybe<Scalars['String']>;
     paySource: ExpensePaySource;
     paySourceBank: InputMaybe<ExpensePaySourceBank>;
+    size: InputMaybe<Scalars['Int']>;
 };
 
 export const ExpensePaySource = {
@@ -152,6 +198,41 @@ export const ExpenseType = {
 } as const;
 
 export type ExpenseType = (typeof ExpenseType)[keyof typeof ExpenseType];
+export type ExpensesResponse = {
+    __typename?: 'ExpensesResponse';
+    items: Array<Expense>;
+    total: Scalars['Int'];
+};
+
+export type File = {
+    __typename?: 'File';
+    createdAt: Scalars['Date'];
+    expenses: Array<Expense>;
+    filename: Scalars['String'];
+    id: Scalars['ID'];
+    key: Scalars['String'];
+    mimeType: Scalars['String'];
+    size: Scalars['Int'];
+    updatedAt: Scalars['Date'];
+    url: Scalars['String'];
+    urlExpire: Maybe<Scalars['Date']>;
+};
+
+export type FileCrudRef = {
+    __typename?: 'FileCrudRef';
+    file: Maybe<File>;
+    message: Maybe<Scalars['String']>;
+    success: Scalars['Boolean'];
+};
+
+export type FileInput = {
+    filename: Scalars['String'];
+    key: Scalars['String'];
+    mimeType: Scalars['String'];
+    size: Scalars['Int'];
+    url: Scalars['String'];
+};
+
 export type Image = {
     __typename?: 'Image';
     id: Scalars['ID'];
@@ -171,39 +252,65 @@ export type LoginUserResult = {
 
 export type Mutation = {
     __typename?: 'Mutation';
+    changePassword: AuthResult;
     createBranch: BranchCrudResult;
-    createCity: CityCrudResult;
+    createBusiness: Business;
+    createCity: CityCrudRef;
+    createClient: ClientResult;
     createExpense: ExpenseCrudResult;
+    createFile: FileCrudRef;
     createMyTask: TaskCrudResult;
-    createPreventive: PreventiveCrudResult;
+    createPreventive: PreventiveCrudRef;
+    createProvince: ProvinceCrudResult;
     createTask: TaskCrudResult;
     createUser: UserCrudPothosRef;
     deleteBranch: BranchCrudResult;
-    deleteCity: CityCrudResult;
+    deleteBusiness: BusinessResult;
+    deleteCity: CityCrudRef;
+    deleteClient: ClientResult;
     deleteExpense: ExpenseCrudResult;
+    deleteFile: FileCrudRef;
     deleteImage: TaskCrudResult;
-    deletePreventive: PreventiveCrudResult;
+    deletePreventive: PreventiveCrudRef;
+    deleteProvince: ProvinceCrudResult;
     deleteTask: TaskCrudResult;
+    deleteUser: UserCrudPothosRef;
     generateApprovedExpensesReport: Scalars['String'];
     generateApprovedTasksReport: Scalars['String'];
     login: LoginUserResult;
+    logout: AuthResult;
     sendNewUserRandomPassword: UserCrudPothosRef;
     updateBranch: BranchCrudResult;
-    updateCity: CityCrudResult;
+    updateBusiness: Business;
+    updateCity: CityCrudRef;
+    updateClient: ClientResult;
     updateExpenseStatus: ExpenseCrudResult;
     updateMyAssignedTask: TaskCrudResult;
-    updatePreventive: PreventiveCrudResult;
+    updatePreventive: PreventiveCrudRef;
+    updateProvince: ProvinceCrudResult;
     updateTask: TaskCrudResult;
     updateTaskStatus: TaskCrudResult;
     updateUser: UserCrudPothosRef;
+};
+
+export type MutationChangePasswordArgs = {
+    data: ChangePasswordInput;
 };
 
 export type MutationCreateBranchArgs = {
     input: BranchInput;
 };
 
+export type MutationCreateBusinessArgs = {
+    data: BusinessInput;
+};
+
 export type MutationCreateCityArgs = {
     input: CityInput;
+};
+
+export type MutationCreateClientArgs = {
+    data: ClientInput;
 };
 
 export type MutationCreateExpenseArgs = {
@@ -211,12 +318,20 @@ export type MutationCreateExpenseArgs = {
     taskId: InputMaybe<Scalars['String']>;
 };
 
+export type MutationCreateFileArgs = {
+    input: FileInput;
+};
+
 export type MutationCreateMyTaskArgs = {
     input: MyTaskInput;
 };
 
 export type MutationCreatePreventiveArgs = {
-    data: PreventiveInput;
+    input: PreventiveInput;
+};
+
+export type MutationCreateProvinceArgs = {
+    data: ProvinceInput;
 };
 
 export type MutationCreateTaskArgs = {
@@ -231,13 +346,25 @@ export type MutationDeleteBranchArgs = {
     id: Scalars['String'];
 };
 
+export type MutationDeleteBusinessArgs = {
+    id: Scalars['String'];
+};
+
 export type MutationDeleteCityArgs = {
+    id: Scalars['String'];
+};
+
+export type MutationDeleteClientArgs = {
     id: Scalars['String'];
 };
 
 export type MutationDeleteExpenseArgs = {
     id: Scalars['String'];
     taskId: Scalars['String'];
+};
+
+export type MutationDeleteFileArgs = {
+    id: Scalars['String'];
 };
 
 export type MutationDeleteImageArgs = {
@@ -249,7 +376,15 @@ export type MutationDeletePreventiveArgs = {
     id: Scalars['String'];
 };
 
+export type MutationDeleteProvinceArgs = {
+    id: Scalars['String'];
+};
+
 export type MutationDeleteTaskArgs = {
+    id: Scalars['String'];
+};
+
+export type MutationDeleteUserArgs = {
     id: Scalars['String'];
 };
 
@@ -279,9 +414,19 @@ export type MutationUpdateBranchArgs = {
     input: BranchInput;
 };
 
+export type MutationUpdateBusinessArgs = {
+    data: BusinessInput;
+    id: Scalars['String'];
+};
+
 export type MutationUpdateCityArgs = {
     id: Scalars['String'];
     input: CityInput;
+};
+
+export type MutationUpdateClientArgs = {
+    data: ClientInput;
+    id: Scalars['String'];
 };
 
 export type MutationUpdateExpenseStatusArgs = {
@@ -294,7 +439,12 @@ export type MutationUpdateMyAssignedTaskArgs = {
 };
 
 export type MutationUpdatePreventiveArgs = {
-    data: PreventiveInput;
+    id: Scalars['String'];
+    input: PreventiveInput;
+};
+
+export type MutationUpdateProvinceArgs = {
+    data: ProvinceInput;
     id: Scalars['String'];
 };
 
@@ -331,33 +481,31 @@ export type MyTaskInput = {
 export type Preventive = {
     __typename?: 'Preventive';
     assigned: Array<User>;
-    assignedIDs: Array<Scalars['String']>;
-    batteryChangedAt: Maybe<Scalars['DateTime']>;
+    batteryChangedAt: Maybe<Scalars['Date']>;
     branch: Branch;
     business: Business;
-    createdAt: Scalars['DateTime'];
-    deleted: Scalars['Boolean'];
     frequency: Scalars['Int'];
     id: Scalars['ID'];
-    lastDoneAt: Maybe<Scalars['DateTime']>;
+    lastDoneAt: Maybe<Scalars['Date']>;
     months: Array<Scalars['String']>;
     observations: Maybe<Scalars['String']>;
     status: PreventiveStatus;
-    updatedAt: Scalars['DateTime'];
 };
 
-export type PreventiveCrudResult = {
-    __typename?: 'PreventiveCrudResult';
+export type PreventiveCrudRef = {
+    __typename?: 'PreventiveCrudRef';
     message: Maybe<Scalars['String']>;
     preventive: Maybe<Preventive>;
     success: Scalars['Boolean'];
 };
 
 export type PreventiveInput = {
-    assignedIDs: Array<Scalars['String']>;
+    assignedIds: Array<Scalars['String']>;
+    batteryChangedAt: InputMaybe<Scalars['Date']>;
     branchId: Scalars['String'];
     businessId: Scalars['String'];
     frequency: Scalars['Int'];
+    lastDoneAt: InputMaybe<Scalars['Date']>;
     months: Array<Scalars['String']>;
     observations: InputMaybe<Scalars['String']>;
     status: PreventiveStatus;
@@ -371,35 +519,77 @@ export const PreventiveStatus = {
 export type PreventiveStatus = (typeof PreventiveStatus)[keyof typeof PreventiveStatus];
 export type Province = {
     __typename?: 'Province';
+    cities: Array<City>;
+    createdAt: Scalars['Date'];
     id: Scalars['ID'];
+    name: Scalars['String'];
+    updatedAt: Scalars['Date'];
+};
+
+export type ProvinceCrudResult = {
+    __typename?: 'ProvinceCrudResult';
+    message: Maybe<Scalars['String']>;
+    province: Maybe<Province>;
+    success: Scalars['Boolean'];
+};
+
+export type ProvinceInput = {
     name: Scalars['String'];
 };
 
 export type Query = {
     __typename?: 'Query';
+    branch: Branch;
     branchBusinesses: Array<Business>;
     branches: Array<Branch>;
+    business: Business;
+    businesses: Array<Business>;
     cities: Array<City>;
+    city: City;
+    client: Client;
     clientBranches: Array<Branch>;
     clients: Array<Client>;
     expenseById: Maybe<Expense>;
-    expenses: Maybe<Array<Expense>>;
+    expenses: Array<Expense>;
+    expensesCount: Scalars['Int'];
+    file: File;
+    files: Array<File>;
     images: Array<Image>;
     myAssignedTaskById: Maybe<Task>;
     myAssignedTasks: Array<Task>;
     myExpenseById: Maybe<Expense>;
     myExpenses: Maybe<Array<Expense>>;
+    preventive: Preventive;
     preventives: Array<Preventive>;
+    provinceById: Province;
     provinces: Array<Province>;
     taskById: Maybe<Task>;
     taskTypes: Array<TaskType>;
     tasks: Array<Task>;
+    tasksCount: Scalars['Int'];
     technicians: Array<User>;
+    user: User;
     users: Array<User>;
+};
+
+export type QueryBranchArgs = {
+    id: Scalars['String'];
 };
 
 export type QueryBranchBusinessesArgs = {
     branch: InputMaybe<Scalars['String']>;
+};
+
+export type QueryBusinessArgs = {
+    id: Scalars['String'];
+};
+
+export type QueryCityArgs = {
+    id: Scalars['String'];
+};
+
+export type QueryClientArgs = {
+    id: Scalars['String'];
 };
 
 export type QueryClientBranchesArgs = {
@@ -414,9 +604,21 @@ export type QueryExpenseByIdArgs = {
 };
 
 export type QueryExpensesArgs = {
-    expenseType: InputMaybe<ExpenseType>;
+    expenseType: InputMaybe<Array<ExpenseType>>;
     registeredBy: InputMaybe<Array<Scalars['String']>>;
-    status: InputMaybe<ExpenseStatus>;
+    skip: InputMaybe<Scalars['Int']>;
+    status: InputMaybe<Array<ExpenseStatus>>;
+    take: InputMaybe<Scalars['Int']>;
+};
+
+export type QueryExpensesCountArgs = {
+    expenseType: InputMaybe<Array<ExpenseType>>;
+    registeredBy: InputMaybe<Array<Scalars['String']>>;
+    status: InputMaybe<Array<ExpenseStatus>>;
+};
+
+export type QueryFileArgs = {
+    id: Scalars['String'];
 };
 
 export type QueryMyAssignedTaskByIdArgs = {
@@ -427,17 +629,40 @@ export type QueryMyExpenseByIdArgs = {
     id: Scalars['String'];
 };
 
+export type QueryPreventiveArgs = {
+    id: Scalars['String'];
+};
+
+export type QueryProvinceByIdArgs = {
+    id: Scalars['String'];
+};
+
 export type QueryTaskByIdArgs = {
     id: Scalars['String'];
 };
 
 export type QueryTasksArgs = {
-    assigneed: InputMaybe<Array<Scalars['String']>>;
-    business: InputMaybe<Scalars['String']>;
-    city: InputMaybe<Scalars['String']>;
-    client: InputMaybe<Scalars['String']>;
-    status: InputMaybe<TaskStatus>;
-    taskType: InputMaybe<TaskType>;
+    assigned: InputMaybe<Array<Scalars['String']>>;
+    business: InputMaybe<Array<Scalars['String']>>;
+    city: InputMaybe<Array<Scalars['String']>>;
+    client: InputMaybe<Array<Scalars['String']>>;
+    skip: InputMaybe<Scalars['Int']>;
+    status: InputMaybe<Array<TaskStatus>>;
+    take: InputMaybe<Scalars['Int']>;
+    taskType: InputMaybe<Array<TaskType>>;
+};
+
+export type QueryTasksCountArgs = {
+    assigned: InputMaybe<Array<Scalars['String']>>;
+    business: InputMaybe<Array<Scalars['String']>>;
+    city: InputMaybe<Array<Scalars['String']>>;
+    client: InputMaybe<Array<Scalars['String']>>;
+    status: InputMaybe<Array<TaskStatus>>;
+    taskType: InputMaybe<Array<TaskType>>;
+};
+
+export type QueryUserArgs = {
+    id: Scalars['String'];
 };
 
 export const Role = {
@@ -621,7 +846,15 @@ export type MyExpenseByIdQuery = {
         installments: number | null;
         expenseDate: any | null;
         createdAt: any;
-        image: { __typename?: 'Image'; id: string; url: string };
+        image: { __typename?: 'Image'; id: string; url: string } | null;
+        file: {
+            __typename?: 'File';
+            id: string;
+            url: string;
+            filename: string;
+            mimeType: string;
+            size: number;
+        } | null;
         auditor: { __typename?: 'User'; id: string; fullName: string } | null;
     } | null;
 };
@@ -652,7 +885,16 @@ export type CreateExpenseMutation = {
             installments: number | null;
             expenseDate: any | null;
             status: ExpenseStatus;
-            image: { __typename?: 'Image'; id: string; url: string; key: string };
+            image: { __typename?: 'Image'; id: string; url: string; key: string } | null;
+            file: {
+                __typename?: 'File';
+                id: string;
+                url: string;
+                key: string;
+                filename: string;
+                mimeType: string;
+                size: number;
+            } | null;
         } | null;
     };
 };
@@ -686,7 +928,7 @@ export type MyExpensesQuery = {
         id: string;
         paySource: ExpensePaySource;
         status: ExpenseStatus;
-        image: { __typename?: 'Image'; id: string; url: string; key: string };
+        image: { __typename?: 'Image'; id: string; url: string; key: string } | null;
     }> | null;
 };
 
@@ -783,7 +1025,14 @@ export type MyAssignedTaskByIdQuery = {
                 url: string;
                 urlExpire: any | null;
                 key: string;
-            };
+            } | null;
+            file: {
+                __typename?: 'File';
+                id: string;
+                url: string;
+                urlExpire: any | null;
+                key: string;
+            } | null;
             registeredBy: {
                 __typename?: 'User';
                 id: string;
@@ -860,7 +1109,7 @@ export type CreateMyTaskMutation = {
                     url: string;
                     urlExpire: any | null;
                     key: string;
-                };
+                } | null;
                 registeredBy: {
                     __typename?: 'User';
                     id: string;
@@ -912,7 +1161,7 @@ export type UpdateMyAssignedTaskMutation = {
                     url: string;
                     urlExpire: any | null;
                     key: string;
-                };
+                } | null;
                 registeredBy: {
                     __typename?: 'User';
                     id: string;
@@ -1267,6 +1516,35 @@ export const MyExpenseByIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
+                                    name: { kind: 'Name', value: 'file' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'url' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'filename' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'mimeType' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'size' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
                                     name: { kind: 'Name', value: 'auditor' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
@@ -1443,6 +1721,57 @@ export const CreateExpenseDocument = {
                                                             name: {
                                                                 kind: 'Name',
                                                                 value: 'key',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'file' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'url',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'key',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'filename',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'mimeType',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'size',
                                                             },
                                                         },
                                                     ],
@@ -2112,6 +2441,43 @@ export const MyAssignedTaskByIdDocument = {
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'image' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'url',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'urlExpire',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'key',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'file' },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
                                                     selections: [

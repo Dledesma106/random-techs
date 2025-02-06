@@ -2,11 +2,12 @@ import { EvilIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
-import { Text, View, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { Text, View, ScrollView, Image, TouchableOpacity, Linking } from 'react-native';
 
 import { ExpensePaySource, ExpensePaySourceBank, ExpenseType } from '@/api/graphql';
 import ConfirmButton from '@/components/ConfirmButton';
-import { getS3SignedUrl, stringifyObject } from '@/lib/utils';
+import { showToast } from '@/lib/toast';
+import { getFileSignedUrl, getS3SignedUrl, stringifyObject } from '@/lib/utils';
 
 interface ExpenseDetail {
     amount: number | string;
@@ -16,12 +17,13 @@ interface ExpenseDetail {
     doneBy: string;
     createdAt?: Date;
     observations: string | null;
-    image?: { url: string };
-    imageKey?: string;
+    image?: { url: string } | null;
+    imageKey?: string | null;
     installments: number | null;
     expenseDate: Date;
     cityName: string | null;
     expenseNumber?: string;
+    file?: { url: string; mimeType: string } | null;
 }
 
 interface ExpenseDetailProps {
@@ -36,19 +38,34 @@ const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
     };
     const [isLoading, setIsLoading] = useState(true);
     const [imageUrl, setImageUrl] = useState<string>(expense.image?.url ?? '');
+    const [fileUrl, setFileUrl] = useState<string>(expense.file?.url ?? '');
 
     useEffect(() => {
-        const getImageUrl = async () => {
-            setImageUrl(
-                expense.image?.url ?? (await getS3SignedUrl(expense.imageKey ?? '')),
-            );
+        const getImageOrFileUrl = async () => {
+            if (expense.image) {
+                setImageUrl(
+                    expense.image.url ?? (await getS3SignedUrl(expense.imageKey ?? '')),
+                );
+            }
+            if (expense.file) {
+                const { url } = await getFileSignedUrl(
+                    expense.file.url,
+                    expense.file.mimeType,
+                );
+                setFileUrl(url);
+            }
             setIsLoading(false);
         };
 
-        getImageUrl();
+        getImageOrFileUrl();
     }, [expense]);
 
-    if (isLoading) return <Text>Cargando...</Text>;
+    if (isLoading)
+        return (
+            <View className="flex-1 items-center justify-center">
+                <Text>Cargando...</Text>
+            </View>
+        );
 
     return (
         <ScrollView className="bg-white h-screen">
@@ -57,10 +74,11 @@ const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
                     <Text>detalle {stringifyObject(expense)}</Text>
                 </>
             )}
-            <View className="px-4 py-4">
+            <View className="px-4 pt-4 pb-20">
                 {expense.expenseNumber && (
                     <View className="mb-4">
                         <Text className="mb-2 text-gray-800 font-bold">ID de gasto</Text>
+
                         <Text className="text-gray-600">#{expense.expenseNumber}</Text>
                     </View>
                 )}
@@ -152,27 +170,50 @@ const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
                         </Text>
                     </View> */}
 
-                <View className="mb-4">
-                    <Text className="mb-2 text-gray-800 font-bold">Imagen</Text>
+                {expense.image && (
+                    <View className="mb-4">
+                        <Text className="mb-2 text-gray-800 font-bold">Imagen</Text>
 
-                    <TouchableOpacity
-                        onPress={() =>
-                            navigation.navigate('FullScreenImage', {
-                                uri: imageUrl ?? '',
-                            })
-                        }
-                        className="mx-auto w-8/12"
-                    >
-                        <Image
-                            className="bg-gray-200 mb-14"
-                            source={{ uri: imageUrl }}
-                            style={{
-                                borderRadius: 6,
-                                aspectRatio: 9 / 16,
+                        <TouchableOpacity
+                            onPress={() =>
+                                navigation.navigate('FullScreenImage', {
+                                    uri: imageUrl ?? '',
+                                })
+                            }
+                            className="mx-auto w-8/12"
+                        >
+                            <Image
+                                className="bg-gray-200 mb-14"
+                                source={{ uri: imageUrl }}
+                                style={{
+                                    borderRadius: 6,
+                                    aspectRatio: 9 / 16,
+                                }}
+                            />
+                        </TouchableOpacity>
+                    </View>
+                )}
+
+                {expense.file && (
+                    <View className="mb-4">
+                        <Text className="mb-2 text-gray-800 font-bold">
+                            Archivo adjunto
+                        </Text>
+                        <TouchableOpacity
+                            onPress={async () => {
+                                const supported = await Linking.canOpenURL(fileUrl);
+
+                                if (supported) {
+                                    await Linking.openURL(fileUrl);
+                                } else {
+                                    showToast('No se puede abrir el archivo', 'error');
+                                }
                             }}
-                        />
-                    </TouchableOpacity>
-                </View>
+                        >
+                            <Text className="text-blue-500 underline">Abrir archivo</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </View>
             <ConfirmButton
                 title="Eliminar Gasto"

@@ -74,6 +74,22 @@ export const getS3SignedUrl = async (key: string) => {
     return url;
 };
 
+export const getFileSignedUrl = async (key: string, mimeType: string) => {
+    const command = new GetObjectCommand({
+        Bucket: S3Credentials.bucketName,
+        Key: key,
+        ResponseContentType: mimeType,
+        ResponseContentDisposition: 'inline',
+    });
+
+    const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+
+    return {
+        url,
+        urlExpire: new Date(Date.now() + 3600 * 1000 - 120 * 1000).toISOString(),
+    };
+};
+
 export function pascalCaseToSpaces(input: string): string {
     return input
         .replace(/([a-z])([A-Z])/g, '$1 $2')

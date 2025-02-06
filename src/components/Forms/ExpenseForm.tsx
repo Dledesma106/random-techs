@@ -2,6 +2,7 @@ import { AntDesign, EvilIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import clsx from 'clsx';
 import { format } from 'date-fns';
+import * as DocumentPicker from 'expo-document-picker';
 import { useEffect, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import {
@@ -38,6 +39,15 @@ interface InputImage {
     unsaved: boolean;
 }
 
+interface InputFile {
+    key: string;
+    uri: string;
+    unsaved: boolean;
+    name: string;
+    mimeType: string;
+    size: number;
+}
+
 export type ExpenseFormValues = {
     amount: string;
     paySource: ExpensePaySource;
@@ -47,6 +57,7 @@ export type ExpenseFormValues = {
     observations: string;
     expenseType: ExpenseType;
     image?: InputImage;
+    file?: InputFile;
     installments?: number;
     expenseDate: Date;
     cityName: string;
@@ -117,13 +128,18 @@ const ExpenseForm = ({ onFinish }: Props) => {
             showToast('Especifique el banco emisor', 'error');
             return;
         }
-        if (!data.image) {
-            showToast('La imagen es requerida', 'error');
+        if (!data.image && !data.file) {
+            showToast('Debe incluir una imagen o un archivo', 'error');
             return;
         }
 
-        if (!data.image.key) {
-            showToast('Espere a que la imagen termine de subirse', 'error');
+        if (data.image && data.file) {
+            showToast('Solo puede incluir una imagen o un archivo, no ambos', 'error');
+            return;
+        }
+
+        if ((data.image && !data.image.key) || (data.file && !data.file.key)) {
+            showToast('Espere a que el archivo termine de subirse', 'error');
             return;
         }
 
@@ -143,7 +159,11 @@ const ExpenseForm = ({ onFinish }: Props) => {
             doneBy: data.doneBy,
             observations: data.observations ?? '',
             expenseType: data.expenseType,
-            imageKey: data.image.key,
+            imageKey: data.image?.key ?? null,
+            fileKey: data.file?.key ?? null,
+            filename: data.file?.name ?? null,
+            mimeType: data.file?.mimeType ?? null,
+            size: data.file?.size ?? null,
             cityName: data.cityName,
         };
         try {
@@ -161,12 +181,6 @@ const ExpenseForm = ({ onFinish }: Props) => {
         setValue('image', undefined);
     };
 
-    const addPictureToExpense = async (uri: string) => {
-        setValue('image', { key: '', uri, unsaved: true });
-        const key = String(await uploadPhoto(uri));
-        setValue('image', { key, uri, unsaved: false });
-    };
-
     const selectImage = async () => {
         const uri = await pickImage();
         if (uri) addPictureToExpense(uri);
@@ -175,6 +189,56 @@ const ExpenseForm = ({ onFinish }: Props) => {
     const goToCameraScreen = () => {
         addFullScreenCameraListener(addPictureToExpense);
         navigation.navigate('FullScreenCamera');
+    };
+
+    const selectFile = async () => {
+        try {
+            const result = await DocumentPicker.getDocumentAsync({
+                type: ['application/pdf', 'image/*'],
+            });
+
+            if (result.assets?.[0]) {
+                const { uri, name, size, mimeType } = result.assets[0];
+                setValue('file', {
+                    key: '',
+                    uri,
+                    unsaved: true,
+                    name,
+                    mimeType: mimeType ?? '',
+                    size: size ?? 0,
+                });
+                const key = String(await uploadPhoto(uri));
+
+                setValue('file', {
+                    key,
+                    uri,
+                    unsaved: false,
+                    name,
+                    mimeType: mimeType ?? '',
+                    size: size ?? 0,
+                });
+                // Limpiar imagen si existe
+
+                setValue('image', undefined);
+            }
+        } catch (err) {
+            showToast('Error al seleccionar el archivo', 'error');
+        }
+    };
+
+    const deleteFile = async () => {
+        const key = watch('file.key');
+        await deletePhoto(key);
+        setValue('file', undefined);
+    };
+
+    // Modificar addPictureToExpense para limpiar archivo si existe
+    const addPictureToExpense = async (uri: string) => {
+        setValue('image', { key: '', uri, unsaved: true });
+        const key = String(await uploadPhoto(uri));
+        setValue('image', { key, uri, unsaved: false });
+        // Limpiar archivo si existe
+        setValue('file', undefined);
     };
 
     if (isLoading) return <Text>Cargando...</Text>;
@@ -437,31 +501,73 @@ const ExpenseForm = ({ onFinish }: Props) => {
                         </View>
                     )}
 
-                    {!watch('image') && (
-                        <>
-                            <View className="flex flex-row gap-4 pt-4 px-4">
-                                <TouchableOpacity
-                                    onPress={goToCameraScreen}
-                                    className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
-                                >
-                                    <Text className="font-semibold text-white">
-                                        Sacar foto
-                                    </Text>
+                    {!watch('image') && !watch('file') && (
+                        <View className="flex flex-col gap-4 p-4">
+                            <TouchableOpacity
+                                onPress={goToCameraScreen}
+                                className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
+                            >
+                                <Text className="font-semibold text-white">
+                                    Sacar foto
+                                </Text>
+                                <EvilIcons name="camera" size={22} color="white" />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={selectImage}
+                                className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
+                            >
+                                <Text className="font-semibold text-white">
+                                    Elegir Imagen
+                                </Text>
+                                <EvilIcons name="image" size={22} color="white" />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={selectFile}
+                                className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
+                            >
+                                <Text className="font-semibold text-white">
+                                    Elegir Archivo
+                                </Text>
+                                <EvilIcons name="paperclip" size={22} color="white" />
+                            </TouchableOpacity>
+                        </View>
+                    )}
 
-                                    <EvilIcons name="camera" size={22} color="white" />
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={selectImage}
-                                    className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
-                                >
-                                    <Text className="font-semibold text-white">
-                                        Elegir Imagen
-                                    </Text>
+                    {watch('file') && (
+                        <View className="px-4 pt-4">
+                            <View className="flex-1 relative p-4 border border-gray-200 rounded-lg">
+                                <Text className="font-bold">{watch('file')?.name}</Text>
+                                <Text className="text-sm text-gray-500">
+                                    {((watch('file')?.size ?? 0) / 1024 / 1024).toFixed(
+                                        2,
+                                    )}{' '}
+                                    MB
+                                </Text>
 
-                                    <EvilIcons name="image" size={22} color="white" />
+                                <Text className="text-blue-500 underline mt-2">
+                                    Ver archivo
+                                </Text>
+
+                                {watch('file')?.unsaved && (
+                                    <View className="absolute inset-0 flex items-center justify-center bg-white/70">
+                                        <ActivityIndicator
+                                            className="mb-1"
+                                            size="small"
+                                            color="black"
+                                        />
+                                        <Text className="text-xs text-black">
+                                            Subiendo...
+                                        </Text>
+                                    </View>
+                                )}
+                                <TouchableOpacity
+                                    onPress={deleteFile}
+                                    className="flex flex-row items-center justify-center py-1 absolute rounded-full w-8 h-8 bg-black top-2 right-2"
+                                >
+                                    <AntDesign name="close" size={20} color="white" />
                                 </TouchableOpacity>
                             </View>
-                        </>
+                        </View>
                     )}
                 </ScrollView>
             </View>
