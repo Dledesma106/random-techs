@@ -49,12 +49,22 @@ export const useCreateExpense = () => {
                                         paySource: expenseData.paySource,
                                         expenseType: expenseData.expenseType,
                                         status: ExpenseStatus.Enviado,
-                                        image: {
-                                            id: newExpense.image.id,
-                                            url: newExpense.image.url,
-                                            key: newExpense.image.key,
-                                            urlExpire: new Date().toISOString(),
-                                        },
+                                        image: newExpense.image
+                                            ? {
+                                                  id: newExpense.image.id,
+                                                  url: newExpense.image.url,
+                                                  key: newExpense.image.key,
+                                                  urlExpire: new Date().toISOString(),
+                                              }
+                                            : null,
+                                        file: newExpense.file
+                                            ? {
+                                                  id: newExpense.file.id,
+                                                  url: newExpense.file.url,
+                                                  key: newExpense.file.key,
+                                                  urlExpire: new Date().toISOString(),
+                                              }
+                                            : null,
                                         paySourceBank: newExpense.paySourceBank,
                                         installments: newExpense.installments,
                                         expenseDate: newExpense.expenseDate,

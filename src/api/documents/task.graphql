@@ -94,11 +94,18 @@ query myAssignedTaskById($id: String!) {
                 urlExpire
                 key
             }
+            file {
+                id
+                url
+                urlExpire
+                key
+            }
             status
             doneBy
             observations
             installments
             expenseDate
+
             registeredBy {
                 id
                 email
