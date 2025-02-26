@@ -22,7 +22,10 @@ import {
     ExpensePaySourceBank,
     ExpenseType,
 } from '@/api/graphql';
+import AddImage from '@/components/AddImage';
 import FileViewer from '@/components/FileViewer';
+import ImageThumbnail from '@/components/ImageThumbnail';
+import { Button, ButtonText } from '@/components/ui/button';
 import Dropdown from '@/components/ui/Dropdown';
 import { TextInput } from '@/components/ui/Input';
 import { useUserContext } from '@/context/userContext/useUser';
@@ -33,6 +36,8 @@ import { deletePhoto, getFileSignedUrl, stringifyObject, uploadPhoto } from '@/l
 import { addFullScreenCameraListener } from '@/screens/FullScreenCamera';
 
 import RHFDropdown from '../ui/RHFDropdown';
+
+const MAX_IMAGE_AMOUNT = 5;
 
 interface InputImage {
     key: string;
@@ -57,8 +62,8 @@ export type ExpenseFormValues = {
     doneBy: string;
     observations: string;
     expenseType: ExpenseType;
-    image?: InputImage;
-    file?: InputFile;
+    images?: InputImage[];
+    files?: InputFile[];
     installments?: number;
     expenseDate: Date;
     cityName: string;
@@ -107,7 +112,8 @@ const ExpenseForm = ({ onFinish }: Props) => {
         { label: 'Otro', value: 'Otro' },
     ];
     const isOtherCity = watch('selectedCity') === 'Otro';
-    const [fileViewerUrl, setFileViewerUrl] = useState<string>('');
+    const [fileViewerUrls, setFileViewerUrls] = useState<{ [key: string]: string }>({});
+    const [fullScreenImage, setFullScreenImage] = useState<InputImage | null>(null);
 
     useEffect(() => {
         setValue('doneBy', user?.fullName ?? '');
@@ -115,10 +121,11 @@ const ExpenseForm = ({ onFinish }: Props) => {
     }, [user]);
 
     useEffect(() => {
-        if (watch('file')) {
-            getFileUrl().then((url) => setFileViewerUrl(url.url));
+        const files = watch('files');
+        if (files && files.length > 0) {
+            getFileUrls();
         }
-    }, [watch('file')]);
+    }, [watch('files')]);
 
     const onSubmit: SubmitHandler<ExpenseFormValues> = async (data) => {
         if (!data.amount) {
@@ -137,18 +144,16 @@ const ExpenseForm = ({ onFinish }: Props) => {
             showToast('Especifique el banco emisor', 'error');
             return;
         }
-        if (!data.image && !data.file) {
-            showToast('Debe incluir una imagen o un archivo', 'error');
+        if (!data.images?.length && !data.files?.length) {
+            showToast('Debe incluir al menos una imagen o un archivo', 'error');
             return;
         }
 
-        if (data.image && data.file) {
-            showToast('Solo puede incluir una imagen o un archivo, no ambos', 'error');
-            return;
-        }
+        const imagesUnsaved = data.images?.some((img) => !img.key || img.unsaved);
+        const filesUnsaved = data.files?.some((file) => !file.key || file.unsaved);
 
-        if ((data.image && !data.image.key) || (data.file && !data.file.key)) {
-            showToast('Espere a que el archivo termine de subirse', 'error');
+        if (imagesUnsaved || filesUnsaved) {
+            showToast('Espere a que todos los archivos terminen de subirse', 'error');
             return;
         }
 
@@ -168,11 +173,11 @@ const ExpenseForm = ({ onFinish }: Props) => {
             doneBy: data.doneBy,
             observations: data.observations ?? '',
             expenseType: data.expenseType,
-            imageKey: data.image?.key ?? null,
-            fileKey: data.file?.key ?? null,
-            filename: data.file?.name ?? null,
-            mimeType: data.file?.mimeType ?? null,
-            size: data.file?.size ?? null,
+            imageKeys: data.images?.map((img) => img.key) ?? [],
+            fileKeys: data.files?.map((file) => file.key) ?? [],
+            filenames: data.files?.map((file) => file.name) ?? [],
+            mimeTypes: data.files?.map((file) => file.mimeType) ?? [],
+            sizes: data.files?.map((file) => file.size) ?? [],
             cityName: data.cityName,
         };
         try {
@@ -184,10 +189,14 @@ const ExpenseForm = ({ onFinish }: Props) => {
         }
     };
 
-    const deleteImage = async () => {
-        const key = watch('image.key');
-        await deletePhoto(key);
-        setValue('image', undefined);
+    const deleteImage = async (imageToDelete: InputImage) => {
+        const images = watch('images') || [];
+        await deletePhoto(imageToDelete.key);
+        setValue(
+            'images',
+            images.filter((img) => img.key !== imageToDelete.key),
+            { shouldValidate: true },
+        );
     };
 
     const selectImage = async () => {
@@ -195,8 +204,19 @@ const ExpenseForm = ({ onFinish }: Props) => {
         if (uri) addPictureToExpense(uri);
     };
 
-    const getFileUrl = async () =>
-        await getFileSignedUrl(watch('file')?.key ?? '', watch('file')?.mimeType ?? '');
+    const getFileUrls = async () => {
+        const files = watch('files') || [];
+        const urls: { [key: string]: string } = {};
+
+        for (const file of files) {
+            if (file.key) {
+                const result = await getFileSignedUrl(file.key, file.mimeType);
+                urls[file.key] = result.url;
+            }
+        }
+
+        setFileViewerUrls(urls);
+    };
 
     const goToCameraScreen = () => {
         addFullScreenCameraListener(addPictureToExpense);
@@ -211,47 +231,81 @@ const ExpenseForm = ({ onFinish }: Props) => {
 
             if (result.assets?.[0]) {
                 const { uri, name, size, mimeType } = result.assets[0];
-                setValue('file', {
-                    key: '',
-                    uri,
-                    unsaved: true,
-                    name,
-                    mimeType: mimeType ?? '',
-                    size: size ?? 0,
-                });
+                const currentFiles = watch('files') || [];
+
+                setValue('files', [
+                    ...currentFiles,
+                    {
+                        key: '',
+                        uri,
+                        unsaved: true,
+                        name,
+                        mimeType: mimeType ?? '',
+                        size: size ?? 0,
+                    },
+                ]);
+
                 const key = String(await uploadPhoto(uri));
 
-                setValue('file', {
-                    key,
-                    uri,
-                    unsaved: false,
-                    name,
-                    mimeType: mimeType ?? '',
-                    size: size ?? 0,
-                });
-                // Limpiar imagen si existe
-
-                setValue('image', undefined);
+                setValue('files', [
+                    ...currentFiles,
+                    {
+                        key,
+                        uri,
+                        unsaved: false,
+                        name,
+                        mimeType: mimeType ?? '',
+                        size: size ?? 0,
+                    },
+                ]);
             }
         } catch (err) {
             showToast('Error al seleccionar el archivo', 'error');
         }
     };
 
-    const deleteFile = async () => {
-        const key = watch('file.key');
-        await deletePhoto(key);
-        setValue('file', undefined);
+    const deleteFile = async (fileToDelete: InputFile) => {
+        const files = watch('files') || [];
+        await deletePhoto(fileToDelete.key);
+        setValue(
+            'files',
+            files.filter((file) => file.key !== fileToDelete.key),
+            { shouldValidate: true },
+        );
     };
 
-    // Modificar addPictureToExpense para limpiar archivo si existe
     const addPictureToExpense = async (uri: string) => {
-        setValue('image', { key: '', uri, unsaved: true });
+        const currentImages = watch('images') || [];
+        setValue('images', [...currentImages, { key: '', uri, unsaved: true }]);
         const key = String(await uploadPhoto(uri));
-        setValue('image', { key, uri, unsaved: false });
-        // Limpiar archivo si existe
-        setValue('file', undefined);
+        setValue('images', [...currentImages, { key, uri, unsaved: false }]);
     };
+
+    const imagesAmount = watch('images')?.length || 0;
+    const filesAmount = watch('files')?.length || 0;
+
+    if (fullScreenImage) {
+        return (
+            <View className="flex-1 relative">
+                <Image source={{ uri: fullScreenImage.uri }} style={{ flex: 1 }} />
+                <TouchableOpacity
+                    onPress={() => setFullScreenImage(null)}
+                    className="absolute top-4 right-4 bg-black rounded-full p-2"
+                >
+                    <AntDesign name="close" size={24} color="white" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() => {
+                        deleteImage(fullScreenImage);
+                        setFullScreenImage(null);
+                    }}
+                    className="absolute bottom-4 right-4 bg-red-500 rounded-full p-3"
+                >
+                    <EvilIcons name="trash" size={24} color="white" />
+                </TouchableOpacity>
+            </View>
+        );
+    }
 
     if (isLoading) return <Text>Cargando...</Text>;
 
@@ -473,87 +527,61 @@ const ExpenseForm = ({ onFinish }: Props) => {
                         name="observations"
                     />
 
-                    {watch('image') && (
-                        <View className="px-4 pt-4">
-                            <TouchableOpacity
-                                onPress={() =>
-                                    navigation.navigate('FullScreenImage', {
-                                        uri: watch('image')?.uri ?? '',
-                                    })
-                                }
-                            >
-                                <View className="flex-1 relative">
-                                    <Image
-                                        source={{ uri: watch('image')?.uri }}
-                                        style={{
-                                            borderRadius: 6,
-                                            aspectRatio: 9 / 16,
-                                        }}
-                                    />
-                                    {watch('image')?.unsaved && (
-                                        <View className="absolute inset-x-0 inset-y-0 flex items-center justify-center bg-white/70">
-                                            <ActivityIndicator
-                                                className="mb-1"
-                                                size="small"
-                                                color="black"
-                                            />
-                                            <Text className="text-xs text-black">
-                                                Subiendo...
-                                            </Text>
-                                        </View>
+                    <View>
+                        <Text className="mb-2 text-gray-800 font-bold">
+                            Imágenes de comprobante ({imagesAmount} de {MAX_IMAGE_AMOUNT})
+                        </Text>
+
+                        <View className="flex flex-row flex-wrap space-x-4 mb-4">
+                            {watch('images')?.map((image) => (
+                                <ImageThumbnail
+                                    key={image.key || image.uri}
+                                    image={image}
+                                    onImagePress={() => setFullScreenImage(image)}
+                                />
+                            ))}
+
+                            {imagesAmount < MAX_IMAGE_AMOUNT && (
+                                <AddImage
+                                    navigateToCameraScreen={goToCameraScreen}
+                                    selectImage={selectImage}
+                                    maxImageAmount={MAX_IMAGE_AMOUNT}
+                                />
+                            )}
+                        </View>
+                    </View>
+
+                    <View className="mb-4">
+                        <Text className="mb-2 text-gray-800 font-bold">
+                            Archivos adjuntos ({filesAmount})
+                        </Text>
+
+                        <View className="space-y-2 w-full">
+                            {watch('files')?.map((file) => (
+                                <View
+                                    key={file.key || file.uri}
+                                    className="flex-row items-center justify-between bg-background rounded-md mb-2"
+                                >
+                                    {file.unsaved ? (
+                                        <ActivityIndicator size="small" color="black" />
+                                    ) : (
+                                        <FileViewer
+                                            url={fileViewerUrls[file.key]}
+                                            name={file.name}
+                                            size={file.size}
+                                            onDelete={() => deleteFile(file)}
+                                        />
                                     )}
-                                    <TouchableOpacity
-                                        onPress={deleteImage}
-                                        className="flex flex-row items-center justify-center py-1 absolute rounded-full w-8 h-8 bg-black top-2 right-2"
-                                    >
-                                        <AntDesign name="close" size={20} color="white" />
-                                    </TouchableOpacity>
                                 </View>
-                            </TouchableOpacity>
+                            ))}
                         </View>
-                    )}
 
-                    {!watch('image') && !watch('file') && (
-                        <View className="flex flex-col gap-4 p-4">
-                            <TouchableOpacity
-                                onPress={goToCameraScreen}
-                                className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
-                            >
-                                <Text className="font-semibold text-white">
-                                    Sacar foto
-                                </Text>
-                                <EvilIcons name="camera" size={22} color="white" />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={selectImage}
-                                className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
-                            >
-                                <Text className="font-semibold text-white">
-                                    Elegir Imagen
-                                </Text>
-                                <EvilIcons name="image" size={22} color="white" />
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                onPress={selectFile}
-                                className="flex flex-row justify-center items-center bg-black p-4 rounded-xl space-x-4"
-                            >
-                                <Text className="font-semibold text-white">
-                                    Elegir Archivo
-                                </Text>
-                                <EvilIcons name="paperclip" size={22} color="white" />
-                            </TouchableOpacity>
+                        <View className="mt-3">
+                            <Button variant="outline" size="sm" onPress={selectFile}>
+                                <ButtonText>Agregar archivo</ButtonText>
+                            </Button>
                         </View>
-                    )}
-
-                    {watch('file') && (
-                        <FileViewer
-                            url={fileViewerUrl}
-                            name={watch('file')?.name ?? ''}
-                            size={watch('file')?.size}
-                            isUploading={watch('file')?.unsaved}
-                            onDelete={deleteFile}
-                        />
-                    )}
+                    </View>
                 </ScrollView>
             </View>
         </SafeAreaView>

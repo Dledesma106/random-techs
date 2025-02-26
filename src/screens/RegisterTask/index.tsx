@@ -62,6 +62,7 @@ interface FormInputs {
     businessId: string;
     businessName: string;
     assigned: string[];
+    participants: string[];
     images: InputImage[];
     expenses: ExpenseInput[];
     closedAt: Date;
@@ -73,6 +74,8 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
     const [fullScreenImage, setFullScreenImage] = useState<ThumbnailImage | null>(null);
     const [isClosedDatePickerVisible, setClosedDatePickerVisibility] = useState(false);
     const [isStartDatePickerVisible, setStartDatePickerVisibility] = useState(false);
+    const [customParticipant, setCustomParticipant] = useState('');
+    const [selectedOption, setSelectedOption] = useState<string | null>(null);
     const formMethods = useForm<FormInputs>();
     const {
         control,
@@ -133,13 +136,19 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
     const mappedTechs =
         technicians?.technicians
             .filter((tech) => tech.id !== user?.id)
-            .filter((tech) => !watch('assigned')?.includes(tech.id))
+            .filter((tech) => {
+                const participants = watch('participants') || [];
+                if (participants.includes(tech.id)) return false;
+                if (participants.includes(tech.fullName)) return false;
+                return true;
+            })
             .map((tech) => ({
                 label: tech.fullName,
                 value: tech.id,
             })) ?? [];
+    const mappedTechsWithOther = [{ label: 'Otro', value: 'other' }, ...mappedTechs];
     const selectedTechs = technicians?.technicians.filter((tech) =>
-        watch('assigned')?.includes(tech.id),
+        watch('participants')?.includes(tech.id),
     );
     const taskTypes = Object.values(TaskType);
     const mappedTaskTypes = taskTypes?.map((taskType) => ({
@@ -163,11 +172,14 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
         setValue('expenses', [...currentExpenses, expense]);
     };
 
-    const removeExpenseOnForm = (expenseImageKey: string) => {
+    const removeExpenseOnForm = (expenseId: string) => {
         const currentExpenses = watch('expenses') ?? [];
         setValue(
             'expenses',
-            currentExpenses.filter((expense) => expense.imageKey !== expenseImageKey),
+            currentExpenses.filter(
+                (expense) =>
+                    (expense.imageKeys?.[0] || expense.fileKeys?.[0]) !== expenseId,
+            ),
         );
     };
 
@@ -193,6 +205,15 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
 
     const isLoading = isClientsLoading || isTechsLoading || isUpdatePending;
 
+    const addCustomParticipant = () => {
+        if (customParticipant.trim()) {
+            const currentParticipants = watch('participants') || [];
+            setValue('participants', [...currentParticipants, customParticipant]);
+            setCustomParticipant('');
+            setSelectedOption(null);
+        }
+    };
+
     const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
         const {
             actNumber,
@@ -207,22 +228,19 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
             businessName,
             startedAt,
             taskType,
-            assigned,
+            participants,
         } = formData;
 
-        // Validación para cliente "Otro"
         if (clientId === 'other' && !clientName?.trim()) {
             showToast('Debe especificar el nombre del cliente', 'error');
             return;
         }
 
-        // Validación para empresa "Otro"
         if (businessId === 'other' && !businessName?.trim()) {
             showToast('Debe especificar el nombre de la empresa', 'error');
             return;
         }
 
-        // Validación de sucursal cuando el cliente no es "Otro"
         if (clientId !== 'other' && !branchId) {
             showToast('Debe seleccionar una sucursal', 'error');
             return;
@@ -239,7 +257,8 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                 input: {
                     branch: clientId === 'other' ? null : branchId,
                     business: businessId === 'other' ? null : businessId,
-                    assigned: [user?.id ?? '', ...(assigned ?? [])],
+                    assigned: [user?.id ?? ''],
+                    participants: participants || [],
                     taskType,
                     observations,
                     actNumber,
@@ -261,6 +280,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                 businessId: '',
                 businessName: '',
                 assigned: [],
+                participants: [],
                 images: [],
                 expenses: [],
                 closedAt: undefined,
@@ -430,36 +450,97 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                         </View>
 
                         <View>
-                            <Label className="mb-1.5">Tecnicos</Label>
-                            <Dropdown
-                                items={mappedTechs}
-                                placeholder="Selecciona los tecnicos participantes"
-                                value="Selecciona los tecnicos participantes"
-                                onValueChange={(value) =>
-                                    value &&
-                                    setValue('assigned', [
-                                        ...(watch('assigned') ?? []),
-                                        value,
-                                    ])
-                                }
-                            />
-                        </View>
-                        <View className="flex-row flex-wrap">
-                            {selectedTechs &&
-                                selectedTechs.map((tech) => (
-                                    <Chip
-                                        key={tech.id}
-                                        label={tech.firstName}
-                                        onCrossPress={() =>
-                                            setValue(
-                                                'assigned',
-                                                watch('assigned').filter(
-                                                    (techId) => tech.id !== techId,
-                                                ),
-                                            )
+                            <Label className="mb-1.5">Técnicos participantes</Label>
+                            <View className="flex-row items-center space-x-2 mb-2">
+                                <View className="flex-1">
+                                    <Dropdown
+                                        items={mappedTechsWithOther}
+                                        placeholder="Selecciona los participantes"
+                                        value={
+                                            selectedOption ||
+                                            'Selecciona los participantes'
                                         }
+                                        onValueChange={(value) => {
+                                            setSelectedOption(value);
+                                            if (value && value !== 'other') {
+                                                const currentParticipants =
+                                                    watch('participants') || [];
+                                                if (
+                                                    !currentParticipants.includes(value)
+                                                ) {
+                                                    setValue('participants', [
+                                                        ...currentParticipants,
+                                                        value,
+                                                    ]);
+                                                    setSelectedOption(null);
+                                                }
+                                            }
+                                        }}
                                     />
-                                ))}
+                                </View>
+                            </View>
+
+                            {selectedOption === 'other' && (
+                                <View className="flex-row items-center space-x-2 mb-4">
+                                    <View className="flex-1">
+                                        <TextInput
+                                            placeholder="Agregar otro participante"
+                                            value={customParticipant}
+                                            onChangeText={setCustomParticipant}
+                                        />
+                                    </View>
+                                    <TouchableOpacity
+                                        onPress={addCustomParticipant}
+                                        className="bg-black p-2 rounded-md"
+                                    >
+                                        <AntDesign name="plus" size={20} color="white" />
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+
+                            <View className="flex-row flex-wrap mb-4">
+                                {selectedTechs &&
+                                    selectedTechs.map((tech) => (
+                                        <Chip
+                                            key={tech.id}
+                                            label={tech.fullName}
+                                            onCrossPress={() => {
+                                                const currentParticipants =
+                                                    watch('participants') || [];
+                                                setValue(
+                                                    'participants',
+                                                    currentParticipants.filter(
+                                                        (id) => id !== tech.id,
+                                                    ),
+                                                );
+                                            }}
+                                        />
+                                    ))}
+
+                                {watch('participants')
+                                    ?.filter(
+                                        (participant) =>
+                                            !technicians?.technicians?.some(
+                                                (tech) => tech.id === participant,
+                                            ),
+                                    )
+                                    .map((customName) => (
+                                        <Chip
+                                            key={customName}
+                                            label={customName}
+                                            onCrossPress={() => {
+                                                const currentParticipants =
+                                                    watch('participants') || [];
+                                                setValue(
+                                                    'participants',
+                                                    currentParticipants.filter(
+                                                        (name) => name !== customName,
+                                                    ),
+                                                );
+                                            }}
+                                        />
+                                    ))}
+                            </View>
                         </View>
 
                         <View>
@@ -577,9 +658,9 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
 
                             <View className="space-y-2 w-full">
                                 {watch('expenses') &&
-                                    watch('expenses').map((expense) => (
+                                    watch('expenses').map((expense, index) => (
                                         <Button
-                                            key={expense.imageKey}
+                                            key={index}
                                             onPress={() =>
                                                 navigateToExpenseOnTaskForm(expense)
                                             }

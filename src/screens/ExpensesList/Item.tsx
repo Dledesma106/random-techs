@@ -3,11 +3,11 @@ import { es } from 'date-fns/locale';
 import { useState } from 'react';
 import { Text, View, Pressable, ViewProps } from 'react-native';
 
-import { Badge, BadgeText } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { useGetMyExpenses } from '@/hooks/api/expense/useGetMyExpenses';
-import { addDeleteExpenseByIdListener } from '../Expense';
 import { useDeleteExpenseById } from '@/hooks/api/expense/useDeleteExpenseById';
+import { useGetMyExpenses } from '@/hooks/api/expense/useGetMyExpenses';
+import { cn } from '@/lib/utils';
+
+import { addDeleteExpenseByIdListener } from '../Expense';
 
 type ElementType<T> = T extends (infer U)[] ? U : never;
 

@@ -5,7 +5,14 @@ import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import ContentLoader, { Rect } from 'react-content-loader/native';
 import { useForm } from 'react-hook-form';
-import { Text, View, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
+import {
+    Text,
+    View,
+    ScrollView,
+    RefreshControl,
+    TouchableOpacity,
+    ActivityIndicator,
+} from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 import { ExpenseInput } from '@/api/graphql';
@@ -14,11 +21,15 @@ import ConfirmButton from '@/components/ConfirmButton';
 import ImageThumbnail, { ThumbnailImage } from '@/components/ImageThumbnail';
 import { Badge, BadgeText } from '@/components/ui/badge';
 import { Button, ButtonText } from '@/components/ui/button';
+import Chip from '@/components/ui/Chip';
+import Dropdown from '@/components/ui/Dropdown';
 import { Form, FormField } from '@/components/ui/form';
 import { TextInput } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
+import { useFinishTask } from '@/hooks/api/tasks/useFinishTask';
 import { useGetMyAssignedTaskById } from '@/hooks/api/tasks/useGetMyAssignedTaskById';
 import { useUpdateMyAssignedTask } from '@/hooks/api/tasks/useUpdateMyAssignedTask';
+import { useGetTechnicians } from '@/hooks/api/useGetTechnicians';
 import { useDebouncer } from '@/hooks/useDebouncer';
 import useImagePicker from '@/hooks/useImagePicker';
 import { showToast } from '@/lib/toast';
@@ -35,6 +46,7 @@ import { addDeleteExpenseByIdListener } from '../Expense';
 import { addDeleteExpenseOnTaskListener } from '../ExpenseOnTaskForm';
 import { addFullScreenCameraListener } from '../FullScreenCamera';
 import { addRegisterExpenseOnTaskListener } from '../RegisterExpenseOnTask';
+
 const MAX_IMAGE_AMOUNT = 5;
 interface InputImage {
     key: string;
@@ -51,6 +63,7 @@ interface FormInputs {
     expenseIdsToDelete: string[];
     closedAt: Date;
     startedAt: Date;
+    participants: string[];
 }
 
 const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
@@ -69,6 +82,11 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
     } = formMethods;
     const { pickImage } = useImagePicker();
     const { mutateAsync: updateTask } = useUpdateMyAssignedTask();
+    const { mutateAsync: finishTask, isPending: isFinishing } = useFinishTask();
+    const [customParticipant, setCustomParticipant] = useState('');
+    const [selectedOption, setSelectedOption] = useState<string | null>(null);
+    const { data: techsData } = useGetTechnicians();
+    const [participantsChanged, setParticipantsChanged] = useState(false);
 
     useEffect(() => {
         const task = data?.myAssignedTaskById;
@@ -80,6 +98,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
             startedAt: task.startedAt ? new Date(task.startedAt) : undefined,
             images: undefined,
             expenses: undefined,
+            participants: task.participants || [],
         });
     }, [data]);
 
@@ -100,11 +119,14 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
         setValue('expenses', [...currentExpenses, expense]);
     };
 
-    const removeExpenseOnForm = (expenseImageKey: string) => {
+    const removeExpenseOnForm = (expenseId: string) => {
         const currentExpenses = watch('expenses') ?? [];
         setValue(
             'expenses',
-            currentExpenses.filter((expense) => expense.imageKey !== expenseImageKey),
+            currentExpenses.filter(
+                (expense) =>
+                    (expense.imageKeys?.[0] || expense.fileKeys?.[0]) !== expenseId,
+            ),
         );
     };
 
@@ -138,36 +160,6 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
         navigation.navigate('ExpenseOnTaskForm', { expense });
     }
 
-    // const onSubmit: SubmitHandler<FormInputs> = async (formData) => {
-    //     const {
-    //         actNumber,
-    //         images,
-    //         observations,
-    //         closedAt,
-    //         expenses,
-    //         imageIdsToDelete,
-    //         expenseIdsToDelete,
-    //         startedAt,
-    //     } = formData;
-    //     const imageKeys = images ? images.map((image) => image.key) : [];
-    //     try {
-    //         await updateTask({
-    //             input: {
-    //                 observations,
-    //                 startedAt,
-    //                 id,
-    //                 actNumber,
-    //                 imageKeys,
-    //                 closedAt,
-    //                 expenses,
-    //                 imageIdsToDelete,
-    //                 expenseIdsToDelete,
-    //             },
-    //         });
-    //     } catch (error) {}
-    //     reset();
-    // };
-
     const handleDeleteImage = async (image: ThumbnailImage) => {
         if (image.id) deleteImageById(image.id);
         if (image.key) {
@@ -189,9 +181,11 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
 
     const debouncedSave = useDebouncer(async (formData: FormInputs) => {
         try {
+            console.log('Guardando cambios:', JSON.stringify(formData.participants));
             await updateTask({
                 input: {
                     id,
+                    participants: formData.participants || [],
                     actNumber: formData.actNumber,
                     observations: formData.observations,
                     imageKeys: formData.images?.map((image) => image.key) ?? [],
@@ -217,16 +211,70 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
         String(new Date(watch('closedAt'))) !==
             String(new Date(data?.myAssignedTaskById?.closedAt ?? '')) ||
         String(new Date(watch('startedAt'))) !==
-            String(new Date(data?.myAssignedTaskById?.startedAt ?? ''));
+            String(new Date(data?.myAssignedTaskById?.startedAt ?? '')) ||
+        JSON.stringify(watch('participants')) !==
+            JSON.stringify(data?.myAssignedTaskById?.participants || []);
 
     useEffect(() => {
         const subscription = watch((formData) => {
-            if (isFormDirty) {
+            if (isFormDirty || participantsChanged) {
                 debouncedSave(formData as FormInputs);
             }
         });
         return () => subscription.unsubscribe();
-    }, [watch, debouncedSave, isFormDirty]);
+    }, [watch, debouncedSave, isFormDirty, participantsChanged]);
+
+    useEffect(() => {
+        if (participantsChanged) {
+            const formData = watch() as FormInputs;
+            console.log(
+                'Participantes cambiados, guardando:',
+                JSON.stringify(formData.participants),
+            );
+            debouncedSave(formData);
+            setParticipantsChanged(false);
+        }
+    }, [participantsChanged, watch, debouncedSave]);
+
+    const handleFinishTask = async () => {
+        try {
+            await finishTask({ id });
+        } catch (error) {
+            showToast('Error al finalizar la tarea', 'error');
+        }
+    };
+
+    // Preparar los técnicos para el dropdown, filtrando los ya seleccionados por ID o nombre
+    const mappedTechs = [
+        { label: 'Otro', value: 'other' },
+        ...(techsData?.technicians
+            ?.filter((tech) => {
+                const participants = watch('participants') || [];
+                // Filtrar si el ID ya está en la lista
+                if (participants.includes(tech.id)) return false;
+                // Filtrar si el nombre ya está en la lista
+                if (participants.includes(tech.fullName)) return false;
+                return true;
+            })
+            .map((tech) => ({
+                label: tech.fullName,
+                value: tech.id,
+            })) || []),
+    ];
+
+    // Función para agregar un participante personalizado
+    const addCustomParticipant = () => {
+        if (customParticipant.trim()) {
+            const currentParticipants = watch('participants') || [];
+            setValue('participants', [...currentParticipants, customParticipant], {
+                shouldDirty: true,
+                shouldTouch: true,
+            });
+            setParticipantsChanged(true);
+            setCustomParticipant('');
+            setSelectedOption(null);
+        }
+    };
 
     if (fullScreenImage)
         return (
@@ -321,10 +369,113 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                         </View>
 
                         <View>
-                            <Label className="mb-1.5">Tecnicos asignados</Label>
-                            <Text className="text-muted-foreground">
-                                {task.assigned.map((tech) => tech.fullName).join(', ')}
-                            </Text>
+                            <Label className="mb-1.5">Técnicos participantes</Label>
+
+                            {task.status !== TaskStatus.Aprobada && (
+                                <>
+                                    <View className="flex-row items-center space-x-2 mb-2">
+                                        <View className="flex-1">
+                                            <Dropdown
+                                                items={mappedTechs}
+                                                placeholder="Selecciona los participantes"
+                                                value={
+                                                    selectedOption ||
+                                                    'Selecciona los participantes'
+                                                }
+                                                onValueChange={(value) => {
+                                                    setSelectedOption(value);
+                                                    if (value && value !== 'other') {
+                                                        const currentParticipants =
+                                                            watch('participants') || [];
+                                                        if (
+                                                            !currentParticipants.includes(
+                                                                value,
+                                                            )
+                                                        ) {
+                                                            setValue(
+                                                                'participants',
+                                                                [
+                                                                    ...currentParticipants,
+                                                                    value,
+                                                                ],
+                                                                {
+                                                                    shouldDirty: true,
+                                                                    shouldTouch: true,
+                                                                },
+                                                            );
+                                                            setParticipantsChanged(true);
+                                                            setSelectedOption(null);
+                                                        }
+                                                    }
+                                                }}
+                                            />
+                                        </View>
+                                    </View>
+
+                                    {selectedOption === 'other' && (
+                                        <View className="flex-row items-center space-x-2 mb-4">
+                                            <View className="flex-1">
+                                                <TextInput
+                                                    placeholder="Agregar otro participante"
+                                                    value={customParticipant}
+                                                    onChangeText={setCustomParticipant}
+                                                />
+                                            </View>
+                                            <TouchableOpacity
+                                                onPress={addCustomParticipant}
+                                                className="bg-black p-2 rounded-md"
+                                            >
+                                                <AntDesign
+                                                    name="plus"
+                                                    size={20}
+                                                    color="white"
+                                                />
+                                            </TouchableOpacity>
+                                        </View>
+                                    )}
+                                </>
+                            )}
+
+                            <View className="flex-row flex-wrap mb-4">
+                                {watch('participants')?.map((participant) => {
+                                    // Verificar si es un ID de técnico o un nombre personalizado
+                                    const tech = techsData?.technicians?.find(
+                                        (t) => t.id === participant,
+                                    );
+                                    return (
+                                        <Chip
+                                            key={participant}
+                                            label={tech ? tech.fullName : participant}
+                                            onCrossPress={
+                                                task.status !== TaskStatus.Aprobada
+                                                    ? () => {
+                                                          const currentParticipants =
+                                                              watch('participants') || [];
+                                                          setValue(
+                                                              'participants',
+                                                              currentParticipants.filter(
+                                                                  (p) =>
+                                                                      p !== participant,
+                                                              ),
+                                                              {
+                                                                  shouldDirty: true,
+                                                                  shouldTouch: true,
+                                                              },
+                                                          );
+                                                          setParticipantsChanged(true);
+                                                      }
+                                                    : undefined
+                                            } // No mostrar la X cuando está aprobada
+                                        />
+                                    );
+                                })}
+
+                                {watch('participants')?.length === 0 && (
+                                    <Text className="text-muted-foreground">
+                                        No hay participantes registrados
+                                    </Text>
+                                )}
+                            </View>
                         </View>
 
                         <View>
@@ -511,9 +662,9 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                     ))}
 
                                 {watch('expenses') &&
-                                    watch('expenses').map((expense) => (
+                                    watch('expenses').map((expense, index) => (
                                         <Button
-                                            key={expense.imageKey}
+                                            key={index}
                                             onPress={() =>
                                                 navigateToExpenseOnTaskForm(expense)
                                             }
@@ -606,6 +757,32 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                         </View>
                     </View>
                 </ScrollView>
+
+                {task.status !== TaskStatus.Aprobada &&
+                    task.status !== TaskStatus.Finalizada && (
+                        <View className="absolute bottom-6 right-0 left-0 flex items-center">
+                            <TouchableOpacity
+                                onPress={handleFinishTask}
+                                disabled={isFinishing}
+                                className="bg-black py-3 px-6 rounded-full flex-row items-center"
+                            >
+                                {isFinishing ? (
+                                    <ActivityIndicator size="small" color="white" />
+                                ) : (
+                                    <>
+                                        <Text className="text-white font-bold mr-2">
+                                            Finalizar Tarea
+                                        </Text>
+                                        <AntDesign
+                                            name="checkcircleo"
+                                            size={16}
+                                            color="white"
+                                        />
+                                    </>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    )}
             </View>
         );
     }

@@ -972,6 +972,18 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "discountAmount",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "Float",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "doneBy",
                         "description": null,
                         "args": [],
@@ -1032,13 +1044,25 @@
                         "deprecationReason": null
                     },
                     {
-                        "name": "file",
+                        "name": "files",
                         "description": null,
                         "args": [],
                         "type": {
-                            "kind": "OBJECT",
-                            "name": "File",
-                            "ofType": null
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "LIST",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "OBJECT",
+                                        "name": "File",
+                                        "ofType": null
+                                    }
+                                }
+                            }
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
@@ -1060,13 +1084,25 @@
                         "deprecationReason": null
                     },
                     {
-                        "name": "image",
+                        "name": "images",
                         "description": null,
                         "args": [],
                         "type": {
-                            "kind": "OBJECT",
-                            "name": "Image",
-                            "ofType": null
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "LIST",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "OBJECT",
+                                        "name": "Image",
+                                        "ofType": null
+                                    }
+                                }
+                            }
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
@@ -1309,36 +1345,60 @@
                         "deprecationReason": null
                     },
                     {
-                        "name": "fileKey",
+                        "name": "fileKeys",
                         "description": null,
                         "type": {
-                            "kind": "SCALAR",
-                            "name": "String",
-                            "ofType": null
+                            "kind": "LIST",
+                            "name": null,
+                            "ofType": {
+                                "kind": "NON_NULL",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                }
+                            }
                         },
                         "defaultValue": null,
                         "isDeprecated": false,
                         "deprecationReason": null
                     },
                     {
-                        "name": "filename",
+                        "name": "filenames",
                         "description": null,
                         "type": {
-                            "kind": "SCALAR",
-                            "name": "String",
-                            "ofType": null
+                            "kind": "LIST",
+                            "name": null,
+                            "ofType": {
+                                "kind": "NON_NULL",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                }
+                            }
                         },
                         "defaultValue": null,
                         "isDeprecated": false,
                         "deprecationReason": null
                     },
                     {
-                        "name": "imageKey",
+                        "name": "imageKeys",
                         "description": null,
                         "type": {
-                            "kind": "SCALAR",
-                            "name": "String",
-                            "ofType": null
+                            "kind": "LIST",
+                            "name": null,
+                            "ofType": {
+                                "kind": "NON_NULL",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                }
+                            }
                         },
                         "defaultValue": null,
                         "isDeprecated": false,
@@ -1361,12 +1421,20 @@
                         "deprecationReason": null
                     },
                     {
-                        "name": "mimeType",
+                        "name": "mimeTypes",
                         "description": null,
                         "type": {
-                            "kind": "SCALAR",
-                            "name": "String",
-                            "ofType": null
+                            "kind": "LIST",
+                            "name": null,
+                            "ofType": {
+                                "kind": "NON_NULL",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                }
+                            }
                         },
                         "defaultValue": null,
                         "isDeprecated": false,
@@ -1413,12 +1481,20 @@
                         "deprecationReason": null
                     },
                     {
-                        "name": "size",
+                        "name": "sizes",
                         "description": null,
                         "type": {
-                            "kind": "SCALAR",
-                            "name": "Int",
-                            "ofType": null
+                            "kind": "LIST",
+                            "name": null,
+                            "ofType": {
+                                "kind": "NON_NULL",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "SCALAR",
+                                    "name": "Int",
+                                    "ofType": null
+                                }
+                            }
                         },
                         "defaultValue": null,
                         "isDeprecated": false,
@@ -1584,6 +1660,12 @@
                     },
                     {
                         "name": "Otro",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "Viatico",
                         "description": null,
                         "isDeprecated": false,
                         "deprecationReason": null
@@ -2253,7 +2335,7 @@
                             "name": null,
                             "ofType": {
                                 "kind": "OBJECT",
-                                "name": "Business",
+                                "name": "BusinessResult",
                                 "ofType": null
                             }
                         },
@@ -2965,6 +3047,39 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "finishTask",
+                        "description": null,
+                        "args": [
+                            {
+                                "name": "id",
+                                "description": null,
+                                "type": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "SCALAR",
+                                        "name": "String",
+                                        "ofType": null
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "OBJECT",
+                                "name": "TaskCrudResult",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "generateApprovedExpensesReport",
                         "description": null,
                         "args": [
@@ -3033,13 +3148,9 @@
                                 "name": "endDate",
                                 "description": null,
                                 "type": {
-                                    "kind": "NON_NULL",
-                                    "name": null,
-                                    "ofType": {
-                                        "kind": "SCALAR",
-                                        "name": "String",
-                                        "ofType": null
-                                    }
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
                                 },
                                 "defaultValue": null,
                                 "isDeprecated": false,
@@ -3069,13 +3180,9 @@
                                 "name": "startDate",
                                 "description": null,
                                 "type": {
-                                    "kind": "NON_NULL",
-                                    "name": null,
-                                    "ofType": {
-                                        "kind": "SCALAR",
-                                        "name": "String",
-                                        "ofType": null
-                                    }
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
                                 },
                                 "defaultValue": null,
                                 "isDeprecated": false,
@@ -3283,7 +3390,7 @@
                             "name": null,
                             "ofType": {
                                 "kind": "OBJECT",
-                                "name": "Business",
+                                "name": "BusinessResult",
                                 "ofType": null
                             }
                         },
@@ -3382,6 +3489,51 @@
                             "ofType": {
                                 "kind": "OBJECT",
                                 "name": "ClientResult",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "updateExpenseDiscountAmount",
+                        "description": null,
+                        "args": [
+                            {
+                                "name": "discountAmount",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "Float",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "expenseId",
+                                "description": null,
+                                "type": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "SCALAR",
+                                        "name": "String",
+                                        "ofType": null
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "OBJECT",
+                                "name": "ExpenseCrudResult",
                                 "ofType": null
                             }
                         },
@@ -3873,6 +4025,26 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "participants",
+                        "description": null,
+                        "type": {
+                            "kind": "LIST",
+                            "name": null,
+                            "ofType": {
+                                "kind": "NON_NULL",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                }
+                            }
+                        },
+                        "defaultValue": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "startedAt",
                         "description": null,
                         "type": {
@@ -4070,6 +4242,30 @@
                                 "kind": "ENUM",
                                 "name": "PreventiveStatus",
                                 "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "tasks",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "LIST",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "OBJECT",
+                                        "name": "Task",
+                                        "ofType": null
+                                    }
+                                }
                             }
                         },
                         "isDeprecated": false,
@@ -4633,7 +4829,44 @@
                     {
                         "name": "businesses",
                         "description": null,
-                        "args": [],
+                        "args": [
+                            {
+                                "name": "search",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "skip",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "Int",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "take",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "Int",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
                         "type": {
                             "kind": "NON_NULL",
                             "name": null,
@@ -4655,9 +4888,87 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "businessesCount",
+                        "description": null,
+                        "args": [
+                            {
+                                "name": "search",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "Int",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "cities",
                         "description": null,
-                        "args": [],
+                        "args": [
+                            {
+                                "name": "provinceId",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "search",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "skip",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "Int",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "take",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "Int",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
                         "type": {
                             "kind": "NON_NULL",
                             "name": null,
@@ -4673,6 +4984,47 @@
                                         "ofType": null
                                     }
                                 }
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "citiesCount",
+                        "description": null,
+                        "args": [
+                            {
+                                "name": "provinceId",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "search",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "Int",
+                                "ofType": null
                             }
                         },
                         "isDeprecated": false,
@@ -4752,9 +5104,17 @@
                                 "name": "businessId",
                                 "description": null,
                                 "type": {
-                                    "kind": "SCALAR",
-                                    "name": "String",
-                                    "ofType": null
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "SCALAR",
+                                            "name": "String",
+                                            "ofType": null
+                                        }
+                                    }
                                 },
                                 "defaultValue": null,
                                 "isDeprecated": false,
@@ -4764,9 +5124,17 @@
                                 "name": "cityId",
                                 "description": null,
                                 "type": {
-                                    "kind": "SCALAR",
-                                    "name": "String",
-                                    "ofType": null
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "SCALAR",
+                                            "name": "String",
+                                            "ofType": null
+                                        }
+                                    }
                                 },
                                 "defaultValue": null,
                                 "isDeprecated": false,
@@ -4789,11 +5157,23 @@
                                 "deprecationReason": null
                             },
                             {
-                                "name": "provinceId",
+                                "name": "skip",
                                 "description": null,
                                 "type": {
                                     "kind": "SCALAR",
-                                    "name": "String",
+                                    "name": "Int",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "take",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "Int",
                                     "ofType": null
                                 },
                                 "defaultValue": null,
@@ -4822,9 +5202,139 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "clientBranchesCount",
+                        "description": null,
+                        "args": [
+                            {
+                                "name": "businessId",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "SCALAR",
+                                            "name": "String",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "cityId",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "SCALAR",
+                                            "name": "String",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "clientId",
+                                "description": null,
+                                "type": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "SCALAR",
+                                        "name": "String",
+                                        "ofType": null
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "provinceId",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "SCALAR",
+                                            "name": "String",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "Int",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "clients",
                         "description": null,
-                        "args": [],
+                        "args": [
+                            {
+                                "name": "search",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "skip",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "Int",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "take",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "Int",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
                         "type": {
                             "kind": "NON_NULL",
                             "name": null,
@@ -4840,6 +5350,35 @@
                                         "ofType": null
                                     }
                                 }
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "clientsCount",
+                        "description": null,
+                        "args": [
+                            {
+                                "name": "search",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "Int",
+                                "ofType": null
                             }
                         },
                         "isDeprecated": false,
@@ -4879,6 +5418,30 @@
                         "description": null,
                         "args": [
                             {
+                                "name": "expenseDateFrom",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "DateTime",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "expenseDateTo",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "DateTime",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
                                 "name": "expenseType",
                                 "description": null,
                                 "type": {
@@ -4890,6 +5453,26 @@
                                         "ofType": {
                                             "kind": "ENUM",
                                             "name": "ExpenseType",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "paySource",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "ENUM",
+                                            "name": "ExpensePaySource",
                                             "ofType": null
                                         }
                                     }
@@ -4988,6 +5571,30 @@
                         "description": null,
                         "args": [
                             {
+                                "name": "expenseDateFrom",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "DateTime",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "expenseDateTo",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "DateTime",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
                                 "name": "expenseType",
                                 "description": null,
                                 "type": {
@@ -4999,6 +5606,26 @@
                                         "ofType": {
                                             "kind": "ENUM",
                                             "name": "ExpenseType",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "paySource",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "ENUM",
+                                            "name": "ExpensePaySource",
                                             "ofType": null
                                         }
                                     }
@@ -5279,7 +5906,112 @@
                     {
                         "name": "preventives",
                         "description": null,
-                        "args": [],
+                        "args": [
+                            {
+                                "name": "assigned",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "SCALAR",
+                                            "name": "String",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "business",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "SCALAR",
+                                            "name": "String",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "city",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "SCALAR",
+                                            "name": "String",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "client",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "SCALAR",
+                                            "name": "String",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "skip",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "Int",
+                                    "ofType": null
+                                },
+                                "defaultValue": "0",
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "take",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "Int",
+                                    "ofType": null
+                                },
+                                "defaultValue": "10",
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
                         "type": {
                             "kind": "NON_NULL",
                             "name": null,
@@ -5301,7 +6033,104 @@
                         "deprecationReason": null
                     },
                     {
-                        "name": "provinceById",
+                        "name": "preventivesCount",
+                        "description": null,
+                        "args": [
+                            {
+                                "name": "assigned",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "SCALAR",
+                                            "name": "String",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "business",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "SCALAR",
+                                            "name": "String",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "city",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "SCALAR",
+                                            "name": "String",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "client",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "SCALAR",
+                                            "name": "String",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "Int",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "province",
                         "description": null,
                         "args": [
                             {
@@ -5336,7 +6165,44 @@
                     {
                         "name": "provinces",
                         "description": null,
-                        "args": [],
+                        "args": [
+                            {
+                                "name": "search",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "skip",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "Int",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "take",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "Int",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
                         "type": {
                             "kind": "NON_NULL",
                             "name": null,
@@ -5352,6 +6218,35 @@
                                         "ofType": null
                                     }
                                 }
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "provincesCount",
+                        "description": null,
+                        "args": [
+                            {
+                                "name": "search",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "Int",
+                                "ofType": null
                             }
                         },
                         "isDeprecated": false,
@@ -5776,7 +6671,84 @@
                     {
                         "name": "users",
                         "description": null,
-                        "args": [],
+                        "args": [
+                            {
+                                "name": "cityId",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "SCALAR",
+                                            "name": "String",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "roles",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "ENUM",
+                                            "name": "Role",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "search",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "skip",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "Int",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "take",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "Int",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
                         "type": {
                             "kind": "NON_NULL",
                             "name": null,
@@ -5792,6 +6764,75 @@
                                         "ofType": null
                                     }
                                 }
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "usersCount",
+                        "description": null,
+                        "args": [
+                            {
+                                "name": "cityId",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "SCALAR",
+                                            "name": "String",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "roles",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "ENUM",
+                                            "name": "Role",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "search",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "Int",
+                                "ofType": null
                             }
                         },
                         "isDeprecated": false,
@@ -6147,6 +7188,30 @@
                                 "kind": "SCALAR",
                                 "name": "DateTime",
                                 "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "participants",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "LIST",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "SCALAR",
+                                        "name": "String",
+                                        "ofType": null
+                                    }
+                                }
                             }
                         },
                         "isDeprecated": false,
@@ -6700,6 +7765,26 @@
                             "kind": "SCALAR",
                             "name": "String",
                             "ofType": null
+                        },
+                        "defaultValue": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "participants",
+                        "description": null,
+                        "type": {
+                            "kind": "LIST",
+                            "name": null,
+                            "ofType": {
+                                "kind": "NON_NULL",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                }
+                            }
                         },
                         "defaultValue": null,
                         "isDeprecated": false,

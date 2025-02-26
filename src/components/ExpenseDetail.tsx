@@ -15,12 +15,12 @@ export type ExpenseDetailType =
           Partial<
               Pick<
                   ExpenseInput,
-                  'imageKey' | 'fileKey' | 'filename' | 'mimeType' | 'size'
+                  'imageKeys' | 'fileKeys' | 'filenames' | 'mimeTypes' | 'sizes'
               >
           >)
     | (ExpenseInput & {
-          image?: { url: string } | null;
-          file?: { url: string; filename?: string; size?: number } | null;
+          images?: { url: string }[] | null;
+          files?: { url: string; filename?: string; size?: number }[] | null;
           createdAt?: string;
       });
 
@@ -35,31 +35,69 @@ const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
         onDelete();
     };
     const [isLoading, setIsLoading] = useState(true);
-    const [imageUrl, setImageUrl] = useState<string>(expense?.image?.url ?? '');
-    const [fileUrl, setFileUrl] = useState<string>(expense?.file?.url ?? '');
+    const [imageUrls, setImageUrls] = useState<string[]>([]);
+    const [fileUrls, setFileUrls] = useState<
+        { url: string; filename: string; size: number }[]
+    >([]);
 
     useEffect(() => {
-        const getImageOrFileUrl = async () => {
-            if (expense?.image || expense?.imageKey) {
-                setImageUrl(
-                    expense.image?.url ?? (await getS3SignedUrl(expense.imageKey ?? '')),
-                );
+        const getImagesAndFilesUrls = async () => {
+            const images: string[] = [];
+            const files: { url: string; filename: string; size: number }[] = [];
+
+            // Procesar todas las imágenes disponibles
+            // Primero las imágenes ya con URL
+            if ('images' in expense && expense.images && expense.images.length > 0) {
+                for (const img of expense.images) {
+                    if (img.url) images.push(img.url);
+                }
             }
-            if (expense?.file || expense?.fileKey) {
-                setFileUrl(
-                    expense.file?.url ??
-                        (
-                            await getFileSignedUrl(
-                                expense.fileKey ?? '',
-                                expense.mimeType ?? '',
-                            )
-                        ).url,
-                );
+
+            // Finalmente las claves de imágenes múltiples
+            if (expense.imageKeys && expense.imageKeys.length > 0) {
+                for (const key of expense.imageKeys) {
+                    if (key) {
+                        const url = await getS3SignedUrl(key);
+                        images.push(url);
+                    }
+                }
             }
+
+            // Procesar archivos
+            if ('files' in expense && expense.files && expense.files.length > 0) {
+                for (const file of expense.files) {
+                    if (file.url) {
+                        files.push({
+                            url: file.url,
+                            filename: file.filename || 'archivo.pdf',
+                            size: file.size || 0,
+                        });
+                    }
+                }
+            }
+
+            // Procesar claves de archivos múltiples
+            if (expense.fileKeys && expense.fileKeys.length > 0) {
+                for (let i = 0; i < expense.fileKeys.length; i++) {
+                    const key = expense.fileKeys[i];
+                    if (key) {
+                        const mimeType = expense.mimeTypes?.[i] || 'application/pdf';
+                        const result = await getFileSignedUrl(key, mimeType);
+                        files.push({
+                            url: result.url,
+                            filename: expense.filenames?.[i] || `archivo_${i + 1}.pdf`,
+                            size: expense.sizes?.[i] || 0,
+                        });
+                    }
+                }
+            }
+
+            setImageUrls(images);
+            setFileUrls(files);
             setIsLoading(false);
         };
 
-        getImageOrFileUrl();
+        getImagesAndFilesUrls();
     }, [expense]);
 
     if (isLoading || !expense)
@@ -159,52 +197,49 @@ const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
                     </View>
                 )}
 
-                {/* <View className="mb-4">
-                        <Text className="mb-2 text-gray-800 font-bold">Estado</Text>
-                        <Text className="text-gray-600">{expense.status}</Text>
-                    </View> */}
-
-                {/* <View className="mb-4">
-                        <Text className="mb-2 text-gray-800 font-bold">Auditor</Text>
-                        <Text className="text-gray-600">
-                            {expense.auditor ? expense.auditor.fullName : 'Sin asignar'}
-                        </Text>
-                    </View> */}
-
-                {expense.image && (
+                {imageUrls.length > 0 && (
                     <View className="mb-4">
-                        <Text className="mb-2 text-gray-800 font-bold">Imagen</Text>
-
-                        <TouchableOpacity
-                            onPress={() =>
-                                navigation.navigate('FullScreenImage', {
-                                    uri: imageUrl ?? '',
-                                })
-                            }
-                            className="mx-auto w-8/12"
-                        >
-                            <Image
-                                className="bg-gray-200 mb-14"
-                                source={{ uri: imageUrl }}
-                                style={{
-                                    borderRadius: 6,
-                                    aspectRatio: 9 / 16,
-                                }}
-                            />
-                        </TouchableOpacity>
+                        <Text className="mb-2 text-gray-800 font-bold">Imágenes</Text>
+                        <View className="flex-row flex-wrap">
+                            {imageUrls.map((url, index) => (
+                                <TouchableOpacity
+                                    key={`image-${index}`}
+                                    onPress={() =>
+                                        navigation.navigate('FullScreenImage', {
+                                            uri: url,
+                                        })
+                                    }
+                                    className="mx-1 mb-2 w-[45%]"
+                                >
+                                    <Image
+                                        className="bg-gray-200"
+                                        source={{ uri: url }}
+                                        style={{
+                                            borderRadius: 6,
+                                            aspectRatio: 9 / 16,
+                                        }}
+                                    />
+                                </TouchableOpacity>
+                            ))}
+                        </View>
                     </View>
                 )}
 
-                {(expense.file || expense.fileKey) && (
+                {fileUrls.length > 0 && (
                     <View className="mb-4">
                         <Text className="mb-2 text-gray-800 font-bold">
-                            Archivo adjunto
+                            Archivos adjuntos
                         </Text>
-                        <FileViewer
-                            url={fileUrl}
-                            name={expense.file?.filename ?? expense.filename ?? ''}
-                            size={expense.file?.size ?? expense.size ?? 0}
-                        />
+                        <View className="space-y-2">
+                            {fileUrls.map((file, index) => (
+                                <FileViewer
+                                    key={`file-${index}`}
+                                    url={file.url}
+                                    name={file.filename}
+                                    size={file.size}
+                                />
+                            ))}
+                        </View>
                     </View>
                 )}
             </View>
