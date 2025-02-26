@@ -46,6 +46,7 @@ query myAssignedTaskById($id: String!) {
         createdAt
         closedAt
         startedAt
+        participants
         description
         observations
         businessName
@@ -76,10 +77,7 @@ query myAssignedTaskById($id: String!) {
         }
         assigned {
             id
-            firstName
-            lastName
             fullName
-            email
         }
         expenses {
             id
@@ -88,13 +86,13 @@ query myAssignedTaskById($id: String!) {
             paySourceBank
             expenseType
             createdAt
-            image {
+            images {
                 id
                 url
                 urlExpire
                 key
             }
-            file {
+            files {
                 id
                 url
                 urlExpire
@@ -172,7 +170,13 @@ mutation createMyTask($input: MyTaskInput!) {
                 createdAt
                 installments
                 expenseDate
-                image {
+                images {
+                    id
+                    url
+                    urlExpire
+                    key
+                }
+                files {
                     id
                     url
                     urlExpire
@@ -217,7 +221,13 @@ mutation updateMyAssignedTask($input: UpdateMyTaskInput!) {
                 createdAt
                 installments
                 expenseDate
-                image {
+                images {
+                    id
+                    url
+                    urlExpire
+                    key
+                }
+                files {
                     id
                     url
                     urlExpire
@@ -256,4 +266,25 @@ mutation DeleteImage($taskId: String!, $imageId: String!) {
             }
         }
     }
+}
+
+mutation FinishTask($id: String!) {
+  finishTask(id: $id) {
+    success
+    message
+    task {
+      id
+      taskNumber
+      status
+      description
+      observations
+      closedAt
+      startedAt
+      participants
+      assigned {
+        id
+        fullName
+      }
+    }
+  }
 }

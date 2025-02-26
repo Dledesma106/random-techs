@@ -27,17 +27,17 @@ export const useCreateExpense = () => {
                 client.setQueryData<TaskByIdQuery>(
                     TASK_BY_ID_QUERY_KEY(taskId),
                     (oldData) => {
-                        if (!oldData || !oldData.myAssignedTaskById) {
-                            return oldData;
-                        }
+                        if (!oldData?.myAssignedTaskById) return oldData;
                         if (!newExpense) return oldData;
-                        const newData: TaskByIdQuery = {
+
+                        return {
                             ...oldData,
                             myAssignedTaskById: {
                                 ...oldData.myAssignedTaskById,
                                 expenses: [
                                     ...oldData.myAssignedTaskById.expenses,
                                     {
+                                        ...newExpense,
                                         amount: expenseData.amount,
                                         createdAt: new Date().toISOString(),
                                         registeredBy: {
@@ -45,47 +45,38 @@ export const useCreateExpense = () => {
                                             email: 'me',
                                             fullName: 'me',
                                         },
-                                        id: newExpense.id,
-                                        paySource: expenseData.paySource,
-                                        expenseType: expenseData.expenseType,
                                         status: ExpenseStatus.Enviado,
-                                        image: newExpense.image
-                                            ? {
-                                                  id: newExpense.image.id,
-                                                  url: newExpense.image.url,
-                                                  key: newExpense.image.key,
-                                                  urlExpire: new Date().toISOString(),
-                                              }
-                                            : null,
-                                        file: newExpense.file
-                                            ? {
-                                                  id: newExpense.file.id,
-                                                  url: newExpense.file.url,
-                                                  key: newExpense.file.key,
-                                                  urlExpire: new Date().toISOString(),
-                                              }
-                                            : null,
-                                        paySourceBank: newExpense.paySourceBank,
-                                        installments: newExpense.installments,
-                                        expenseDate: newExpense.expenseDate,
-                                        doneBy: newExpense.doneBy,
-                                        observations: newExpense.observations,
+                                        images:
+                                            expenseData.imageKeys?.map((key) => ({
+                                                id: key,
+                                                url: '',
+                                                key: key,
+                                                urlExpire: new Date().toISOString(),
+                                            })) || [],
+                                        files:
+                                            expenseData.fileKeys?.map((key, index) => ({
+                                                id: key,
+                                                url: '',
+                                                key: key,
+                                                urlExpire: new Date().toISOString(),
+                                                filename:
+                                                    expenseData.filenames?.[index] || '',
+                                                size: expenseData.sizes?.[index] || 0,
+                                            })) || [],
                                     },
                                 ],
                             },
                         };
-                        return newData;
                     },
                 );
             } else {
                 client.setQueryData<MyExpensesQuery>(['expenses'], (oldData) => {
-                    if (!oldData || !oldData.myExpenses) return oldData;
+                    if (!oldData?.myExpenses) return oldData;
                     if (!newExpense) return oldData;
-                    const newData: MyExpensesQuery = {
+                    return {
                         ...oldData,
                         myExpenses: [...oldData.myExpenses, newExpense],
                     };
-                    return newData;
                 });
             }
             showToast('Gasto registrado', 'success');

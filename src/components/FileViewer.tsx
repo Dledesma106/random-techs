@@ -43,7 +43,7 @@ const FileViewer = ({
     };
 
     return (
-        <View className={className}>
+        <View className={`${className} w-full`}>
             <View className="flex-1 relative p-4 border border-gray-200 rounded-lg">
                 {isUploading ? (
                     <View className="flex-1 items-center justify-center">

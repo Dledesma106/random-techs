@@ -1,10 +1,12 @@
+import { Text, TouchableOpacity, View } from 'react-native';
+
+import Item from './Item';
+
 import RefreshableScroll from '@/components/RefreshableScroll';
 import Header from '@/components/ui/Header';
 import { useGetMyExpenses } from '@/hooks/api/expense/useGetMyExpenses';
-import { ExpensesListScreenProp } from '@/navigation/types';
-import { Text, TouchableOpacity, View } from 'react-native';
-import Item from './Item';
 import { cn } from '@/lib/utils';
+import { ExpensesListScreenProp } from '@/navigation/types';
 
 const ExpensesList = ({ navigation }: ExpensesListScreenProp) => {
     const { data: expenses, isFetching, refetch, isLoading } = useGetMyExpenses();
