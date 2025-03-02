@@ -36,11 +36,13 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
         eas: {
             projectId: '27b396d4-0e33-4573-ab58-f18a85482277',
         },
-        awsAccessKeyId: process.env.EXPO_PUBLIC_AWS_ACCESS_KEY_ID,
-        awsSecretAccessKey: process.env.EXPO_PUBLIC_AWS_SECRET_ACCESS_KEY,
-        awsRegion: process.env.EXPO_PUBLIC_AWS_REGION,
-        awsBucketName: process.env.EXPO_PUBLIC_AWS_BUCKET_NAME,
-        apiHost: process.env.EXPO_PUBLIC_API_HOST,
+        awsAccessKeyId:
+            process.env.AWS_ACCESS_KEY_ID ?? process.env.DEV_AWS_ACCESS_KEY_ID,
+        awsSecretAccessKey:
+            process.env.AWS_SECRET_ACCESS_KEY ?? process.env.DEV_AWS_SECRET_ACCESS_KEY,
+        awsRegion: process.env.AWS_REGION ?? process.env.DEV_AWS_REGION,
+        awsBucketName: process.env.AWS_BUCKET_NAME ?? process.env.DEV_AWS_BUCKET_NAME,
+        apiHost: process.env.API_HOST ?? process.env.DEV_API_HOST,
     },
     experiments: {
         tsconfigPaths: true,
