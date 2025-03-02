@@ -1,7 +1,15 @@
 {
     "build": {
         "development": {
-            "distribution": "internal"
+            "distribution": "internal",
+            "env": {
+                "DEV_API_BASE_URL": "@env:DEV_API_BASE_URL",
+                "DEV_API_HOST": "@env:DEV_API_HOST",
+                "DEV_AWS_ACCESS_KEY_ID": "@env:DEV_AWS_ACCESS_KEY_ID",
+                "DEV_AWS_SECRET_ACCESS_KEY": "@env:DEV_AWS_SECRET_ACCESS_KEY",
+                "DEV_AWS_REGION": "@env:DEV_AWS_REGION",
+                "DEV_AWS_BUCKET_NAME": "@env:DEV_AWS_BUCKET_NAME"
+            }
         },
         "preview": {
             "distribution": "internal",
@@ -9,8 +17,8 @@
                 "buildType": "apk"
             },
             "env": {
-                "EXPO_PUBLIC_API_BASE_URL": "https://ransys-test.vercel.app",
-                "EXPO_PUBLIC_API_HOST": "https://ransys-test.vercel.app"
+                "API_BASE_URL": "https://ransys-test.vercel.app",
+                "API_HOST": "https://ransys-test.vercel.app"
             }
         },
         "production": {
@@ -19,12 +27,12 @@
                 "image": "latest"
             },
             "env": {
-                "EXPO_PUBLIC_API_BASE_URL": "@env:EXPO_PUBLIC_API_BASE_URL",
-                "EXPO_PUBLIC_API_HOST": "@env:EXPO_PUBLIC_API_HOST",
-                "EXPO_PUBLIC_AWS_ACCESS_KEY_ID": "@env:EXPO_PUBLIC_AWS_ACCESS_KEY_ID",
-                "EXPO_PUBLIC_AWS_SECRET_ACCESS_KEY": "@env:EXPO_PUBLIC_AWS_SECRET_ACCESS_KEY",
-                "EXPO_PUBLIC_AWS_REGION": "@env:EXPO_PUBLIC_AWS_REGION",
-                "EXPO_PUBLIC_AWS_BUCKET_NAME": "@env:EXPO_PUBLIC_AWS_BUCKET_NAME"
+                "API_BASE_URL": "@env:API_BASE_URL",
+                "API_HOST": "@env:API_HOST",
+                "AWS_ACCESS_KEY_ID": "@env:AWS_ACCESS_KEY_ID",
+                "AWS_SECRET_ACCESS_KEY": "@env:AWS_SECRET_ACCESS_KEY",
+                "AWS_REGION": "@env:AWS_REGION",
+                "AWS_BUCKET_NAME": "@env:AWS_BUCKET_NAME"
             }
         }
     }
