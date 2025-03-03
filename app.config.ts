@@ -48,7 +48,7 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
         tsconfigPaths: true,
     },
     plugins: ['expo-font', 'expo-secure-store', 'expo-build-properties'],
-    owner: 'dledesma2020',
+    owner: 'undefineddevs',
 });
 
 export default config;
