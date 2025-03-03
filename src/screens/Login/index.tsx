@@ -19,6 +19,8 @@ import { TextInput } from '@/components/ui/Input';
 import { useUserContext } from '@/context/userContext/useUser';
 import useLogin from '@/hooks/api/auth/useLogin';
 import JWTTokenService from '@/lib/JWTTokenService';
+import { S3Credentials } from '@/lib/s3Client';
+import { stringifyObject } from '@/lib/utils';
 import { RootStackParamList } from '@/navigation/types';
 
 interface LoginForm {
@@ -64,6 +66,7 @@ const LoginScreen = ({ navigation }: Props) => {
                     className="flex-1 bg-white flex justify-center"
                 >
                     <View className="px-4 w-full">
+                        <Text>{stringifyObject(S3Credentials)}</Text>
                         <Text className="text-2xl font-bold mb-4 text-gray-800 text-center">
                             Tecnicos Random
                         </Text>
