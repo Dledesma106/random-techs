@@ -5,9 +5,6 @@
             "android": {
                 "buildType": "apk"
             },
-            "cache": {
-                "disabled": true
-              },
             "env": {
                 "API_BASE_URL": "@env:API_BASE_URL",
                 "API_HOST": "@env:API_HOST",
