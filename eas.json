@@ -3,7 +3,8 @@
         "development": {
             "distribution": "internal",
             "android": {
-                "buildType": "apk"
+                "buildType": "apk",
+                "image": "latest"
             },
             "env": {
                 "DEV_API_BASE_URL": "@env:DEV_API_BASE_URL",
@@ -29,6 +30,7 @@
             }
         },
         "production": {
+            "distribution": "internal",
             "android": {
                 "buildType": "apk",
                 "image": "latest"
@@ -39,7 +41,8 @@
                 "AWS_ACCESS_KEY_ID": "@env:AWS_ACCESS_KEY_ID",
                 "AWS_SECRET_ACCESS_KEY": "@env:AWS_SECRET_ACCESS_KEY",
                 "AWS_REGION": "@env:AWS_REGION",
-                "AWS_BUCKET_NAME": "@env:AWS_BUCKET_NAME"
+                "AWS_BUCKET_NAME": "@env:AWS_BUCKET_NAME",
+                "ENVIRONMENT": "@env:ENVIRONMENT"
             }
         }
     }
