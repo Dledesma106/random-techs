@@ -13,7 +13,10 @@
         "format": "prettier './**/*.ts{,x}'",
         "format:fix": "prettier --write './**/*.ts{,x}'",
         "lint-format:fix": "yarn lint:fix && yarn format:fix",
-        "gen": "graphql-codegen --config codegen.ts"
+        "gen": "graphql-codegen --config codegen.ts",
+        "use-dev-config": "cp app.config.dev.ts app.config.ts",
+        "use-prod-config": "cp app.config.prod.ts app.config.ts",
+        "postinstall": "if [ \"$APP_ENV\" = \"development\" ]; then yarn use-dev-config; else yarn use-prod-config; fi"
     },
     "jest": {
         "preset": "jest-expo"

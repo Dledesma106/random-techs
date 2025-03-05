@@ -3,7 +3,7 @@ import { ExpoConfig, ConfigContext } from 'expo/config';
 
 const config = ({ config }: ConfigContext): ExpoConfig => ({
     ...config,
-    name: 'Tecnicos Random',
+    name: 'Tecnicos Random Dev',
     slug: 'random-techs',
     version: '0.1.7',
     orientation: 'portrait',
@@ -34,8 +34,7 @@ const config = ({ config }: ConfigContext): ExpoConfig => ({
     },
     extra: {
         eas: {
-            projectId:
-                process.env.EXPO_PROJECT_ID || '27b396d4-0e33-4573-ab58-f18a85482277',
+            projectId: '3d82b726-b563-4a79-aea4-fc3d07cb84b6',
         },
         awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
         awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
