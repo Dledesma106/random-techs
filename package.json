@@ -16,7 +16,7 @@
         "gen": "graphql-codegen --config codegen.ts",
         "use-dev-config": "cp app.config.dev.ts app.config.ts",
         "use-prod-config": "cp app.config.prod.ts app.config.ts",
-        "postinstall": "if [ \"$APP_ENV\" = \"development\" ]; then yarn use-dev-config; else yarn use-prod-config; fi"
+        "postinstall": "if [ \"$EXPO_PROJECT_TYPE\" = \"development\" ]; then yarn use-dev-config; else yarn use-prod-config; fi"
     },
     "jest": {
         "preset": "jest-expo"

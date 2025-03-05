@@ -38,7 +38,7 @@
                 "image": "latest"
             },
             "env": {
-                "APP_ENV": "production",
+                "EXPO_PROJECT_TYPE": "@env:EXPO_PROJECT_TYPE",
                 "API_BASE_URL": "@env:API_BASE_URL",
                 "API_HOST": "@env:API_HOST",
                 "AWS_ACCESS_KEY_ID": "@env:AWS_ACCESS_KEY_ID",
