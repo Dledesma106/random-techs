@@ -13,10 +13,7 @@
         "format": "prettier './**/*.ts{,x}'",
         "format:fix": "prettier --write './**/*.ts{,x}'",
         "lint-format:fix": "yarn lint:fix && yarn format:fix",
-        "gen": "graphql-codegen --config codegen.ts",
-        "use-dev-config": "cp app.config.dev.ts app.config.ts && echo 'Switched to development config'",
-        "use-prod-config": "cp app.config.prod.ts app.config.ts && echo 'Switched to production config'",
-        "postinstall": "echo \"EXPO_PROJECT_TYPE=$EXPO_PROJECT_TYPE\" && if [ \"$EXPO_PROJECT_TYPE\" = \"development\" ]; then yarn use-dev-config || echo 'Failed to switch to dev config'; else yarn use-prod-config || echo 'Failed to switch to prod config'; fi"
+        "gen": "graphql-codegen --config codegen.ts"
     },
     "jest": {
         "preset": "jest-expo"
