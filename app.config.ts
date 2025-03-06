@@ -1,23 +1,10 @@
 import 'dotenv/config';
 import { ExpoConfig, ConfigContext } from 'expo/config';
 
-const getProjectId = (type: string | undefined) => {
-    return type === 'development'
-        ? '3d82b726-b563-4a79-aea4-fc3d07cb84b6' // Dev Project ID
-        : '27b396d4-0e33-4573-ab58-f18a85482277'; // Prod Project ID
-};
-
-const getAppName = (type: string | undefined) => {
-    return type === 'development' ? 'Tecnicos Random Dev' : 'Tecnicos Random';
-};
-
 const config = ({ config }: ConfigContext): ExpoConfig => {
-    const projectType = process.env.EXPO_PROJECT_TYPE;
-    console.log('🔧 Current EXPO_PROJECT_TYPE:', projectType);
-
     return {
         ...config,
-        name: getAppName(projectType),
+        name: 'Tecnicos Random',
         slug: 'random-techs',
         version: '0.1.7',
         orientation: 'portrait',
@@ -48,14 +35,14 @@ const config = ({ config }: ConfigContext): ExpoConfig => {
         },
         extra: {
             eas: {
-                projectId: getProjectId(projectType),
+                projectId: '27b396d4-0e33-4573-ab58-f18a85482277',
             },
-            awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
-            awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-            awsRegion: process.env.AWS_REGION,
-            awsBucketName: process.env.AWS_BUCKET_NAME,
-            apiHost: process.env.API_HOST,
-            apiBaseUrl: process.env.API_BASE_URL,
+            AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+            AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+            AWS_REGION: process.env.AWS_REGION,
+            AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME,
+            EXPO_PUBLIC_API_HOST: process.env.EXPO_PUBLIC_API_HOST,
+            EXPO_PUBLIC_API_BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL,
         },
         experiments: {
             tsconfigPaths: true,
