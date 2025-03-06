@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import Constants from 'expo-constants';
 import { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import {
@@ -27,6 +28,9 @@ interface LoginForm {
     email: string;
     password: string;
 }
+
+const apiHost = Constants.expoConfig?.extra?.['apiHost'];
+const apiBaseUrl = Constants.expoConfig?.extra?.['apiBaseUrl'];
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -67,6 +71,8 @@ const LoginScreen = ({ navigation }: Props) => {
                 >
                     <View className="px-4 w-full">
                         <Text>{stringifyObject(S3Credentials)}</Text>
+                        <Text>{apiHost}</Text>
+                        <Text>{apiBaseUrl}</Text>
                         <Text className="text-2xl font-bold mb-4 text-gray-800 text-center">
                             Tecnicos Random
                         </Text>
