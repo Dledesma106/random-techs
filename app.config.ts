@@ -41,8 +41,8 @@ const config = ({ config }: ConfigContext): ExpoConfig => {
             AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
             AWS_REGION: process.env.AWS_REGION,
             AWS_BUCKET_NAME: process.env.AWS_BUCKET_NAME,
-            EXPO_PUBLIC_API_HOST: process.env.EXPO_PUBLIC_API_HOST,
-            EXPO_PUBLIC_API_BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL,
+            API_HOST: process.env.API_HOST,
+            API_BASE_URL: process.env.API_BASE_URL,
         },
         experiments: {
             tsconfigPaths: true,
