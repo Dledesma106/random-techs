@@ -30,7 +30,6 @@
             }
         },
         "production": {
-            "distribution": "internal",
             "android": {
                 "buildType": "apk",
                 "image": "latest"
