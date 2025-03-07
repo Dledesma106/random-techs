@@ -1,13 +1,19 @@
 import { EvilIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
+import Constants from 'expo-constants';
 import { useEffect, useState } from 'react';
 import { Text, View, ScrollView, Image, TouchableOpacity } from 'react-native';
 
+import CollapsableText from './CollapsableText';
+
+import { TaskStatus } from '@/api/graphql';
 import { MyExpenseByIdQuery, ExpenseInput } from '@/api/graphql';
 import ConfirmButton from '@/components/ConfirmButton';
 import FileViewer from '@/components/FileViewer';
 import { getFileSignedUrl, getS3SignedUrl, stringifyObject } from '@/lib/utils';
+
+const isDevelopment = Constants.expoConfig?.extra?.['environment'] === 'development';
 
 // Unión de tipos para soportar tanto Expense como ExpenseInput
 export type ExpenseDetailType =
@@ -22,14 +28,16 @@ export type ExpenseDetailType =
           images?: { url: string }[] | null;
           files?: { url: string; filename?: string; size?: number }[] | null;
           createdAt?: string;
+          task?: { status: TaskStatus };
       });
 
 interface ExpenseDetailProps {
     onDelete: () => void;
     expense: ExpenseDetailType;
+    canDelete?: boolean;
 }
 
-const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
+const ExpenseDetail = ({ onDelete, expense, canDelete = true }: ExpenseDetailProps) => {
     const navigation = useNavigation();
     const handleDeleteExpense = async () => {
         onDelete();
@@ -109,10 +117,11 @@ const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
 
     return (
         <ScrollView className="bg-white h-screen">
-            {process.env.NODE_ENV === 'development' && (
-                <>
-                    <Text>detalle {stringifyObject(expense ?? {})}</Text>
-                </>
+            {isDevelopment && (
+                <CollapsableText
+                    buttonText="datos de desarrollo"
+                    text={stringifyObject(expense ?? {})}
+                />
             )}
             <View className="px-4 pt-4 pb-20">
                 {'expenseNumber' in expense && expense.expenseNumber && (
@@ -243,12 +252,14 @@ const ExpenseDetail = ({ onDelete, expense }: ExpenseDetailProps) => {
                     </View>
                 )}
             </View>
-            <ConfirmButton
-                title="Eliminar Gasto"
-                confirmMessage="¿Seguro que quiere eliminar el gasto?"
-                onConfirm={handleDeleteExpense}
-                icon={<EvilIcons name="trash" size={22} color="white" />}
-            />
+            {canDelete && (
+                <ConfirmButton
+                    title="Eliminar Gasto"
+                    confirmMessage="¿Seguro que quiere eliminar el gasto?"
+                    onConfirm={handleDeleteExpense}
+                    icon={<EvilIcons name="trash" size={22} color="white" />}
+                />
+            )}
         </ScrollView>
     );
 };

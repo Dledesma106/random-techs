@@ -2,6 +2,9 @@ query myExpenseById($id: String!) {
     myExpenseById(id: $id) {
         id
         amount
+        task {
+            status
+        }
         expenseType
         cityName
         expenseNumber

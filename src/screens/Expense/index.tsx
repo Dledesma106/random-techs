@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Text, ScrollView, RefreshControl, DeviceEventEmitter } from 'react-native';
 
+import { TaskStatus } from '@/api/graphql';
 import ExpenseDetail from '@/components/ExpenseDetail';
 import { useGetExpenseById } from '@/hooks/api/expense/useGetExpenseById';
 import { ExpenseScreenRouteProp } from '@/navigation/types';
@@ -58,7 +59,13 @@ const Expense = ({ navigation, route }: ExpenseScreenRouteProp) => {
             );
         }
 
-        return <ExpenseDetail onDelete={handleDeleteExpense} expense={expense} />;
+        return (
+            <ExpenseDetail
+                canDelete={expense.task?.status !== TaskStatus.Aprobada}
+                onDelete={handleDeleteExpense}
+                expense={expense}
+            />
+        );
     }
 
     if (queryError) {

@@ -2,6 +2,7 @@ import { AntDesign, EvilIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import clsx from 'clsx';
 import { format } from 'date-fns';
+import Constants from 'expo-constants';
 import * as DocumentPicker from 'expo-document-picker';
 import { useEffect, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
@@ -35,9 +36,12 @@ import { showToast } from '@/lib/toast';
 import { deletePhoto, getFileSignedUrl, stringifyObject, uploadPhoto } from '@/lib/utils';
 import { addFullScreenCameraListener } from '@/screens/FullScreenCamera';
 
+import CollapsableText from '../CollapsableText';
 import RHFDropdown from '../ui/RHFDropdown';
 
 const MAX_IMAGE_AMOUNT = 5;
+
+const isDevelopment = Constants.expoConfig?.extra?.['environment'] === 'development';
 
 interface InputImage {
     key: string;
@@ -163,7 +167,6 @@ const ExpenseForm = ({ onFinish }: Props) => {
         }
 
         const parsedAmount = parseFloat(data.amount.replace(',', '.'));
-
         const expenseData: ExpenseInput = {
             amount: parsedAmount,
             paySource: data.paySource,
@@ -330,9 +333,12 @@ const ExpenseForm = ({ onFinish }: Props) => {
                 </View>
 
                 <ScrollView className="flex-1 px-4">
-                    {process.env.NODE_ENV === 'development' && (
+                    {isDevelopment && (
                         <>
-                            <Text>form {stringifyObject(watch())}</Text>
+                            <CollapsableText
+                                buttonText="datos de formulario"
+                                text={stringifyObject(watch())}
+                            />
                         </>
                     )}
                     <View className="w-full mb-4">

@@ -2,13 +2,12 @@ query myAssignedTasks {
     myAssignedTasks {
         id
         taskNumber
-        createdAt
-        closedAt
         description
         business {
             id
             name
         }
+        createdAt
         businessName
         clientName
         branch {
@@ -27,13 +26,6 @@ query myAssignedTasks {
                 name
             }
         }
-        assigned {
-            id
-            fullName
-        }
-        expenses {
-            amount
-        }
         taskType
         status
     }
@@ -51,6 +43,7 @@ query myAssignedTaskById($id: String!) {
         observations
         businessName
         clientName
+        useMaterials
         business {
             id
             name
@@ -135,6 +128,7 @@ mutation createMyTask($input: MyTaskInput!) {
             description
             businessName
             clientName
+            useMaterials
             business {
                 id
                 name
@@ -212,6 +206,7 @@ mutation updateMyAssignedTask($input: UpdateMyTaskInput!) {
             startedAt
             businessName
             clientName
+            useMaterials
             expenses {
                 id
                 amount

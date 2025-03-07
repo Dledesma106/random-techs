@@ -490,17 +490,18 @@ export type MyTaskInput = {
     participants: InputMaybe<Array<Scalars['String']>>;
     startedAt: InputMaybe<Scalars['DateTime']>;
     taskType: TaskType;
+    useMaterials: Scalars['Boolean'];
 };
 
 export type Preventive = {
     __typename?: 'Preventive';
     assigned: Array<User>;
-    batteryChangedAt: Maybe<Scalars['Date']>;
+    batteryChangedAt: Maybe<Scalars['DateTime']>;
     branch: Branch;
     business: Business;
     frequency: Scalars['Int'];
     id: Scalars['ID'];
-    lastDoneAt: Maybe<Scalars['Date']>;
+    lastDoneAt: Maybe<Scalars['DateTime']>;
     months: Array<Scalars['String']>;
     observations: Maybe<Scalars['String']>;
     status: PreventiveStatus;
@@ -516,11 +517,11 @@ export type PreventiveCrudRef = {
 
 export type PreventiveInput = {
     assignedIds: Array<Scalars['String']>;
-    batteryChangedAt: InputMaybe<Scalars['Date']>;
+    batteryChangedAt: InputMaybe<Scalars['DateTime']>;
     branchId: Scalars['String'];
     businessId: Scalars['String'];
     frequency: Scalars['Int'];
-    lastDoneAt: InputMaybe<Scalars['Date']>;
+    lastDoneAt: InputMaybe<Scalars['DateTime']>;
     months: Array<Scalars['String']>;
     observations: InputMaybe<Scalars['String']>;
     status: PreventiveStatus;
@@ -808,6 +809,7 @@ export type Task = {
     taskNumber: Scalars['Int'];
     taskType: TaskType;
     updatedAt: Scalars['DateTime'];
+    useMaterials: Maybe<Scalars['Boolean']>;
 };
 
 export type TaskCrudResult = {
@@ -864,6 +866,7 @@ export type UpdateMyTaskInput = {
     observations: InputMaybe<Scalars['String']>;
     participants: InputMaybe<Array<Scalars['String']>>;
     startedAt: InputMaybe<Scalars['DateTime']>;
+    useMaterials: Scalars['Boolean'];
 };
 
 export type User = {
@@ -956,6 +959,7 @@ export type MyExpenseByIdQuery = {
         installments: number | null;
         expenseDate: any | null;
         createdAt: any;
+        task: { __typename?: 'Task'; status: TaskStatus } | null;
         images: Array<{ __typename?: 'Image'; id: string; url: string }>;
         files: Array<{
             __typename?: 'File';
@@ -1051,9 +1055,8 @@ export type MyAssignedTasksQuery = {
         __typename?: 'Task';
         id: string;
         taskNumber: number;
-        createdAt: any;
-        closedAt: any | null;
         description: string;
+        createdAt: any;
         businessName: string | null;
         clientName: string | null;
         taskType: TaskType;
@@ -1071,8 +1074,6 @@ export type MyAssignedTasksQuery = {
             };
             client: { __typename?: 'Client'; id: string; name: string };
         } | null;
-        assigned: Array<{ __typename?: 'User'; id: string; fullName: string }>;
-        expenses: Array<{ __typename?: 'Expense'; amount: number }>;
     }>;
 };
 
@@ -1094,6 +1095,7 @@ export type MyAssignedTaskByIdQuery = {
         observations: string | null;
         businessName: string | null;
         clientName: string | null;
+        useMaterials: boolean | null;
         actNumber: number | null;
         taskType: TaskType;
         status: TaskStatus;
@@ -1179,6 +1181,7 @@ export type CreateMyTaskMutation = {
             description: string;
             businessName: string | null;
             clientName: string | null;
+            useMaterials: boolean | null;
             taskType: TaskType;
             closedAt: any | null;
             business: { __typename?: 'Business'; id: string; name: string } | null;
@@ -1254,6 +1257,7 @@ export type UpdateMyAssignedTaskMutation = {
             startedAt: any | null;
             businessName: string | null;
             clientName: string | null;
+            useMaterials: boolean | null;
             expenses: Array<{
                 __typename?: 'Expense';
                 id: string;
@@ -1604,6 +1608,19 @@ export const MyExpenseByIdDocument = {
                                 {
                                     kind: 'Field',
                                     name: { kind: 'Name', value: 'amount' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'task' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'status' },
+                                            },
+                                        ],
+                                    },
                                 },
                                 {
                                     kind: 'Field',
@@ -2155,14 +2172,6 @@ export const MyAssignedTasksDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'createdAt' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'closedAt' },
-                                },
-                                {
-                                    kind: 'Field',
                                     name: { kind: 'Name', value: 'description' },
                                 },
                                 {
@@ -2181,6 +2190,10 @@ export const MyAssignedTasksDocument = {
                                             },
                                         ],
                                     },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'createdAt' },
                                 },
                                 {
                                     kind: 'Field',
@@ -2281,36 +2294,6 @@ export const MyAssignedTasksDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'assigned' },
-                                    selectionSet: {
-                                        kind: 'SelectionSet',
-                                        selections: [
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'id' },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'fullName' },
-                                            },
-                                        ],
-                                    },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'expenses' },
-                                    selectionSet: {
-                                        kind: 'SelectionSet',
-                                        selections: [
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'amount' },
-                                            },
-                                        ],
-                                    },
-                                },
-                                {
-                                    kind: 'Field',
                                     name: { kind: 'Name', value: 'taskType' },
                                 },
                                 {
@@ -2400,6 +2383,10 @@ export const MyAssignedTaskByIdDocument = {
                                 {
                                     kind: 'Field',
                                     name: { kind: 'Name', value: 'clientName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'useMaterials' },
                                 },
                                 {
                                     kind: 'Field',
@@ -2896,6 +2883,13 @@ export const CreateMyTaskDocument = {
                                             },
                                             {
                                                 kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'useMaterials',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: { kind: 'Name', value: 'business' },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
@@ -3383,6 +3377,13 @@ export const UpdateMyAssignedTaskDocument = {
                                                 name: {
                                                     kind: 'Name',
                                                     value: 'clientName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'useMaterials',
                                                 },
                                             },
                                             {

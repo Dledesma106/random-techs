@@ -4071,6 +4071,22 @@
                         "defaultValue": null,
                         "isDeprecated": false,
                         "deprecationReason": null
+                    },
+                    {
+                        "name": "useMaterials",
+                        "description": null,
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "Boolean",
+                                "ofType": null
+                            }
+                        },
+                        "defaultValue": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
                     }
                 ],
                 "interfaces": null,
@@ -4113,7 +4129,7 @@
                         "args": [],
                         "type": {
                             "kind": "SCALAR",
-                            "name": "Date",
+                            "name": "DateTime",
                             "ofType": null
                         },
                         "isDeprecated": false,
@@ -4189,7 +4205,7 @@
                         "args": [],
                         "type": {
                             "kind": "SCALAR",
-                            "name": "Date",
+                            "name": "DateTime",
                             "ofType": null
                         },
                         "isDeprecated": false,
@@ -4365,7 +4381,7 @@
                         "description": null,
                         "type": {
                             "kind": "SCALAR",
-                            "name": "Date",
+                            "name": "DateTime",
                             "ofType": null
                         },
                         "defaultValue": null,
@@ -4425,7 +4441,7 @@
                         "description": null,
                         "type": {
                             "kind": "SCALAR",
-                            "name": "Date",
+                            "name": "DateTime",
                             "ofType": null
                         },
                         "defaultValue": null,
@@ -7292,6 +7308,18 @@
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
+                    },
+                    {
+                        "name": "useMaterials",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "Boolean",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
                     }
                 ],
                 "inputFields": null,
@@ -7797,6 +7825,22 @@
                             "kind": "SCALAR",
                             "name": "DateTime",
                             "ofType": null
+                        },
+                        "defaultValue": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "useMaterials",
+                        "description": null,
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "Boolean",
+                                "ofType": null
+                            }
                         },
                         "defaultValue": null,
                         "isDeprecated": false,

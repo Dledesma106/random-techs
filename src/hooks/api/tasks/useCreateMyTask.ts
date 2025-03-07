@@ -1,11 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { TASK_BY_ID_QUERY_KEY, TaskByIdQuery } from './useGetMyAssignedTaskById';
 import { TASKS_LIST_QUERY_KEY } from './useGetMyAssignedTasks';
 
 import { fetchGraphql } from '@/api/fetch-graphql';
 import {
-    MyAssignedTasksQuery,
     CreateMyTaskDocument,
     CreateMyTaskMutation,
     CreateMyTaskMutationVariables,
@@ -18,7 +16,10 @@ export const useCreateMyTask = () => {
         mutationFn: (data) => {
             return fetchGraphql(CreateMyTaskDocument, data);
         },
-        onError: (error) => console.log(error),
+        onError: (error) => {
+            console.error('Error al crear tarea:', error);
+            showToast('Error al crear la tarea', 'error');
+        },
         onSuccess: (data) => {
             if (!data.createMyTask.success) {
                 console.log(data.createMyTask.message);
@@ -26,48 +27,9 @@ export const useCreateMyTask = () => {
                 return;
             }
 
-            const task = data.createMyTask.task;
-            if (!task) {
-                return;
-            }
-
-            client.setQueryData<MyAssignedTasksQuery>(TASKS_LIST_QUERY_KEY, (oldData) => {
-                if (!oldData) {
-                    return oldData;
-                }
-
-                const newData: MyAssignedTasksQuery = {
-                    ...oldData,
-                    myAssignedTasks: [task, ...oldData.myAssignedTasks],
-                };
-
-                return newData;
-            });
-
-            client.setQueryData<TaskByIdQuery>(
-                TASK_BY_ID_QUERY_KEY(task.id),
-                (oldData) => {
-                    if (!oldData || !oldData.myAssignedTaskById) {
-                        return oldData;
-                    }
-
-                    const newData: TaskByIdQuery = {
-                        ...oldData,
-                        myAssignedTaskById: {
-                            ...oldData.myAssignedTaskById,
-                            status: task.status,
-                            images: task.images,
-                            expenses: task.expenses,
-                            actNumber: task.actNumber,
-                        },
-                    };
-
-                    return newData;
-                },
-            );
-            client.invalidateQueries({
-                queryKey: ['tasks', 'detail', task.id],
-            });
+            // Forzar una recarga de la lista de tareas
+            client.invalidateQueries({ queryKey: TASKS_LIST_QUERY_KEY });
+            showToast('Tarea creada correctamente', 'success');
         },
     });
 };
