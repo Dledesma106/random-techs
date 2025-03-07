@@ -3,7 +3,7 @@ import { Zoomable } from '@likashefqet/react-native-image-zoom';
 import { format } from 'date-fns';
 import Constants from 'expo-constants';
 import { Image } from 'expo-image';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import ContentLoader, { Rect } from 'react-content-loader/native';
 import { useForm } from 'react-hook-form';
 import {
@@ -71,13 +71,50 @@ interface FormInputs {
     useMaterials: boolean;
 }
 
+// Función auxiliar para comparar fechas ignorando milisegundos
+const areDatesEqual = (
+    date1: Date | string | undefined | null,
+    date2: Date | string | undefined | null,
+): boolean => {
+    // Si ambas fechas son nulas o indefinidas, son iguales
+    if (!date1 && !date2) return true;
+    // Si solo una es nula o indefinida, son diferentes
+    if (!date1 || !date2) return false;
+
+    // Convertir a objetos Date si son strings
+    const d1 = typeof date1 === 'string' ? new Date(date1) : date1;
+    const d2 = typeof date2 === 'string' ? new Date(date2) : date2;
+
+    // Comparar año, mes, día, hora y minuto
+    return (
+        d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate() &&
+        d1.getHours() === d2.getHours() &&
+        d1.getMinutes() === d2.getMinutes()
+    );
+};
+
 const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
     const { id } = route.params;
     const { data, isPending, refetch, error } = useGetMyAssignedTaskById(id);
     const [fullScreenImage, setFullScreenImage] = useState<ThumbnailImage | null>(null);
     const [isStartDatePickerVisible, setStartDatePickerVisibility] = useState(false);
     const [isCloseDatePickerVisible, setCloseDatePickerVisibility] = useState(false);
-    const formMethods = useForm<FormInputs>();
+    const [userHasModifiedForm, setUserHasModifiedForm] = useState(false);
+    const [isFormInitialized, setIsFormInitialized] = useState(false);
+    const formMethods = useForm<FormInputs>({
+        defaultValues: {
+            actNumber: '',
+            observations: '',
+            images: [],
+            expenses: [],
+            imageIdsToDelete: [],
+            expenseIdsToDelete: [],
+            participants: [],
+            useMaterials: false,
+        },
+    });
     const {
         control,
         setValue,
@@ -95,19 +132,37 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
     useEffect(() => {
         const task = data?.myAssignedTaskById;
         if (!task) return;
-        reset({
-            actNumber: task.actNumber ? String(task.actNumber) : '',
-            observations: task.observations ?? '',
-            closedAt: task.closedAt ? new Date(task.closedAt) : undefined,
-            startedAt: task.startedAt ? new Date(task.startedAt) : undefined,
-            images: undefined,
-            expenses: undefined,
-            participants: task.participants || [],
-            useMaterials: task.useMaterials ?? false,
-        });
-    }, [data]);
+
+        // Resetear el formulario con los valores iniciales de la tarea
+        reset(
+            {
+                actNumber: task.actNumber ? String(task.actNumber) : '',
+                observations: task.observations ?? '',
+                closedAt: task.closedAt ? new Date(task.closedAt) : undefined,
+                startedAt: task.startedAt ? new Date(task.startedAt) : undefined,
+                images: [],
+                expenses: [],
+                imageIdsToDelete: [],
+                expenseIdsToDelete: [],
+                participants: task.participants || [],
+                useMaterials: task.useMaterials ?? false,
+            },
+            {
+                keepDirty: false, // No mantener el estado "dirty"
+                keepValues: false, // No mantener valores anteriores
+                keepDefaultValues: false, // No mantener valores por defecto
+            },
+        );
+
+        // Resetear el estado de modificación del usuario
+        setUserHasModifiedForm(false);
+
+        // Marcar el formulario como inicializado
+        setIsFormInitialized(true);
+    }, [data, reset]);
 
     const addPictureToTask = async (uri: string) => {
+        setUserHasModifiedForm(true);
         const currentImages = watch('images') ?? [];
         setValue('images', [...currentImages, { key: '', uri, unsaved: true }]);
         const key = String(await uploadPhoto(uri));
@@ -120,11 +175,13 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
     };
 
     const addExpenseToTask = (expense: ExpenseInput) => {
+        setUserHasModifiedForm(true);
         const currentExpenses = watch('expenses') ?? [];
         setValue('expenses', [...currentExpenses, expense]);
     };
 
     const removeExpenseOnForm = (expenseId: string) => {
+        setUserHasModifiedForm(true);
         const currentExpenses = watch('expenses') ?? [];
         setValue(
             'expenses',
@@ -136,11 +193,13 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
     };
 
     const deleteExpenseById = (expenseId: string) => {
+        setUserHasModifiedForm(true);
         const currentExpenseIdsToDelete = watch('expenseIdsToDelete') ?? [];
         setValue('expenseIdsToDelete', [...currentExpenseIdsToDelete, expenseId]);
     };
 
     const deleteImageById = (imageId: string) => {
+        setUserHasModifiedForm(true);
         const currentImageIdsToDelete = watch('imageIdsToDelete') ?? [];
         setValue('imageIdsToDelete', [...currentImageIdsToDelete, imageId]);
     };
@@ -166,6 +225,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
     }
 
     const handleDeleteImage = async (image: ThumbnailImage) => {
+        setUserHasModifiedForm(true);
         if (image.id) deleteImageById(image.id);
         if (image.key) {
             try {
@@ -207,36 +267,118 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
         }
     }, 2500);
 
-    const isFormDirty =
-        isDirty ||
-        watch('images')?.length > 0 ||
-        watch('expenses')?.length > 0 ||
-        watch('expenseIdsToDelete')?.length > 0 ||
-        watch('imageIdsToDelete')?.length > 0 ||
-        String(new Date(watch('closedAt'))) !==
-            String(new Date(data?.myAssignedTaskById?.closedAt ?? '')) ||
-        String(new Date(watch('startedAt'))) !==
-            String(new Date(data?.myAssignedTaskById?.startedAt ?? '')) ||
-        JSON.stringify(watch('participants')) !==
-            JSON.stringify(data?.myAssignedTaskById?.participants || []) ||
-        watch('useMaterials') !== data?.myAssignedTaskById?.useMaterials;
+    // Función para verificar si el formulario ha sido modificado
+    const isFormDirty = useMemo(() => {
+        // Si el formulario no se ha inicializado, no está sucio
+        if (!isFormInitialized) return false;
 
-    // Observar todos los campos relevantes
-    const watchedFields = watch([
-        'useMaterials',
-        'participants',
-        'images',
-        'expenses',
-        'imageIdsToDelete',
-        'expenseIdsToDelete',
-        'closedAt',
-        'startedAt',
-        'actNumber',
-        'observations',
+        // Si no hay datos, no podemos determinar si el formulario está sucio
+        if (!data?.myAssignedTaskById) return false;
+
+        const task = data.myAssignedTaskById;
+
+        // Verificar si hay imágenes nuevas
+        const images = watch('images') || [];
+        const hasNewImages = images.length > 0;
+
+        // Verificar si hay gastos nuevos
+        const expenses = watch('expenses') || [];
+        const hasNewExpenses = expenses.length > 0;
+
+        // Verificar si hay IDs de imágenes o gastos para eliminar
+        const expenseIdsToDelete = watch('expenseIdsToDelete') || [];
+        const imageIdsToDelete = watch('imageIdsToDelete') || [];
+        const hasIdsToDelete =
+            expenseIdsToDelete.length > 0 || imageIdsToDelete.length > 0;
+
+        // Verificar si las fechas han cambiado
+        const closedAtChanged = !areDatesEqual(watch('closedAt'), task.closedAt);
+
+        const startedAtChanged = !areDatesEqual(watch('startedAt'), task.startedAt);
+
+        // Verificar si los participantes han cambiado
+        const formParticipants = watch('participants') || [];
+        const taskParticipants = task.participants || [];
+
+        // Comparar arrays ordenados para evitar falsos positivos por diferente orden
+        const sortedFormParticipants = [...formParticipants].sort();
+        const sortedTaskParticipants = [...taskParticipants].sort();
+
+        const participantsChanged =
+            JSON.stringify(sortedFormParticipants) !==
+            JSON.stringify(sortedTaskParticipants);
+
+        // Verificar si useMaterials ha cambiado
+        const formUseMaterials = watch('useMaterials');
+        const taskUseMaterials = task.useMaterials ?? false;
+        const useMaterialsChanged = formUseMaterials !== taskUseMaterials;
+
+        // Verificar si el número de acta ha cambiado
+        const formActNumber = String(watch('actNumber') || '');
+        const taskActNumber = String(task.actNumber || '');
+        const actNumberChanged = formActNumber !== taskActNumber;
+
+        // Verificar si las observaciones han cambiado
+        const formObservations = watch('observations') || '';
+        const taskObservations = task.observations || '';
+        const observationsChanged = formObservations !== taskObservations;
+
+        // Verificar si el formulario está sucio según React Hook Form
+        const isReactHookFormDirty = isDirty;
+
+        // Resumen de todos los cambios
+        const allChanges = {
+            hasNewImages,
+            hasNewExpenses,
+            hasIdsToDelete,
+            closedAtChanged,
+            startedAtChanged,
+            participantsChanged,
+            useMaterialsChanged,
+            actNumberChanged,
+            observationsChanged,
+            isReactHookFormDirty,
+        };
+
+        // El formulario está sucio si cualquiera de las condiciones es verdadera
+        const formIsDirty = Object.values(allChanges).some((value) => value === true);
+
+        return formIsDirty;
+    }, [
+        isFormInitialized,
+        data?.myAssignedTaskById,
+        watch('images'),
+        watch('expenses'),
+        watch('expenseIdsToDelete'),
+        watch('imageIdsToDelete'),
+        watch('closedAt'),
+        watch('startedAt'),
+        watch('participants'),
+        watch('useMaterials'),
+        watch('actNumber'),
+        watch('observations'),
+        isDirty,
     ]);
 
+    // Detectar cambios en los campos observados para marcar que el usuario ha modificado el formulario
     useEffect(() => {
-        if (isFormDirty && data?.myAssignedTaskById?.status !== TaskStatus.Aprobada) {
+        // Solo marcamos el formulario como modificado si realmente hay cambios
+        if (isFormDirty && !userHasModifiedForm) {
+            setUserHasModifiedForm(true);
+        }
+    }, [isFormDirty, userHasModifiedForm]);
+
+    // Solo ejecutar el debounce si el usuario ha modificado el formulario
+    useEffect(() => {
+        // Solo guardamos si:
+        // 1. El usuario ha modificado el formulario
+        // 2. El formulario tiene cambios
+        // 3. La tarea no está aprobada
+        if (
+            userHasModifiedForm &&
+            isFormDirty &&
+            data?.myAssignedTaskById?.status !== TaskStatus.Aprobada
+        ) {
             const formData = watch() as FormInputs;
             const savePromise = debouncedSave(formData) as Promise<any> & {
                 cancel: () => void;
@@ -246,7 +388,12 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                 savePromise.cancel();
             };
         }
-    }, [watchedFields, isFormDirty, debouncedSave]);
+    }, [
+        isFormDirty,
+        userHasModifiedForm,
+        data?.myAssignedTaskById?.status,
+        debouncedSave,
+    ]);
 
     const handleFinishTask = async () => {
         try {
@@ -279,6 +426,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
     const addCustomParticipant = () => {
         if (customParticipant.trim()) {
             const currentParticipants = watch('participants') || [];
+            setUserHasModifiedForm(true);
             setValue('participants', [...currentParticipants, customParticipant], {
                 shouldDirty: true,
                 shouldTouch: true,
@@ -302,12 +450,14 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                         <AntDesign name="close" size={20} color="white" />
                     </TouchableOpacity>
                 </View>
-                <ConfirmButton
-                    onConfirm={() => handleDeleteImage(fullScreenImage)}
-                    title="Eliminar foto"
-                    confirmMessage="¿Seguro que quiere eliminar la foto?"
-                    icon={<EvilIcons name="trash" size={22} color="white" />}
-                />
+                {data?.myAssignedTaskById?.status !== TaskStatus.Aprobada && (
+                    <ConfirmButton
+                        onConfirm={() => handleDeleteImage(fullScreenImage)}
+                        title="Eliminar foto"
+                        confirmMessage="¿Seguro que quiere eliminar la foto?"
+                        icon={<EvilIcons name="trash" size={22} color="white" />}
+                    />
+                )}
             </View>
         );
 
@@ -410,6 +560,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                                                 value,
                                                             )
                                                         ) {
+                                                            setUserHasModifiedForm(true);
                                                             setValue(
                                                                 'participants',
                                                                 [
@@ -468,6 +619,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                                     ? () => {
                                                           const currentParticipants =
                                                               watch('participants') || [];
+                                                          setUserHasModifiedForm(true);
                                                           setValue(
                                                               'participants',
                                                               currentParticipants.filter(
@@ -537,6 +689,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                         isVisible={isStartDatePickerVisible}
                                         mode="datetime"
                                         onConfirm={(date) => {
+                                            setUserHasModifiedForm(true);
                                             setValue('startedAt', date);
                                             setStartDatePickerVisibility(false);
                                         }}
@@ -589,6 +742,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                         isVisible={isCloseDatePickerVisible}
                                         mode="datetime"
                                         onConfirm={(date) => {
+                                            setUserHasModifiedForm(true);
                                             setValue('closedAt', date);
                                             setCloseDatePickerVisibility(false);
                                         }}
@@ -625,6 +779,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                             <TextInput
                                                 onBlur={onBlur}
                                                 onChangeText={(val) => {
+                                                    setUserHasModifiedForm(true);
                                                     onChange(val);
                                                 }}
                                                 value={value?.toString()}
@@ -654,6 +809,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                                 <TouchableOpacity
                                                     className={`flex-row items-center justify-center space-x-2 p-2 rounded-md border w-10 h-10 ${value === true ? 'bg-black border-black' : 'bg-white border-gray-300'}`}
                                                     onPress={() => {
+                                                        setUserHasModifiedForm(true);
                                                         onChange(true);
                                                     }}
                                                 >
@@ -670,6 +826,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                                 <TouchableOpacity
                                                     className={`flex-row items-center justify-center space-x-2 p-2 rounded-md border w-10 h-10 ${value === false ? 'bg-black border-black' : 'bg-white border-gray-300'}`}
                                                     onPress={() => {
+                                                        setUserHasModifiedForm(true);
                                                         onChange(false);
                                                     }}
                                                 >
@@ -708,6 +865,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                             <TextInput
                                                 onBlur={onBlur}
                                                 onChangeText={(val) => {
+                                                    setUserHasModifiedForm(true);
                                                     onChange(val);
                                                 }}
                                                 multiline
