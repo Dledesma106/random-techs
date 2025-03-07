@@ -1,6 +1,7 @@
 import { AntDesign, EvilIcons } from '@expo/vector-icons';
 import { Zoomable } from '@likashefqet/react-native-image-zoom';
 import { format } from 'date-fns';
+import Constants from 'expo-constants';
 import { Image } from 'expo-image';
 import { useState, useRef, useEffect } from 'react';
 import ContentLoader, { Rect } from 'react-content-loader/native';
@@ -17,6 +18,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 import { ExpenseInput, TaskType } from '@/api/graphql';
 import AddImage from '@/components/AddImage';
+import CollapsableText from '@/components/CollapsableText';
 import ConfirmButton from '@/components/ConfirmButton';
 import { ExpenseDetailType } from '@/components/ExpenseDetail';
 import ImageThumbnail, { ThumbnailImage } from '@/components/ImageThumbnail';
@@ -46,6 +48,8 @@ import { addDeleteExpenseOnTaskListener } from '../ExpenseOnTaskForm';
 import { addFullScreenCameraListener } from '../FullScreenCamera';
 import { addRegisterExpenseOnTaskListener } from '../RegisterExpenseOnTask';
 
+const isDevelopment = Constants.expoConfig?.extra?.['environment'] === 'development';
+
 const MAX_IMAGE_AMOUNT = 5;
 interface InputImage {
     key: string;
@@ -68,6 +72,7 @@ interface FormInputs {
     closedAt: Date;
     startedAt: Date;
     taskType: TaskType;
+    useMaterials: boolean;
 }
 
 const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
@@ -229,6 +234,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
             startedAt,
             taskType,
             participants,
+            useMaterials,
         } = formData;
 
         if (clientId === 'other' && !clientName?.trim()) {
@@ -251,6 +257,11 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
             return;
         }
 
+        if (images && images.length > 0 && images.some((image) => image.unsaved)) {
+            showToast('Espere a que se guarden las imágenes', 'error');
+            return;
+        }
+
         const imageKeys = images ? images.map((image) => image.key) : [];
         try {
             await createMyTask({
@@ -268,6 +279,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                     clientName,
                     businessName,
                     startedAt,
+                    useMaterials,
                 },
             });
             navigation.goBack();
@@ -286,6 +298,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                 closedAt: undefined,
                 startedAt: undefined,
                 taskType: '' as TaskType,
+                useMaterials: false,
             });
         } catch (error) {
             showToast(`Error al crear la tarea: ${error}`, 'error');
@@ -361,10 +374,11 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                         <RefreshControl refreshing={isLoading} onRefresh={refetch} />
                     }
                 >
-                    {process.env.EXPO_PUBLIC_ENVIRONMENT === 'development' && (
-                        <>
-                            <Text>form: {stringifyObject(watch())} </Text>
-                        </>
+                    {isDevelopment && (
+                        <CollapsableText
+                            buttonText="datos de desarrollo"
+                            text={stringifyObject(watch())}
+                        />
                     )}
                     <View className="px-4 pt-4 pb-24 space-y-4">
                         <Label className="mb-1.5">
@@ -626,6 +640,49 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                                             placeholder="Numero de Acta"
                                             keyboardType="numeric"
                                         />
+                                    )}
+                                />
+                            </Form>
+                        </View>
+
+                        <View>
+                            <Label className="mb-1.5">¿Se usaron materiales?</Label>
+                            <Form {...formMethods}>
+                                <FormField
+                                    name="useMaterials"
+                                    control={control}
+                                    defaultValue={false}
+                                    render={({ field: { onChange, value } }) => (
+                                        <View className="flex-row space-x-4">
+                                            <TouchableOpacity
+                                                className={`flex-row items-center space-x-2 p-2 h-10 w-10 justify-center rounded-md border ${value === true ? 'bg-black border-black' : 'bg-white border-gray-300'}`}
+                                                onPress={() => onChange(true)}
+                                            >
+                                                <Text
+                                                    className={
+                                                        value === true
+                                                            ? 'text-white'
+                                                            : 'text-black'
+                                                    }
+                                                >
+                                                    Sí
+                                                </Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity
+                                                className={`flex-row items-center space-x-2 p-2 h-10 w-10 justify-center rounded-md border ${value === false ? 'bg-black border-black' : 'bg-white border-gray-300'}`}
+                                                onPress={() => onChange(false)}
+                                            >
+                                                <Text
+                                                    className={
+                                                        value === false
+                                                            ? 'text-white'
+                                                            : 'text-black'
+                                                    }
+                                                >
+                                                    No
+                                                </Text>
+                                            </TouchableOpacity>
+                                        </View>
                                     )}
                                 />
                             </Form>

@@ -43,6 +43,7 @@ const config = ({ config }: ConfigContext): ExpoConfig => {
             awsBucketName: process.env.AWS_BUCKET_NAME,
             apiHost: process.env.API_HOST,
             apiBaseUrl: process.env.API_BASE_URL,
+            environment: process.env.ENVIRONMENT,
         },
         experiments: {
             tsconfigPaths: true,

@@ -1,6 +1,7 @@
 import { AntDesign, EvilIcons } from '@expo/vector-icons';
 import { Zoomable } from '@likashefqet/react-native-image-zoom';
 import { format } from 'date-fns';
+import Constants from 'expo-constants';
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import ContentLoader, { Rect } from 'react-content-loader/native';
@@ -17,6 +18,7 @@ import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 import { ExpenseInput } from '@/api/graphql';
 import AddImage from '@/components/AddImage';
+import CollapsableText from '@/components/CollapsableText';
 import ConfirmButton from '@/components/ConfirmButton';
 import ImageThumbnail, { ThumbnailImage } from '@/components/ImageThumbnail';
 import { Badge, BadgeText } from '@/components/ui/badge';
@@ -47,6 +49,8 @@ import { addDeleteExpenseOnTaskListener } from '../ExpenseOnTaskForm';
 import { addFullScreenCameraListener } from '../FullScreenCamera';
 import { addRegisterExpenseOnTaskListener } from '../RegisterExpenseOnTask';
 
+const isDevelopment = Constants.expoConfig?.extra?.['environment'] === 'development';
+
 const MAX_IMAGE_AMOUNT = 5;
 interface InputImage {
     key: string;
@@ -64,6 +68,7 @@ interface FormInputs {
     closedAt: Date;
     startedAt: Date;
     participants: string[];
+    useMaterials: boolean;
 }
 
 const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
@@ -86,7 +91,6 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
     const [customParticipant, setCustomParticipant] = useState('');
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
     const { data: techsData } = useGetTechnicians();
-    const [participantsChanged, setParticipantsChanged] = useState(false);
 
     useEffect(() => {
         const task = data?.myAssignedTaskById;
@@ -99,6 +103,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
             images: undefined,
             expenses: undefined,
             participants: task.participants || [],
+            useMaterials: task.useMaterials ?? false,
         });
     }, [data]);
 
@@ -181,10 +186,10 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
 
     const debouncedSave = useDebouncer(async (formData: FormInputs) => {
         try {
-            console.log('Guardando cambios:', JSON.stringify(formData.participants));
             await updateTask({
                 input: {
                     id,
+                    useMaterials: formData.useMaterials,
                     participants: formData.participants || [],
                     actNumber: formData.actNumber,
                     observations: formData.observations,
@@ -213,34 +218,42 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
         String(new Date(watch('startedAt'))) !==
             String(new Date(data?.myAssignedTaskById?.startedAt ?? '')) ||
         JSON.stringify(watch('participants')) !==
-            JSON.stringify(data?.myAssignedTaskById?.participants || []);
+            JSON.stringify(data?.myAssignedTaskById?.participants || []) ||
+        watch('useMaterials') !== data?.myAssignedTaskById?.useMaterials;
+
+    // Observar todos los campos relevantes
+    const watchedFields = watch([
+        'useMaterials',
+        'participants',
+        'images',
+        'expenses',
+        'imageIdsToDelete',
+        'expenseIdsToDelete',
+        'closedAt',
+        'startedAt',
+        'actNumber',
+        'observations',
+    ]);
 
     useEffect(() => {
-        const subscription = watch((formData) => {
-            if (isFormDirty || participantsChanged) {
-                debouncedSave(formData as FormInputs);
-            }
-        });
-        return () => subscription.unsubscribe();
-    }, [watch, debouncedSave, isFormDirty, participantsChanged]);
-
-    useEffect(() => {
-        if (participantsChanged) {
+        if (isFormDirty && data?.myAssignedTaskById?.status !== TaskStatus.Aprobada) {
             const formData = watch() as FormInputs;
-            console.log(
-                'Participantes cambiados, guardando:',
-                JSON.stringify(formData.participants),
-            );
-            debouncedSave(formData);
-            setParticipantsChanged(false);
+            const savePromise = debouncedSave(formData) as Promise<any> & {
+                cancel: () => void;
+            };
+
+            return () => {
+                savePromise.cancel();
+            };
         }
-    }, [participantsChanged, watch, debouncedSave]);
+    }, [watchedFields, isFormDirty, debouncedSave]);
 
     const handleFinishTask = async () => {
         try {
             await finishTask({ id });
+            navigation.goBack();
         } catch (error) {
-            showToast('Error al finalizar la tarea', 'error');
+            showToast('' + error, 'error');
         }
     };
 
@@ -270,7 +283,6 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                 shouldDirty: true,
                 shouldTouch: true,
             });
-            setParticipantsChanged(true);
             setCustomParticipant('');
             setSelectedOption(null);
         }
@@ -322,10 +334,16 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                     }
                     className="flex-1"
                 >
-                    {process.env.EXPO_PUBLIC_ENVIRONMENT === 'development' && (
+                    {isDevelopment && (
                         <>
-                            <Text>{stringifyObject(task)}</Text>
-                            <Text>form: {stringifyObject(watch())} </Text>
+                            <CollapsableText
+                                buttonText="datos de tarea"
+                                text={stringifyObject(task)}
+                            />
+                            <CollapsableText
+                                buttonText="datos de formulario"
+                                text={stringifyObject(watch())}
+                            />
                         </>
                     )}
                     <View className="px-4 pt-4 space-y-4">
@@ -403,7 +421,6 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                                                     shouldTouch: true,
                                                                 },
                                                             );
-                                                            setParticipantsChanged(true);
                                                             setSelectedOption(null);
                                                         }
                                                     }
@@ -462,7 +479,6 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                                                   shouldTouch: true,
                                                               },
                                                           );
-                                                          setParticipantsChanged(true);
                                                       }
                                                     : undefined
                                             } // No mostrar la X cuando está aprobada
@@ -494,80 +510,107 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
 
                         <View>
                             <Label className="mb-1.5">Fecha de inicio</Label>
-                            <View>
-                                <TouchableOpacity
-                                    onPress={() => setStartDatePickerVisibility(true)}
-                                >
-                                    <TextInput
-                                        inputStyle={{ color: 'black' }}
-                                        editable={false}
-                                        icon={<EvilIcons name="calendar" size={24} />}
+                            {task.status !== TaskStatus.Aprobada ? (
+                                <View>
+                                    <TouchableOpacity
+                                        onPress={() => setStartDatePickerVisibility(true)}
                                     >
-                                        {watch('startedAt')
-                                            ? format(
-                                                  new Date(watch('startedAt')),
-                                                  'dd/MM/yyyy HH:mm',
-                                              )
-                                            : task.startedAt
-                                              ? format(
-                                                    new Date(task.startedAt),
-                                                    'dd/MM/yyyy HH:mm',
-                                                )
-                                              : 'Fecha de inicio'}
-                                    </TextInput>
-                                </TouchableOpacity>
-                                <DateTimePickerModal
-                                    isVisible={isStartDatePickerVisible}
-                                    mode="datetime"
-                                    onConfirm={(date) => {
-                                        setValue('startedAt', date);
-                                        setStartDatePickerVisibility(false);
-                                    }}
-                                    onCancel={() => setStartDatePickerVisibility(false)}
-                                    date={watch('startedAt') || new Date()}
-                                    maximumDate={watch('closedAt') || undefined}
-                                />
-                            </View>
+                                        <TextInput
+                                            inputStyle={{ color: 'black' }}
+                                            editable={false}
+                                            icon={<EvilIcons name="calendar" size={24} />}
+                                        >
+                                            {watch('startedAt')
+                                                ? format(
+                                                      new Date(watch('startedAt')),
+                                                      'dd/MM/yyyy HH:mm',
+                                                  )
+                                                : task.startedAt
+                                                  ? format(
+                                                        new Date(task.startedAt),
+                                                        'dd/MM/yyyy HH:mm',
+                                                    )
+                                                  : 'Fecha de inicio'}
+                                        </TextInput>
+                                    </TouchableOpacity>
+                                    <DateTimePickerModal
+                                        isVisible={isStartDatePickerVisible}
+                                        mode="datetime"
+                                        onConfirm={(date) => {
+                                            setValue('startedAt', date);
+                                            setStartDatePickerVisibility(false);
+                                        }}
+                                        onCancel={() =>
+                                            setStartDatePickerVisibility(false)
+                                        }
+                                        date={watch('startedAt') || new Date()}
+                                        maximumDate={watch('closedAt') || undefined}
+                                    />
+                                </View>
+                            ) : (
+                                <Text className="text-muted-foreground">
+                                    {task.startedAt
+                                        ? format(
+                                              new Date(task.startedAt),
+                                              'dd/MM/yyyy HH:mm',
+                                          )
+                                        : 'No especificado'}
+                                </Text>
+                            )}
                         </View>
 
                         <View>
                             <Label className="mb-1.5">Fecha de cierre</Label>
 
-                            <View>
-                                <TouchableOpacity
-                                    onPress={() => setCloseDatePickerVisibility(true)}
-                                >
-                                    <TextInput
-                                        inputStyle={{ color: 'black' }}
-                                        editable={false}
-                                        icon={<EvilIcons name="calendar" size={24} />}
+                            {task.status !== TaskStatus.Aprobada ? (
+                                <View>
+                                    <TouchableOpacity
+                                        onPress={() => setCloseDatePickerVisibility(true)}
                                     >
-                                        {watch('closedAt')
-                                            ? format(
-                                                  new Date(watch('closedAt')),
-                                                  'dd/MM/yyyy HH:mm',
-                                              )
-                                            : task.closedAt
-                                              ? format(
-                                                    new Date(task.closedAt),
-                                                    'dd/MM/yyyy HH:mm',
-                                                )
-                                              : 'Fecha de cierre'}
-                                    </TextInput>
-                                </TouchableOpacity>
-                                <DateTimePickerModal
-                                    isVisible={isCloseDatePickerVisible}
-                                    mode="datetime"
-                                    onConfirm={(date) => {
-                                        setValue('closedAt', date);
-                                        setCloseDatePickerVisibility(false);
-                                    }}
-                                    onCancel={() => setCloseDatePickerVisibility(false)}
-                                    date={watch('closedAt') || new Date()}
-                                    minimumDate={watch('startedAt') || undefined}
-                                />
-                            </View>
+                                        <TextInput
+                                            inputStyle={{ color: 'black' }}
+                                            editable={false}
+                                            icon={<EvilIcons name="calendar" size={24} />}
+                                        >
+                                            {watch('closedAt')
+                                                ? format(
+                                                      new Date(watch('closedAt')),
+                                                      'dd/MM/yyyy HH:mm',
+                                                  )
+                                                : task.closedAt
+                                                  ? format(
+                                                        new Date(task.closedAt),
+                                                        'dd/MM/yyyy HH:mm',
+                                                    )
+                                                  : 'Fecha de cierre'}
+                                        </TextInput>
+                                    </TouchableOpacity>
+                                    <DateTimePickerModal
+                                        isVisible={isCloseDatePickerVisible}
+                                        mode="datetime"
+                                        onConfirm={(date) => {
+                                            setValue('closedAt', date);
+                                            setCloseDatePickerVisibility(false);
+                                        }}
+                                        onCancel={() =>
+                                            setCloseDatePickerVisibility(false)
+                                        }
+                                        date={watch('closedAt') || new Date()}
+                                        maximumDate={watch('startedAt') || undefined}
+                                    />
+                                </View>
+                            ) : (
+                                <Text className="text-muted-foreground">
+                                    {task.closedAt
+                                        ? format(
+                                              new Date(task.closedAt),
+                                              'dd/MM/yyyy HH:mm',
+                                          )
+                                        : 'No especificado'}
+                                </Text>
+                            )}
                         </View>
+
                         <View>
                             <Label className="mb-1.5">Numero de Acta</Label>
                             {task.status !== TaskStatus.Aprobada ? (
@@ -594,6 +637,59 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                             ) : (
                                 <Text className="text-muted-foreground">
                                     {task.actNumber || 'No especificado'}
+                                </Text>
+                            )}
+                        </View>
+
+                        <View>
+                            <Label className="mb-1.5">¿Se usaron materiales?</Label>
+                            {task.status !== TaskStatus.Aprobada ? (
+                                <Form {...formMethods}>
+                                    <FormField
+                                        name="useMaterials"
+                                        control={control}
+                                        defaultValue={task.useMaterials ?? false}
+                                        render={({ field: { onChange, value } }) => (
+                                            <View className="flex-row space-x-4">
+                                                <TouchableOpacity
+                                                    className={`flex-row items-center justify-center space-x-2 p-2 rounded-md border w-10 h-10 ${value === true ? 'bg-black border-black' : 'bg-white border-gray-300'}`}
+                                                    onPress={() => {
+                                                        onChange(true);
+                                                    }}
+                                                >
+                                                    <Text
+                                                        className={
+                                                            value === true
+                                                                ? 'text-white'
+                                                                : 'text-black'
+                                                        }
+                                                    >
+                                                        Sí
+                                                    </Text>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity
+                                                    className={`flex-row items-center justify-center space-x-2 p-2 rounded-md border w-10 h-10 ${value === false ? 'bg-black border-black' : 'bg-white border-gray-300'}`}
+                                                    onPress={() => {
+                                                        onChange(false);
+                                                    }}
+                                                >
+                                                    <Text
+                                                        className={
+                                                            value === false
+                                                                ? 'text-white'
+                                                                : 'text-black'
+                                                        }
+                                                    >
+                                                        No
+                                                    </Text>
+                                                </TouchableOpacity>
+                                            </View>
+                                        )}
+                                    />
+                                </Form>
+                            ) : (
+                                <Text className="text-muted-foreground">
+                                    {task.useMaterials ? 'Sí' : 'No'}
                                 </Text>
                             )}
                         </View>

@@ -85,6 +85,7 @@ export const useUpdateMyAssignedTask = () => {
                             (expense) => !expenseIdsToDelete?.includes(expense.id),
                         ),
                         actNumber: task.actNumber,
+                        useMaterials: task.useMaterials,
                     },
                 };
 

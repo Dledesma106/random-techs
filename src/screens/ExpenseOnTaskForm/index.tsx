@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { DeviceEventEmitter } from 'react-native';
 
+import { TaskStatus } from '@/api/graphql';
 import ExpenseDetail from '@/components/ExpenseDetail';
 import { deletePhoto } from '@/lib/utils';
 import { ExpenseOnTaskFormScreenRouteProp } from '@/navigation/types';
-
 const EVENT_NAME = 'expense-deleted-on-task-event';
 
 export const addDeleteExpenseOnTaskListener = (callback: (expenseId: string) => void) => {
@@ -50,7 +50,13 @@ const ExpenseOnTaskForm = ({ navigation, route }: ExpenseOnTaskFormScreenRoutePr
         navigation.goBack();
     };
 
-    return <ExpenseDetail onDelete={handleDeleteExpense} expense={expense} />;
+    return (
+        <ExpenseDetail
+            onDelete={handleDeleteExpense}
+            expense={expense}
+            canDelete={expense.task?.status !== TaskStatus.Aprobada}
+        />
+    );
 };
 
 export default ExpenseOnTaskForm;

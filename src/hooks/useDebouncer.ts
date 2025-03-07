@@ -17,6 +17,9 @@ export function useDebouncer<T extends (...args: any[]) => any>(
     useEffect(() => {
         isMountedRef.current = true;
         return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
             isMountedRef.current = false;
         };
     }, []);
@@ -26,12 +29,27 @@ export function useDebouncer<T extends (...args: any[]) => any>(
             clearTimeout(timeoutRef.current);
         }
 
-        timeoutRef.current = setTimeout(async () => {
-            try {
-                await callbackRef.current(...args);
-            } catch (error) {
-                console.error('Error in debounced function:', error);
+        const promise = new Promise((resolve, reject) => {
+            timeoutRef.current = setTimeout(async () => {
+                try {
+                    if (isMountedRef.current) {
+                        const result = await callbackRef.current(...args);
+                        resolve(result);
+                    }
+                } catch (error) {
+                    console.error('Error in debounced function:', error);
+                    reject(error);
+                }
+            }, delay);
+        });
+
+        // Agregar método cancel a la promesa
+        (promise as any).cancel = () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
             }
-        }, delay);
+        };
+
+        return promise;
     };
 }

@@ -3,12 +3,13 @@ import { es } from 'date-fns/locale';
 import { useState } from 'react';
 import { Text, View, Pressable, ViewProps } from 'react-native';
 
+import { MyAssignedTasksQuery } from '@/api/graphql';
 import { Badge, BadgeText } from '@/components/ui/badge';
 import { cn, pascalCaseToSpaces } from '@/lib/utils';
 
 import { TaskListProps } from '.';
 
-type TaskItem = NonNullable<TaskListProps['tasksQuery']['data']>['myAssignedTasks'][0];
+type TaskItem = NonNullable<MyAssignedTasksQuery['myAssignedTasks']>[0];
 
 type ItemProps = {
     task: TaskItem;

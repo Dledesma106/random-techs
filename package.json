@@ -74,6 +74,7 @@
         "react-dom": "18.2.0",
         "react-hook-form": "^7.49.1",
         "react-native": "0.74.5",
+        "react-native-collapsible": "^1.6.2",
         "react-native-gesture-handler": "~2.16.1",
         "react-native-get-random-values": "~1.11.0",
         "react-native-keyboard-aware-scroll-view": "^0.9.5",

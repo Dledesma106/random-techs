@@ -12,7 +12,8 @@
                 "AWS_REGION": "@env:AWS_REGION",
                 "AWS_BUCKET_NAME": "@env:AWS_BUCKET_NAME",
                 "API_HOST": "@env:API_HOST",
-                "API_BASE_URL": "@env:API_BASE_URL"
+                "API_BASE_URL": "@env:API_BASE_URL",
+                "ENVIRONMENT": "@env:ENVIRONMENT"
             }
         },
         "preview": {
@@ -26,7 +27,8 @@
                 "AWS_REGION": "@env:AWS_REGION",
                 "AWS_BUCKET_NAME": "@env:AWS_BUCKET_NAME",
                 "API_HOST": "@env:API_HOST",
-                "API_BASE_URL": "@env:API_BASE_URL"
+                "API_BASE_URL": "@env:API_BASE_URL",
+                "ENVIRONMENT": "@env:ENVIRONMENT"
             }
         },
         "production": {
@@ -40,7 +42,8 @@
                 "AWS_REGION": "@env:AWS_REGION",
                 "AWS_BUCKET_NAME": "@env:AWS_BUCKET_NAME",
                 "API_HOST": "@env:API_HOST",
-                "API_BASE_URL": "@env:API_BASE_URL"
+                "API_BASE_URL": "@env:API_BASE_URL",
+                "ENVIRONMENT": "@env:ENVIRONMENT"
             }
         }
     }

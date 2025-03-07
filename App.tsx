@@ -17,23 +17,32 @@ import useColorScheme from './src/hooks/useColorScheme';
 import Navigation from './src/navigation';
 
 import useCachedResources from '@/hooks/useCachedResources';
-import { showToast } from '@/lib/toast';
-
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
-            gcTime: 1000 * 60 * 60 * 24,
+            gcTime: 1000 * 60 * 60 * 24, // 24 horas
+            staleTime: 1000 * 60 * 5, // 5 minutos
+            retry: 1,
+            retryDelay: 3000,
+        },
+        mutations: {
+            retry: 1,
+            retryDelay: 3000,
         },
     },
     queryCache: new QueryCache({
-        onError: () => {
-            return showToast('Ocurrió un error al realizar la operación', 'error');
+        onError: (error) => {
+            console.log('Error de query cache:', error);
         },
     }),
 });
 
 const asyncStoragePersister = createAsyncStoragePersister({
     storage: AsyncStorage,
+    key: 'RANDOM-TECHS-CACHE',
+    throttleTime: 1000,
+    serialize: (data) => JSON.stringify(data),
+    deserialize: (data) => JSON.parse(data),
 });
 
 globalThis.ReadableStream = ReadableStream as any;

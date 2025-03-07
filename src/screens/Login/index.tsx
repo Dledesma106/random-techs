@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 
 import { ButtonWithSpinner } from '@/components/ButtonWithSpinner';
+import CollapsableText from '@/components/CollapsableText';
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { TextInput } from '@/components/ui/Input';
 import { useUserContext } from '@/context/userContext/useUser';
@@ -23,7 +24,7 @@ import JWTTokenService from '@/lib/JWTTokenService';
 import { S3Credentials } from '@/lib/s3Client';
 import { stringifyObject } from '@/lib/utils';
 import { RootStackParamList } from '@/navigation/types';
-
+const isDevelopment = Constants.expoConfig?.extra?.['environment'] === 'development';
 interface LoginForm {
     email: string;
     password: string;
@@ -70,9 +71,16 @@ const LoginScreen = ({ navigation }: Props) => {
                     className="flex-1 bg-white flex justify-center"
                 >
                     <View className="px-4 w-full">
-                        <Text>{stringifyObject(S3Credentials)}</Text>
-                        <Text>{apiHost}</Text>
-                        <Text>{apiBaseUrl}</Text>
+                        {isDevelopment && (
+                            <CollapsableText
+                                buttonText="datos de desarrollo"
+                                text={stringifyObject({
+                                    ...S3Credentials,
+                                    apiHost,
+                                    apiBaseUrl,
+                                })}
+                            />
+                        )}
                         <Text className="text-2xl font-bold mb-4 text-gray-800 text-center">
                             Tecnicos Random
                         </Text>
