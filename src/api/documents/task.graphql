@@ -1,0 +1,285 @@
+query myAssignedTasks {
+    myAssignedTasks {
+        id
+        taskNumber
+        description
+        business {
+            id
+            name
+        }
+        createdAt
+        businessName
+        clientName
+        branch {
+            id
+            number
+            city {
+                id
+                name
+                province {
+                    id
+                    name
+                }
+            }
+            client {
+                id
+                name
+            }
+        }
+        taskType
+        status
+    }
+}
+
+query myAssignedTaskById($id: String!) {
+    myAssignedTaskById(id: $id) {
+        id
+        taskNumber
+        createdAt
+        closedAt
+        startedAt
+        participants
+        description
+        observations
+        businessName
+        clientName
+        useMaterials
+        business {
+            id
+            name
+        }
+        images {
+            id
+            url
+        }
+        auditor {
+            fullName
+        }
+        actNumber
+        branch {
+            number
+            city {
+                name
+                province {
+                    name
+                }
+            }
+            client {
+                name
+            }
+        }
+        assigned {
+            id
+            fullName
+        }
+        expenses {
+            id
+            amount
+            paySource
+            paySourceBank
+            expenseType
+            createdAt
+            images {
+                id
+                url
+                urlExpire
+                key
+            }
+            files {
+                id
+                url
+                urlExpire
+                key
+            }
+            status
+            doneBy
+            observations
+            installments
+            expenseDate
+
+            registeredBy {
+                id
+                email
+                fullName
+            }
+        }
+        taskType
+        status
+    }
+}
+
+query branchBusinesses($branch: String!) {
+    branchBusinesses(branch: $branch) {
+        id
+        name
+    }
+}
+
+mutation createMyTask($input: MyTaskInput!) {
+    createMyTask(input: $input) {
+        task {
+            id
+            taskNumber
+            status
+            actNumber
+            observations
+            createdAt
+            startedAt
+            description
+            businessName
+            clientName
+            useMaterials
+            business {
+                id
+                name
+            }
+            branch {
+                id
+                number
+                city {
+                    id
+                    name
+                    province {
+                        id
+                        name
+                    }
+                }
+                client {
+                    id
+                    name
+                }
+            }
+            assigned {
+                id
+                fullName
+            }
+            taskType
+            closedAt
+            expenses {
+                id
+                amount
+                paySource
+                paySourceBank
+                expenseType
+                createdAt
+                installments
+                expenseDate
+                images {
+                    id
+                    url
+                    urlExpire
+                    key
+                }
+                files {
+                    id
+                    url
+                    urlExpire
+                    key
+                }
+                status
+                doneBy
+                observations
+                registeredBy {
+                    id
+                    email
+                    fullName
+                }
+            }
+            images {
+                id
+                url
+            }
+        }
+        success
+        message
+    }
+}
+
+mutation updateMyAssignedTask($input: UpdateMyTaskInput!) {
+    updateMyAssignedTask(input: $input) {
+        task {
+            id
+            status
+            actNumber
+            observations
+            closedAt
+            startedAt
+            businessName
+            clientName
+            useMaterials
+            expenses {
+                id
+                amount
+                paySource
+                paySourceBank
+                expenseType
+                createdAt
+                installments
+                expenseDate
+                images {
+                    id
+                    url
+                    urlExpire
+                    key
+                }
+                files {
+                    id
+                    url
+                    urlExpire
+                    key
+                }
+                status
+                doneBy
+                observations
+                registeredBy {
+                    id
+                    email
+                    fullName
+                }
+            }
+            images {
+                id
+                url
+            }
+        }
+        success
+        message
+    }
+}
+
+mutation DeleteImage($taskId: String!, $imageId: String!) {
+    deleteImage(taskId: $taskId, imageId: $imageId) {
+        success
+        message
+        task {
+            id
+            status
+            actNumber
+            images {
+                id
+                url
+            }
+        }
+    }
+}
+
+mutation FinishTask($id: String!) {
+  finishTask(id: $id) {
+    success
+    message
+    task {
+      id
+      taskNumber
+      status
+      description
+      observations
+      closedAt
+      startedAt
+      participants
+      assigned {
+        id
+        fullName
+      }
+    }
+  }
+}

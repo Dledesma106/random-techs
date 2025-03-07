@@ -1,0 +1,17 @@
+query clients {
+    clients {
+        id
+        name
+        branches {
+            id
+            number
+            city{
+                name
+            }
+            businesses {
+                id
+                name
+            }
+        }
+    }
+}

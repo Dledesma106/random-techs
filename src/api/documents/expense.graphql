@@ -1,0 +1,101 @@
+query myExpenseById($id: String!) {
+    myExpenseById(id: $id) {
+        id
+        amount
+        task {
+            status
+        }
+        expenseType
+        cityName
+        expenseNumber
+        paySource
+        paySourceBank
+        cityName
+        status
+        doneBy
+        observations
+        images {
+            id
+            url
+        }
+        files {
+            id
+            key
+            url
+            filename
+            mimeType
+            size
+        }
+        auditor {
+            id
+            fullName
+        }
+        installments
+        expenseDate
+        createdAt
+    }
+}
+
+mutation createExpense($taskId: String, $expenseData: ExpenseInput!) {
+    createExpense(taskId: $taskId, expenseData: $expenseData) {
+        success
+        message
+        expense {
+            amount
+            createdAt
+            expenseType
+            expenseNumber
+            id
+            cityName
+            doneBy
+            observations
+            images {
+                id
+                url
+                key
+            }
+            files {
+                id
+                url
+                key
+                filename
+                mimeType
+                size
+            }
+
+            paySource
+            paySourceBank
+            installments
+            expenseDate
+            status
+        }
+    }
+}
+
+mutation deleteExpense($id: String!, $taskId: String!) {
+    deleteExpense(id: $id, taskId: $taskId) {
+        success
+        message
+        expense {
+            id
+        }
+    }
+}
+
+query MyExpenses {
+    myExpenses {
+        amount
+        createdAt
+        expenseType
+        cityName
+        expenseNumber
+        id
+        images {
+            id
+            url
+            key
+        }
+        paySource
+        status
+    }
+}

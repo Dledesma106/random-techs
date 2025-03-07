@@ -1,11 +1,50 @@
 {
-	"build": {
-		"development": {
-			"distribution": "internal"
-		},
-		"preview": {
-			"distribution": "internal"
-		},
-		"production": {}
-	}
+    "build": {
+        "development": {
+            "distribution": "internal",
+            "android": {
+                "buildType": "apk",
+                "image": "latest"
+            },
+            "env": {
+                "AWS_ACCESS_KEY_ID": "@env:AWS_ACCESS_KEY_ID",
+                "AWS_SECRET_ACCESS_KEY": "@env:AWS_SECRET_ACCESS_KEY",
+                "AWS_REGION": "@env:AWS_REGION",
+                "AWS_BUCKET_NAME": "@env:AWS_BUCKET_NAME",
+                "API_HOST": "@env:API_HOST",
+                "API_BASE_URL": "@env:API_BASE_URL",
+                "ENVIRONMENT": "@env:ENVIRONMENT"
+            }
+        },
+        "preview": {
+            "distribution": "internal",
+            "android": {
+                "buildType": "apk"
+            },
+            "env": {
+                "AWS_ACCESS_KEY_ID": "@env:AWS_ACCESS_KEY_ID",
+                "AWS_SECRET_ACCESS_KEY": "@env:AWS_SECRET_ACCESS_KEY",
+                "AWS_REGION": "@env:AWS_REGION",
+                "AWS_BUCKET_NAME": "@env:AWS_BUCKET_NAME",
+                "API_HOST": "@env:API_HOST",
+                "API_BASE_URL": "@env:API_BASE_URL",
+                "ENVIRONMENT": "@env:ENVIRONMENT"
+            }
+        },
+        "production": {
+            "android": {
+                "buildType": "apk",
+                "image": "latest"
+            },
+            "env": {
+                "AWS_ACCESS_KEY_ID": "@env:AWS_ACCESS_KEY_ID",
+                "AWS_SECRET_ACCESS_KEY": "@env:AWS_SECRET_ACCESS_KEY",
+                "AWS_REGION": "@env:AWS_REGION",
+                "AWS_BUCKET_NAME": "@env:AWS_BUCKET_NAME",
+                "API_HOST": "@env:API_HOST",
+                "API_BASE_URL": "@env:API_BASE_URL",
+                "ENVIRONMENT": "@env:ENVIRONMENT"
+            }
+        }
+    }
 }
