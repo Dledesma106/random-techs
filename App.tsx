@@ -4,7 +4,6 @@ import NetInfo from '@react-native-community/netinfo';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { onlineManager, QueryCache, QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { StatusBar } from 'expo-status-bar';
 import { RootSiblingParent } from 'react-native-root-siblings';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ReadableStream } from 'web-streams-polyfill';
@@ -12,11 +11,14 @@ import 'react-native-get-random-values';
 import 'react-native-url-polyfill/auto';
 
 import DbProvider from './src/context/dbContext/DbProvider';
+import { NativeWindThemeProvider } from './src/context/NativeWindThemeProvider';
+import { ThemeProvider } from './src/context/ThemeProvider';
 import UserProvider from './src/context/userContext/UserProvider';
 import useColorScheme from './src/hooks/useColorScheme';
 import Navigation from './src/navigation';
 
 import useCachedResources from '@/hooks/useCachedResources';
+
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
@@ -32,24 +34,15 @@ const queryClient = new QueryClient({
     },
     queryCache: new QueryCache({
         onError: (error) => {
-            console.log('Error de query cache:', error);
+            console.log(error);
         },
     }),
-});
-
-const asyncStoragePersister = createAsyncStoragePersister({
-    storage: AsyncStorage,
-    key: 'RANDOM-TECHS-CACHE',
-    throttleTime: 1000,
-    serialize: (data) => JSON.stringify(data),
-    deserialize: (data) => JSON.parse(data),
 });
 
 globalThis.ReadableStream = ReadableStream as any;
 
 export default function App() {
-    const appIsReady = useCachedResources();
-
+    const isLoadingComplete = useCachedResources();
     const colorScheme = useColorScheme();
 
     onlineManager.setEventListener((setOnline) => {
@@ -58,30 +51,33 @@ export default function App() {
         });
     });
 
-    if (!appIsReady) {
-        return null;
-    }
+    const persister = createAsyncStoragePersister({
+        storage: AsyncStorage,
+        key: 'RANDOM_TECHS_QUERY',
+    });
 
-    return (
-        <PersistQueryClientProvider
-            client={queryClient}
-            persistOptions={{ persister: asyncStoragePersister }}
-            onSuccess={() =>
-                queryClient
-                    .resumePausedMutations()
-                    .then(() => queryClient.invalidateQueries())
-            }
-        >
-            <RootSiblingParent>
-                <SafeAreaProvider>
-                    <DbProvider>
-                        <UserProvider>
-                            <Navigation colorScheme={colorScheme} />
-                            <StatusBar />
-                        </UserProvider>
-                    </DbProvider>
-                </SafeAreaProvider>
-            </RootSiblingParent>
-        </PersistQueryClientProvider>
-    );
+    if (!isLoadingComplete) {
+        return null;
+    } else {
+        return (
+            <SafeAreaProvider>
+                <PersistQueryClientProvider
+                    client={queryClient}
+                    persistOptions={{ persister }}
+                >
+                    <ThemeProvider>
+                        <NativeWindThemeProvider>
+                            <RootSiblingParent>
+                                <UserProvider>
+                                    <DbProvider>
+                                        <Navigation colorScheme={colorScheme} />
+                                    </DbProvider>
+                                </UserProvider>
+                            </RootSiblingParent>
+                        </NativeWindThemeProvider>
+                    </ThemeProvider>
+                </PersistQueryClientProvider>
+            </SafeAreaProvider>
+        );
+    }
 }

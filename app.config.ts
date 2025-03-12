@@ -48,8 +48,16 @@ const config = ({ config }: ConfigContext): ExpoConfig => {
         experiments: {
             tsconfigPaths: true,
         },
-        plugins: ['expo-font', 'expo-secure-store', 'expo-build-properties'],
+        plugins: [
+            'expo-font',
+            'expo-secure-store',
+            'expo-build-properties',
+            'expo-dev-client',
+        ],
         owner: 'undefineddevs',
+        developmentClient: {
+            silentLaunch: false,
+        },
     };
 };
 

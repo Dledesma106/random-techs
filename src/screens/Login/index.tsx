@@ -12,6 +12,7 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
     Alert,
+    TouchableOpacity,
 } from 'react-native';
 
 import { ButtonWithSpinner } from '@/components/ButtonWithSpinner';
@@ -48,8 +49,6 @@ const LoginScreen = ({ navigation }: Props) => {
         mutate(data, {
             onSuccess: async (data, { password }) => {
                 const { accessToken, user } = data.login;
-                console.log(accessToken);
-                console.log(user);
 
                 if (!accessToken || !user) {
                     Alert.alert('Error', 'No se pudo iniciar sesión');
@@ -59,6 +58,10 @@ const LoginScreen = ({ navigation }: Props) => {
                 await JWTTokenService.saveAsync(accessToken);
                 setUser(user, password);
                 navigation.replace('Drawer');
+            },
+            onError: (error) => {
+                console.log(error);
+                Alert.alert('Error', error.message);
             },
         });
     };
@@ -84,6 +87,16 @@ const LoginScreen = ({ navigation }: Props) => {
                         <Text className="text-2xl font-bold mb-4 text-gray-800 text-center">
                             Tecnicos Random
                         </Text>
+
+                        {/* Botón para acceder a la pantalla de prueba de tema */}
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate('ThemeTest')}
+                            className="bg-primary py-3 px-4 rounded-md mb-6"
+                        >
+                            <Text className="text-primary-foreground text-center font-medium">
+                                Probar Temas (NativeWind)
+                            </Text>
+                        </TouchableOpacity>
 
                         <Form {...form}>
                             <View className="space-y-4 mb-6 w-full">

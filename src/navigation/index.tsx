@@ -24,6 +24,7 @@ import AssignedTask from '../screens/AssignedTask';
 import Home from '../screens/Home';
 import Login from '../screens/Login';
 import NotFoundScreen from '../screens/NotFoundScreen';
+import ThemeTest from '../screens/ThemeTest';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
     return (
@@ -108,6 +109,11 @@ function RootNavigator() {
                 name="RegisterExpense"
                 component={RegisterExpense}
                 options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name="ThemeTest"
+                component={ThemeTest}
+                options={{ title: 'Prueba de Tema' }}
             />
         </Stack.Navigator>
     );

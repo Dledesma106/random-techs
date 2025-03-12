@@ -30,6 +30,7 @@ export type RootStackParamList = {
     RegisterTask: undefined;
     AccountSettings: undefined;
     Profile: undefined;
+    ThemeTest: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> = StackScreenProps<

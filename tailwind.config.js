@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: ['./src/**/*.{js,ts,jsx,tsx,mdx}', './App.{js,ts,jsx,tsx,mdx}'],
+    darkMode: 'class',
     theme: {
         extend: {
             colors: {
@@ -32,6 +33,34 @@ module.exports = {
                 card: {
                     DEFAULT: 'rgb(255, 255, 255)',
                     foreground: 'rgb(1, 8, 22)',
+                },
+                dark: {
+                    background: 'rgb(15, 23, 42)',
+                    foreground: 'rgb(247, 249, 251)',
+                    primary: {
+                        DEFAULT: 'rgb(59, 130, 246)',
+                        foreground: 'rgb(255, 255, 255)',
+                    },
+                    secondary: {
+                        DEFAULT: 'rgb(30, 41, 59)',
+                        foreground: 'rgb(226, 232, 240)',
+                    },
+                    muted: {
+                        DEFAULT: 'rgb(30, 41, 59)',
+                        foreground: 'rgb(148, 163, 184)',
+                    },
+                    accent: {
+                        DEFAULT: 'rgb(30, 41, 59)',
+                        foreground: 'rgb(226, 232, 240)',
+                    },
+                    destructive: {
+                        DEFAULT: 'rgb(248, 113, 113)',
+                        foreground: 'rgb(255, 255, 255)',
+                    },
+                    card: {
+                        DEFAULT: 'rgb(15, 23, 42)',
+                        foreground: 'rgb(247, 249, 251)',
+                    },
                 },
             },
         },
