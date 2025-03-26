@@ -21,6 +21,7 @@ import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/
 import { TextInput } from '@/components/ui/Input';
 import { useUserContext } from '@/context/userContext/useUser';
 import useLogin from '@/hooks/api/auth/useLogin';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import JWTTokenService from '@/lib/JWTTokenService';
 import { S3Credentials } from '@/lib/s3Client';
 import { stringifyObject } from '@/lib/utils';
@@ -40,6 +41,11 @@ const LoginScreen = ({ navigation }: Props) => {
     const { mutate, error, isPending } = useLogin();
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const { setUser } = useUserContext();
+    const {
+        colors: {
+            primary: { DEFAULT: primary, foreground },
+        },
+    } = useThemeColors();
 
     const form = useForm<LoginForm>({
         reValidateMode: 'onSubmit',
@@ -75,28 +81,32 @@ const LoginScreen = ({ navigation }: Props) => {
                 >
                     <View className="px-4 w-full">
                         {isDevelopment && (
-                            <CollapsableText
-                                buttonText="datos de desarrollo"
-                                text={stringifyObject({
-                                    ...S3Credentials,
-                                    apiHost,
-                                    apiBaseUrl,
-                                })}
-                            />
+                            <>
+                                <CollapsableText
+                                    buttonText="datos de desarrollo"
+                                    text={stringifyObject({
+                                        ...S3Credentials,
+                                        apiHost,
+                                        apiBaseUrl,
+                                    })}
+                                />
+                                <TouchableOpacity
+                                    onPress={() => navigation.navigate('ThemeTest')}
+                                    className={`bg-[${primary}] py-3 px-4 rounded-md mb-6`}
+                                >
+                                    <Text
+                                        className={`text-[${foreground}] text-center font-medium`}
+                                    >
+                                        Probar Temas (NativeWind)
+                                    </Text>
+                                </TouchableOpacity>
+                            </>
                         )}
                         <Text className="text-2xl font-bold mb-4 text-gray-800 text-center">
                             Tecnicos Random
                         </Text>
 
                         {/* Botón para acceder a la pantalla de prueba de tema */}
-                        <TouchableOpacity
-                            onPress={() => navigation.navigate('ThemeTest')}
-                            className="bg-primary py-3 px-4 rounded-md mb-6"
-                        >
-                            <Text className="text-primary-foreground text-center font-medium">
-                                Probar Temas (NativeWind)
-                            </Text>
-                        </TouchableOpacity>
 
                         <Form {...form}>
                             <View className="space-y-4 mb-6 w-full">

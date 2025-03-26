@@ -1,118 +1,106 @@
-# random-techs
+# Random Techs
 
-Aplicacion movil que acompaña a sistema-administrativo-random, que permite a los técnicos ver tareas que les fueron asignadas, y registrar gastos realizados para completar dichas tareas.
+Una aplicación móvil desarrollada con React Native y Expo.
 
-Utiliza React Native para que pueda ser compilado tanto para android como ios
+## Scripts disponibles
 
-## Sobre las tecnologías utilizadas
+### Desarrollo
 
--   React Native: Framework para desarrollar aplicaciones móviles multiplataforma
--   Expo: Plataforma para desarrollar aplicaciones móviles con React Native
--   TypeScript: Lenguaje de programación
--   EAS: Herramienta para hacer build de aplicaciones móviles
--   Nativewind: Librería de estilos para React Native basada en Tailwind CSS
--   React Query: Librería para manejar el estado de la aplicación y hacer peticiones a la API
--   @tanstack/query-async-storage-persister: Plugin para React Query que permite guardar el estado de la aplicación en el AsyncStorage
+- `yarn dev` - Inicia el servidor de desarrollo con Expo Go
+- `yarn android` - Ejecuta la aplicación en un dispositivo/emulador Android
+- `yarn ios` - Ejecuta la aplicación en un dispositivo/emulador iOS
+- `yarn web` - Inicia el servidor web de desarrollo
 
-## Requisitos previos
+### Construcción de APK
 
-### 1. Instala Node.js
+Para construir la aplicación Android, se han incluido los siguientes scripts:
 
-Descarga e instala Node.js desde https://nodejs.org/
+- `yarn clean:android` - Limpia la carpeta de construcción de Android
+- `yarn bundle:android` - Genera el bundle de JavaScript para Android
+- `yarn build:android:dev` - Genera una APK de desarrollo (debug)
+- `yarn build:android:prod` - Genera una APK de producción (release)
 
-### 2. Instala Expo CLI
+**Scripts combinados:**
+- `yarn build:android:dev:full` - Ejecuta todos los pasos para generar una APK de desarrollo
+- `yarn build:android:prod:full` - Ejecuta todos los pasos para generar una APK de producción
 
-Ejecuta el comando:
+### Proceso de construcción de APK
 
-```sh
-npm install -g expo-cli
+Puedes construir la APK manualmente siguiendo estos pasos:
+
+1. Limpia la carpeta de construcción de Android:
+   ```
+   yarn clean:android
+   ```
+
+2. Genera el bundle de JavaScript para Android:
+   ```
+   yarn bundle:android
+   ```
+
+3. Construye la APK de desarrollo o producción:
+   ```
+   yarn build:android:dev
+   ```
+   o
+   ```
+   yarn build:android:prod
+   ```
+
+O puedes usar los scripts combinados:
+```
+yarn build:android:dev:full
+```
+o
+```
+yarn build:android:prod:full
 ```
 
-### 3. Instala el cliente de EAS
+4. Las APKs generadas se encuentran en las siguientes ubicaciones:
+   - Desarrollo: `android/app/build/outputs/apk/debug/app-debug.apk`
+   - Producción: `android/app/build/outputs/apk/release/app-release.apk`
 
-Ejecuta el comando:
+### Otras utilidades
 
-```sh
-npm install -g eas-cli
+- `yarn lint` - Ejecuta el linter
+- `yarn lint:fix` - Corrige errores de linting
+- `yarn format` - Verifica el formato del código
+- `yarn format:fix` - Corrige el formato del código
+- `yarn lint-format:fix` - Corrige errores de linting y formato
+
+## Gestión de temas
+
+La aplicación utiliza un sistema de gestión de temas con las siguientes características:
+
+1. **Themes**: Soporta temas `light`, `dark` y `system`
+2. **Colores**: Usa NativeWind y Tailwind CSS para aplicar estilos según el tema
+
+### Uso de temas en componentes
+
+```jsx
+import useThemeColors from '../hooks/useThemeColors';
+
+const MyComponent = () => {
+    const { 
+        bgBackground, 
+        textForeground, 
+        colorScheme 
+    } = useThemeColors();
+
+    return (
+        <View className={`p-4 ${bgBackground}`}>
+            <Text className={`text-lg ${textForeground}`}>
+                Tema actual: {colorScheme}
+            </Text>
+        </View>
+    );
+};
 ```
 
-## ¿Como correr el proyecto?
+## Requisitos
 
-### 1. Instala las dependencias
-
-Ejecuta el comando:
-
-```sh
-yarn install
-```
-
-### 2. Configura el archivo .env
-
-Copia el archivo .env.example y renombralo a .env, luego configura las variables de entorno.
-Las variables de entorno necesarias son:
-
--   EXPO_PUBLIC_API_HOST: La url del servidor de sistema-administrativo-random. Ej: http://localhost:3000
-
-### 3. Corre el proyecto
-
-Ejecuta el comando:
-
-```sh
-yarn start
-```
-
-o si no tienes yarn instalado:
-
-```sh
-npm start
-```
-
-## ¿Como hacer el build de un APK?
-
-Recuerda que para seguir los pasos necesitas tener el cliente de EAS instalado y una cuenta en expo.dev.
-
-### 1. Configura un proyecto en https://expo.dev
-
-Primero necesitas tener un proyecto en https://expo.dev, si no tienes uno, crea uno y anota el id del proyecto.
-
-### 2. Configura el archivo app.config.ts
-
-Revisa el archivo app.config.ts y busca la sección "extras" -> "eas" -> "projectId" y cambia el valor por el id de tu proyecto en expo.dev
-
-Entonces el archivo app.config.ts debería verse algo así:
-
-```ts
-import 'dotenv/config';
-import { ExpoConfig, ConfigContext } from 'expo/config';
-
-const config = ({ config }: ConfigContext): ExpoConfig => ({
-    ...config,
-    extra: {
-        eas: {
-            projectId: 'El id de tu proyecto en expo.dev',
-        },
-    },
-    // Add custom config here
-});
-
-export default config;
-```
-
-### 3. Configura el archivo .env
-
-Ejecuta el comando:
-
-```sh
-eas build -p android --profile preview
-```
-
-Esto empezará el proceso de build en expo.dev.
-Las variables de entorno ya se encuentran configuradas en el archivo eas.json.
-
-### 4. Descarga el APK
-
-Una vez que el build haya terminado, descarga el APK desde la página de expo.dev.
-
-### 5. Instala el APK
-
-Instala el APK en tu dispositivo android y listo.
+- Node.js (>=14.0.0)
+- Yarn
+- JDK 11
+- Android SDK (para Android)
+- Xcode (para iOS)

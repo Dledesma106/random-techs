@@ -3,7 +3,7 @@
     "version": "0.3.1",
     "main": "node_modules/expo/AppEntry.js",
     "scripts": {
-        "dev": "npx expo start --go",
+        "dev": "npx expo start --dev-client",
         "android": "npx expo run:android",
         "ios": "npx expo run:ios",
         "web": "npx expo start --web",
@@ -13,7 +13,13 @@
         "format": "prettier './**/*.ts{,x}'",
         "format:fix": "prettier --write './**/*.ts{,x}'",
         "lint-format:fix": "yarn lint:fix && yarn format:fix",
-        "gen": "graphql-codegen --config codegen.ts"
+        "gen": "graphql-codegen --config codegen.ts",
+        "build:android:dev": "cd android && ./gradlew assembleDebug && cd ..",
+        "build:android:prod": "cd android && ./gradlew assembleRelease && cd ..",
+        "clean:android": "cd android && ./gradlew clean && cd ..",
+        "bundle:android": "npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
+        "build:android:dev:full": "yarn clean:android && yarn bundle:android && yarn build:android:dev",
+        "build:android:prod:full": "yarn clean:android && yarn bundle:android && yarn build:android:prod"
     },
     "jest": {
         "preset": "jest-expo"

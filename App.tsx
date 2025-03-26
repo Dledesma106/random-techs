@@ -1,4 +1,5 @@
 import 'react-native-get-random-values';
+import './src/config/nativewind';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
@@ -11,10 +12,8 @@ import 'react-native-get-random-values';
 import 'react-native-url-polyfill/auto';
 
 import DbProvider from './src/context/dbContext/DbProvider';
-import { NativeWindThemeProvider } from './src/context/NativeWindThemeProvider';
 import { ThemeProvider } from './src/context/ThemeProvider';
 import UserProvider from './src/context/userContext/UserProvider';
-import useColorScheme from './src/hooks/useColorScheme';
 import Navigation from './src/navigation';
 
 import useCachedResources from '@/hooks/useCachedResources';
@@ -43,7 +42,6 @@ globalThis.ReadableStream = ReadableStream as any;
 
 export default function App() {
     const isLoadingComplete = useCachedResources();
-    const colorScheme = useColorScheme();
 
     onlineManager.setEventListener((setOnline) => {
         return NetInfo.addEventListener((state) => {
@@ -66,15 +64,13 @@ export default function App() {
                     persistOptions={{ persister }}
                 >
                     <ThemeProvider>
-                        <NativeWindThemeProvider>
-                            <RootSiblingParent>
-                                <UserProvider>
-                                    <DbProvider>
-                                        <Navigation colorScheme={colorScheme} />
-                                    </DbProvider>
-                                </UserProvider>
-                            </RootSiblingParent>
-                        </NativeWindThemeProvider>
+                        <RootSiblingParent>
+                            <UserProvider>
+                                <DbProvider>
+                                    <Navigation />
+                                </DbProvider>
+                            </UserProvider>
+                        </RootSiblingParent>
                     </ThemeProvider>
                 </PersistQueryClientProvider>
             </SafeAreaProvider>

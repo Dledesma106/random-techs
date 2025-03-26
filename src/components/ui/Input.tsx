@@ -11,6 +11,7 @@ import {
     View,
 } from 'react-native';
 
+import useThemeColors from '@/hooks/useThemeColors';
 import { cn } from '@/lib/utils';
 
 export interface InputProps extends TextInputProps {
@@ -22,7 +23,10 @@ export interface InputProps extends TextInputProps {
 export const TextInput = forwardRef<NativeTextInput, InputProps>(
     ({ className, style, inputStyle, onBlur, icon, onIconPress, ...props }, ref) => {
         const [isFocused, setIsFocused] = useState(false);
-
+        const {
+            colors: { accent, border },
+            bgBackground,
+        } = useThemeColors();
         const handleFocus = () => setIsFocused(true);
         const handleBlur: InputProps['onBlur'] = (e) => {
             setIsFocused(false);
@@ -53,8 +57,11 @@ export const TextInput = forwardRef<NativeTextInput, InputProps>(
                 >
                     <NativeTextInput
                         className={cn(
-                            'rounded-md border bg-background border-input py-3 px-3 ring-offset-background disabled:opacity-50',
+                            'rounded-md border py-3 px-3 disabled:opacity-50',
                             className,
+                            `border-[${border}]`,
+                            `bg-[${bgBackground}]`,
+                            `ring-offset-[${accent}]`,
                         )}
                         style={[{ fontSize: 14, lineHeight: 17 }, inputStyle]}
                         ref={ref}

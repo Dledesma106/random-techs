@@ -1,155 +1,93 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, ScrollView } from 'react-native';
 
-import { useTheme } from '../../context/ThemeProvider';
+import DarkModeTest from './DarkModeTest';
+import DarkModeTestSimple from './DarkModeTestSimple';
+
+import { ThemeToggle } from '../../components/ThemeToggle';
+import useThemeColors from '../../hooks/useThemeColors';
 
 const ThemeTest = () => {
-    const { colorScheme, toggleTheme, setTheme } = useTheme();
-    const isDark = colorScheme === 'dark';
+    const {
+        bgBackground,
+        textForeground,
+        textMuted,
+        border,
+        bgBackgroundPrimary,
+        textPrimary,
+        bgSecondary,
+        textSecondary,
+        bgMuted,
+        textMuted: textMutedFg,
+        bgAccent,
+        textAccent,
+        bgDestructive,
+        textDestructive,
+        bgCard,
+        textCard,
+        colorScheme,
+    } = useThemeColors();
+
+    useEffect(() => {
+        console.log('ThemeTest - colorScheme:', colorScheme);
+    }, [colorScheme]);
 
     return (
-        <ScrollView
-            className={`flex-1 p-4 ${isDark ? 'bg-dark-background' : 'bg-white'}`}
-        >
-            <View className="mb-6">
-                <Text
-                    className={`text-2xl font-bold mb-2 ${isDark ? 'text-dark-foreground' : 'text-foreground'}`}
-                >
-                    Prueba de NativeWind en Expo Go
+        <ScrollView className={`flex-1 p-4 ${bgBackground}`}>
+            <Text className={`text-2xl font-bold mb-2 ${textForeground}`}>
+                Prueba de Tema con NativeWind
+            </Text>
+
+            <Text className={`mb-4 ${textMuted}`}>Tema actual: {colorScheme}</Text>
+
+            <ThemeToggle />
+
+            {/* Componente de prueba simple para modo oscuro */}
+            <View className={`mt-6 p-4 border ${border} rounded-md`}>
+                <Text className={`text-lg font-bold mb-2 ${textForeground}`}>
+                    Componente de prueba simple:
                 </Text>
-                <Text
-                    className={`mb-4 ${isDark ? 'text-dark-muted-foreground' : 'text-muted-foreground'}`}
-                >
-                    Tema actual: {colorScheme}
-                </Text>
-
-                <View className="flex-row space-x-2 mb-6">
-                    <TouchableOpacity
-                        onPress={() => setTheme('light')}
-                        className={`flex-1 py-3 px-4 rounded-md ${
-                            colorScheme === 'light'
-                                ? isDark
-                                    ? 'bg-dark-primary'
-                                    : 'bg-primary'
-                                : isDark
-                                  ? 'bg-dark-secondary'
-                                  : 'bg-secondary'
-                        }`}
-                    >
-                        <Text
-                            className={`text-center font-medium ${
-                                colorScheme === 'light'
-                                    ? isDark
-                                        ? 'text-dark-primary-foreground'
-                                        : 'text-primary-foreground'
-                                    : isDark
-                                      ? 'text-dark-secondary-foreground'
-                                      : 'text-secondary-foreground'
-                            }`}
-                        >
-                            Tema Claro
-                        </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        onPress={() => setTheme('dark')}
-                        className={`flex-1 py-3 px-4 rounded-md ${
-                            colorScheme === 'dark'
-                                ? isDark
-                                    ? 'bg-dark-primary'
-                                    : 'bg-primary'
-                                : isDark
-                                  ? 'bg-dark-secondary'
-                                  : 'bg-secondary'
-                        }`}
-                    >
-                        <Text
-                            className={`text-center font-medium ${
-                                colorScheme === 'dark'
-                                    ? isDark
-                                        ? 'text-dark-primary-foreground'
-                                        : 'text-primary-foreground'
-                                    : isDark
-                                      ? 'text-dark-secondary-foreground'
-                                      : 'text-secondary-foreground'
-                            }`}
-                        >
-                            Tema Oscuro
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-                <TouchableOpacity
-                    onPress={toggleTheme}
-                    className={`py-3 px-4 rounded-md mb-6 ${isDark ? 'bg-dark-primary' : 'bg-primary'}`}
-                >
-                    <Text
-                        className={`text-center font-medium ${isDark ? 'text-dark-primary-foreground' : 'text-primary-foreground'}`}
-                    >
-                        Alternar Tema
-                    </Text>
-                </TouchableOpacity>
+                <DarkModeTestSimple />
             </View>
 
-            <View className="space-y-4">
-                <View
-                    className={`p-4 rounded-md ${isDark ? 'bg-dark-primary' : 'bg-primary'}`}
-                >
-                    <Text
-                        className={`font-medium ${isDark ? 'text-dark-primary-foreground' : 'text-primary-foreground'}`}
-                    >
-                        Primary
-                    </Text>
+            {/* Componente de prueba para modo oscuro */}
+            <View className={`mt-6 p-4 border ${border} rounded-md`}>
+                <Text className={`text-lg font-bold mb-2 ${textForeground}`}>
+                    Componente de prueba:
+                </Text>
+                <DarkModeTest />
+            </View>
+
+            {/* Ejemplo de uso directo de los colores del tema */}
+            <View className={`mt-6 p-4 rounded-md ${bgAccent}`}>
+                <Text className={`font-bold ${textAccent}`}>
+                    Este componente usa los colores del tema directamente
+                </Text>
+            </View>
+
+            <View className="mt-6 space-y-4">
+                <View className={`p-4 rounded-md ${bgBackgroundPrimary}`}>
+                    <Text className={`font-medium ${textPrimary}`}>Primary</Text>
                 </View>
 
-                <View
-                    className={`p-4 rounded-md ${isDark ? 'bg-dark-secondary' : 'bg-secondary'}`}
-                >
-                    <Text
-                        className={`font-medium ${isDark ? 'text-dark-secondary-foreground' : 'text-secondary-foreground'}`}
-                    >
-                        Secondary
-                    </Text>
+                <View className={`p-4 rounded-md ${bgSecondary}`}>
+                    <Text className={`font-medium ${textSecondary}`}>Secondary</Text>
                 </View>
 
-                <View
-                    className={`p-4 rounded-md ${isDark ? 'bg-dark-muted' : 'bg-muted'}`}
-                >
-                    <Text
-                        className={`font-medium ${isDark ? 'text-dark-muted-foreground' : 'text-muted-foreground'}`}
-                    >
-                        Muted
-                    </Text>
+                <View className={`p-4 rounded-md ${bgMuted}`}>
+                    <Text className={`font-medium ${textMutedFg}`}>Muted</Text>
                 </View>
 
-                <View
-                    className={`p-4 rounded-md ${isDark ? 'bg-dark-accent' : 'bg-accent'}`}
-                >
-                    <Text
-                        className={`font-medium ${isDark ? 'text-dark-accent-foreground' : 'text-accent-foreground'}`}
-                    >
-                        Accent
-                    </Text>
+                <View className={`p-4 rounded-md ${bgAccent}`}>
+                    <Text className={`font-medium ${textAccent}`}>Accent</Text>
                 </View>
 
-                <View
-                    className={`p-4 rounded-md ${isDark ? 'bg-dark-destructive' : 'bg-destructive'}`}
-                >
-                    <Text
-                        className={`font-medium ${isDark ? 'text-dark-destructive-foreground' : 'text-destructive-foreground'}`}
-                    >
-                        Destructive
-                    </Text>
+                <View className={`p-4 rounded-md ${bgDestructive}`}>
+                    <Text className={`font-medium ${textDestructive}`}>Destructive</Text>
                 </View>
 
-                <View
-                    className={`p-4 rounded-md ${isDark ? 'bg-dark-card' : 'bg-white'}`}
-                >
-                    <Text
-                        className={`font-medium ${isDark ? 'text-dark-foreground' : 'text-foreground'}`}
-                    >
-                        Card
-                    </Text>
+                <View className={`p-4 rounded-md ${bgCard}`}>
+                    <Text className={`font-medium ${textCard}`}>Card</Text>
                 </View>
             </View>
         </ScrollView>

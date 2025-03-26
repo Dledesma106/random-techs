@@ -1,39 +1,78 @@
-import { useNavigation } from '@react-navigation/native';
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { useColorScheme } from 'nativewind';
+import React, { useEffect } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
 
-import { useTheme } from '../context/ThemeProvider';
+import useThemeColors from '../hooks/useThemeColors';
 
-const ThemeToggle = () => {
-    const { colorScheme, toggleTheme } = useTheme();
-    const navigation = useNavigation();
-    const isDark = colorScheme === 'dark';
+export const ThemeToggle = () => {
+    const { toggleColorScheme, setColorScheme } = useColorScheme();
+    const { bgSecondary, textSecondary, bgDestructive, textDestructive, colorScheme } =
+        useThemeColors();
+
+    useEffect(() => {
+        console.log('ThemeToggle - colorScheme:', colorScheme);
+    }, [colorScheme]);
 
     return (
-        <View className="flex-row items-center space-x-2">
+        <View className="p-4">
             <TouchableOpacity
-                onPress={toggleTheme}
-                className={`px-4 py-2 rounded-md ${isDark ? 'bg-dark-secondary' : 'bg-secondary'}`}
+                onPress={toggleColorScheme}
+                className={`${bgSecondary} p-3 rounded-md mb-2`}
             >
-                <Text
-                    className={`${isDark ? 'text-dark-secondary-foreground' : 'text-secondary-foreground'}`}
-                >
-                    {colorScheme === 'dark' ? '🌙' : '☀️'}
+                <Text className={`text-center ${textSecondary}`}>
+                    Tema actual: {colorScheme} - Toca para cambiar
                 </Text>
             </TouchableOpacity>
 
+            <View className="flex-row space-x-2">
+                <ThemeSelector
+                    theme="light"
+                    currentTheme={colorScheme}
+                    onPress={() => setColorScheme('light')}
+                />
+                <ThemeSelector
+                    theme="dark"
+                    currentTheme={colorScheme}
+                    onPress={() => setColorScheme('dark')}
+                />
+                <ThemeSelector
+                    theme="system"
+                    currentTheme={colorScheme}
+                    onPress={() => setColorScheme('system')}
+                />
+            </View>
+
+            {/* Ejemplo de uso directo de los colores del tema */}
             <TouchableOpacity
-                onPress={() => navigation.navigate('ThemeTest' as never)}
-                className={`px-4 py-2 rounded-md ${isDark ? 'bg-dark-primary' : 'bg-primary'}`}
+                className={`mt-4 p-3 rounded-md ${bgDestructive}`}
+                onPress={toggleColorScheme}
             >
-                <Text
-                    className={`${isDark ? 'text-dark-primary-foreground' : 'text-primary-foreground'}`}
-                >
-                    Prueba de Tema
+                <Text className={`text-center ${textDestructive} font-bold`}>
+                    Botón con estilos del tema
                 </Text>
             </TouchableOpacity>
         </View>
     );
 };
 
-export default ThemeToggle;
+interface ThemeSelectorProps {
+    theme: 'light' | 'dark' | 'system';
+    currentTheme: string;
+    onPress: () => void;
+}
+
+const ThemeSelector = ({ theme, currentTheme, onPress }: ThemeSelectorProps) => {
+    const isSelected = theme === currentTheme;
+    const { bgPrimary, textPrimary, bgSecondary, textSecondary } = useThemeColors();
+
+    return (
+        <TouchableOpacity
+            onPress={onPress}
+            className={`flex-1 p-2 rounded-md ${isSelected ? bgPrimary : bgSecondary}`}
+        >
+            <Text className={`text-center ${isSelected ? textPrimary : textSecondary}`}>
+                {theme.charAt(0).toUpperCase() + theme.slice(1)}
+            </Text>
+        </TouchableOpacity>
+    );
+};

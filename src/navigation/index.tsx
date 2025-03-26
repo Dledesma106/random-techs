@@ -2,7 +2,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-import { ColorSchemeName } from 'react-native';
+import { useColorScheme } from 'nativewind';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import LinkingConfiguration from './LinkingConfiguration';
@@ -26,12 +26,13 @@ import Login from '../screens/Login';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import ThemeTest from '../screens/ThemeTest';
 
-export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
+export default function Navigation() {
+    const { colorScheme } = useColorScheme();
     return (
         <GestureHandlerRootView>
             <NavigationContainer
                 linking={LinkingConfiguration}
-                theme={colorScheme === 'light' ? DarkTheme : DefaultTheme}
+                theme={colorScheme === 'light' ? DefaultTheme : DarkTheme}
             >
                 <StatusBar style="dark" />
                 <RootNavigator />
