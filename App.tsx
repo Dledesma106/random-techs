@@ -1,5 +1,4 @@
 import 'react-native-get-random-values';
-import './src/config/nativewind';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';

@@ -1,8 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-    NativeWindStyleSheet,
-    useColorScheme as useNativeWindColorScheme,
-} from 'nativewind';
+import { useColorScheme } from 'nativewind';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { View } from 'react-native';
 
@@ -22,7 +19,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const THEME_STORAGE_KEY = '@theme';
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { colorScheme, setColorScheme } = useNativeWindColorScheme();
+    const { colorScheme, setColorScheme } = useColorScheme();
     const [theme, setThemeState] = useState<Theme>('system');
     const { bgBackground } = useThemeColors();
 
@@ -33,32 +30,23 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
                 if (savedTheme) {
                     setThemeState(savedTheme as Theme);
+                    if (savedTheme !== 'system') {
+                        setColorScheme(savedTheme as 'light' | 'dark');
+                    }
                 }
             } catch (error) {
                 console.error('Error al cargar el tema:', error);
             }
         };
         loadTheme();
-    }, []);
-
-    // Actualizar el esquema de colores cuando cambia el tema o el esquema del dispositivo
-    useEffect(() => {
-        if (theme === 'system') {
-            setColorScheme(colorScheme || 'light');
-        } else {
-            setColorScheme(theme);
-        }
-
-        // Aplicar el esquema de colores a NativeWind directamente
-        NativeWindStyleSheet.setColorScheme(colorScheme || 'light');
-
-        console.log('ThemeProvider - theme:', theme);
-        console.log('ThemeProvider - colorScheme:', colorScheme);
-    }, [theme, colorScheme, setColorScheme]);
+    }, [setColorScheme]);
 
     const setTheme = async (newTheme: Theme) => {
         console.log('ThemeProvider - setTheme:', newTheme);
         setThemeState(newTheme);
+        if (newTheme !== 'system') {
+            setColorScheme(newTheme as 'light' | 'dark');
+        }
         try {
             await AsyncStorage.setItem(THEME_STORAGE_KEY, newTheme);
         } catch (error) {
@@ -66,8 +54,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
     };
 
+    const currentColorScheme = colorScheme || 'light';
+
     return (
-        <ThemeContext.Provider value={{ theme, colorScheme, setTheme }}>
+        <ThemeContext.Provider
+            value={{ theme, colorScheme: currentColorScheme, setTheme }}
+        >
             <View className={`flex-1 ${bgBackground}`}>{children}</View>
         </ThemeContext.Provider>
     );

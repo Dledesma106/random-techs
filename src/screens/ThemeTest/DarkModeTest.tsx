@@ -6,20 +6,21 @@ import useThemeColors from '../../hooks/useThemeColors';
 
 const DarkModeTest = () => {
     const { toggleColorScheme } = useColorScheme();
-    const { bgBackground, textForeground, bgSecondary, textSecondary, colorScheme } =
-        useThemeColors();
+    const { colorScheme } = useThemeColors();
 
     return (
-        <View className={`p-4 ${bgBackground}`}>
-            <Text className={`text-lg font-bold ${textForeground}`}>
+        <View className={`p-4 bg-red-500 dark:bg-blue-500`}>
+            <Text className={`text-lg font-bold text-foreground`}>
                 Prueba de Modo Oscuro
             </Text>
-            <Text className={textForeground}>Tema actual: {colorScheme}</Text>
+            <Text className={`text-foreground`}>Tema actual: {colorScheme}</Text>
             <TouchableOpacity
                 onPress={toggleColorScheme}
-                className={`mt-4 p-3 rounded-md ${bgSecondary}`}
+                className={`mt-4 p-3 rounded-md bg-secondary`}
             >
-                <Text className={`text-center ${textSecondary}`}>Cambiar tema</Text>
+                <Text className={`text-center text-secondary-foreground`}>
+                    Cambiar tema
+                </Text>
             </TouchableOpacity>
         </View>
     );

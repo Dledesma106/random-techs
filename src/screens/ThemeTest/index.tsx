@@ -8,86 +8,74 @@ import { ThemeToggle } from '../../components/ThemeToggle';
 import useThemeColors from '../../hooks/useThemeColors';
 
 const ThemeTest = () => {
-    const {
-        bgBackground,
-        textForeground,
-        textMuted,
-        border,
-        bgBackgroundPrimary,
-        textPrimary,
-        bgSecondary,
-        textSecondary,
-        bgMuted,
-        textMuted: textMutedFg,
-        bgAccent,
-        textAccent,
-        bgDestructive,
-        textDestructive,
-        bgCard,
-        textCard,
-        colorScheme,
-    } = useThemeColors();
+    const { colorScheme } = useThemeColors();
 
     useEffect(() => {
         console.log('ThemeTest - colorScheme:', colorScheme);
     }, [colorScheme]);
 
     return (
-        <ScrollView className={`flex-1 p-4 ${bgBackground}`}>
-            <Text className={`text-2xl font-bold mb-2 ${textForeground}`}>
+        <ScrollView className={`flex-1 p-4 bg-background`}>
+            <Text className={`text-2xl font-bold mb-2 text-foreground`}>
                 Prueba de Tema con NativeWind
             </Text>
 
-            <Text className={`mb-4 ${textMuted}`}>Tema actual: {colorScheme}</Text>
+            <Text className={`mb-4 text-muted-foreground`}>
+                Tema actual: {colorScheme}
+            </Text>
 
             <ThemeToggle />
 
             {/* Componente de prueba simple para modo oscuro */}
-            <View className={`mt-6 p-4 border ${border} rounded-md`}>
-                <Text className={`text-lg font-bold mb-2 ${textForeground}`}>
+            <View className={`mt-6 p-4 border border-border rounded-md`}>
+                <Text className={`text-lg font-bold mb-2 text-foreground`}>
                     Componente de prueba simple:
                 </Text>
                 <DarkModeTestSimple />
             </View>
 
             {/* Componente de prueba para modo oscuro */}
-            <View className={`mt-6 p-4 border ${border} rounded-md`}>
-                <Text className={`text-lg font-bold mb-2 ${textForeground}`}>
+            <View className={`mt-6 p-4 border border-border rounded-md`}>
+                <Text className={`text-lg font-bold mb-2 text-foreground`}>
                     Componente de prueba:
                 </Text>
                 <DarkModeTest />
             </View>
 
             {/* Ejemplo de uso directo de los colores del tema */}
-            <View className={`mt-6 p-4 rounded-md ${bgAccent}`}>
-                <Text className={`font-bold ${textAccent}`}>
+            <View className={`mt-6 p-4 rounded-md bg-accent`}>
+                <Text className={`font-bold text-accent-foreground`}>
                     Este componente usa los colores del tema directamente
                 </Text>
             </View>
 
             <View className="mt-6 space-y-4">
-                <View className={`p-4 rounded-md ${bgBackgroundPrimary}`}>
-                    <Text className={`font-medium ${textPrimary}`}>Primary</Text>
+                <View className={`p-4 rounded-md bg-background-primary`}>
+                    <Text className={`font-medium text-foreground`}>Primary</Text>
                 </View>
 
-                <View className={`p-4 rounded-md ${bgSecondary}`}>
-                    <Text className={`font-medium ${textSecondary}`}>Secondary</Text>
+                <View className={`p-4 rounded-md bg-secondary`}>
+                    <Text className={`font-medium text-secondary-foreground`}>
+                        Secondary
+                    </Text>
                 </View>
 
-                <View className={`p-4 rounded-md ${bgMuted}`}>
-                    <Text className={`font-medium ${textMutedFg}`}>Muted</Text>
+                <View className={`p-4 rounded-md bg-muted`}>
+                    <Text className={`font-medium text-muted-foreground`}>Muted</Text>
                 </View>
 
-                <View className={`p-4 rounded-md ${bgAccent}`}>
-                    <Text className={`font-medium ${textAccent}`}>Accent</Text>
+                <View className={`p-4 rounded-md bg-accent`}>
+                    <Text className={`font-medium text-accent-foreground`}>Accent</Text>
                 </View>
 
-                <View className={`p-4 rounded-md ${bgDestructive}`}>
-                    <Text className={`font-medium ${textDestructive}`}>Destructive</Text>
+                <View className={`p-4 rounded-md bg-destructive`}>
+                    <Text className={`font-medium text-destructive-foreground`}>
+                        Destructive
+                    </Text>
                 </View>
 
-                <View className={`p-4 rounded-md ${bgCard}`}>
-                    <Text className={`font-medium ${textCard}`}>Card</Text>
+                <View className={`p-4 rounded-md bg-card`}>
+                    <Text className={`font-medium text-card-foreground`}>Card</Text>
                 </View>
             </View>
         </ScrollView>
