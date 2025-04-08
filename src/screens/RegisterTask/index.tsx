@@ -581,11 +581,17 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                                     mode="datetime"
                                     onConfirm={(date) => {
                                         setValue('startedAt', date);
+                                        // Verificar si la fecha de inicio es mayor a la fecha de cierre existente
+                                        const currentClosedAt = watch('closedAt');
+                                        if (currentClosedAt && date > currentClosedAt) {
+                                            // Si la fecha de inicio es mayor, actualizar la fecha de cierre
+                                            setValue('closedAt', date);
+                                        }
                                         setStartDatePickerVisibility(false);
                                     }}
                                     onCancel={() => setStartDatePickerVisibility(false)}
                                     date={watch('startedAt') || new Date()}
-                                    maximumDate={watch('closedAt') || undefined}
+                                    maximumDate={new Date()}
                                 />
                             </View>
                         </View>
@@ -619,6 +625,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                                     onCancel={() => setClosedDatePickerVisibility(false)}
                                     date={watch('closedAt') || new Date()}
                                     minimumDate={watch('startedAt') || undefined}
+                                    maximumDate={new Date()}
                                 />
                             </View>
                         </View>
