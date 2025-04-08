@@ -691,13 +691,24 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                         onConfirm={(date) => {
                                             setUserHasModifiedForm(true);
                                             setValue('startedAt', date);
+
+                                            // Verificar si la fecha de inicio es mayor a la fecha de cierre existente
+                                            const currentClosedAt = watch('closedAt');
+                                            if (
+                                                currentClosedAt &&
+                                                date > currentClosedAt
+                                            ) {
+                                                // Si la fecha de inicio es mayor, actualizar la fecha de cierre
+                                                setValue('closedAt', date);
+                                            }
+
                                             setStartDatePickerVisibility(false);
                                         }}
                                         onCancel={() =>
                                             setStartDatePickerVisibility(false)
                                         }
                                         date={watch('startedAt') || new Date()}
-                                        maximumDate={watch('closedAt') || undefined}
+                                        maximumDate={new Date() || undefined}
                                     />
                                 </View>
                             ) : (
@@ -750,7 +761,8 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                             setCloseDatePickerVisibility(false)
                                         }
                                         date={watch('closedAt') || new Date()}
-                                        maximumDate={watch('startedAt') || undefined}
+                                        maximumDate={new Date()}
+                                        minimumDate={watch('startedAt') || undefined}
                                     />
                                 </View>
                             ) : (
