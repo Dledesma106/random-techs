@@ -4,6 +4,7 @@
         "jsx": "react-jsx",
         "module": "esnext",
         "strict": true,
+        "types": ["nativewind/types"],
         "baseUrl": ".",
         "paths": {
             "@/*": ["src/*"]
