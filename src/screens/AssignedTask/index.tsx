@@ -522,7 +522,9 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                             <View>
                                 <Label>Sucursal</Label>
                                 <Text className="text-muted-foreground">
-                                    {task.branch?.number}
+                                    {task.branch?.number && `${task.branch?.number}, `}
+                                    {task.branch?.name && `${task.branch?.name}, `}
+                                    {task.branch?.city?.name}
                                 </Text>
                             </View>
                         )}

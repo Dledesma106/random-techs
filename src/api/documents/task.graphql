@@ -13,6 +13,7 @@ query myAssignedTasks {
         branch {
             id
             number
+            name
             city {
                 id
                 name
@@ -58,6 +59,7 @@ query myAssignedTaskById($id: String!) {
         actNumber
         branch {
             number
+            name
             city {
                 name
                 province {
@@ -125,6 +127,7 @@ mutation createMyTask($input: MyTaskInput!) {
             observations
             createdAt
             startedAt
+            closedAt
             description
             businessName
             clientName
@@ -136,6 +139,7 @@ mutation createMyTask($input: MyTaskInput!) {
             branch {
                 id
                 number
+                name
                 city {
                     id
                     name

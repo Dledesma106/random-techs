@@ -119,7 +119,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
         : undefined;
     const mappedBranches =
         selectedClient?.branches.map((branch) => ({
-            label: `${branch.number}, ${branch.city.name}`,
+            label: `${branch.number && `${branch.number}, `}${branch.name && `${branch.name}, `}${branch.city.name}`,
             value: branch.id,
         })) ?? [];
     const selectedBranch = watch('branchId')

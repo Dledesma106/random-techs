@@ -5,6 +5,7 @@ query clients {
         branches {
             id
             number
+            name
             city{
                 name
             }
