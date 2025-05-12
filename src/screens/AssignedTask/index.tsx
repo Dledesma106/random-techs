@@ -370,7 +370,8 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
         if (
             userHasModifiedForm &&
             isFormDirty &&
-            data?.myAssignedTaskById?.status !== TaskStatus.Finalizada
+            data?.myAssignedTaskById?.status !== TaskStatus.Finalizada &&
+            data?.myAssignedTaskById?.status !== TaskStatus.Aprobada
         ) {
             const formData = watch() as FormInputs;
             const savePromise = debouncedSave(formData) as Promise<any> & {
@@ -443,14 +444,15 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                         <AntDesign name="close" size={20} color="white" />
                     </TouchableOpacity>
                 </View>
-                {data?.myAssignedTaskById?.status !== TaskStatus.Finalizada && (
-                    <ConfirmButton
-                        onConfirm={() => handleDeleteImage(fullScreenImage)}
-                        title="Eliminar foto"
-                        confirmTitle="¿Seguro que quiere eliminar la foto?"
-                        icon={<EvilIcons name="trash" size={22} color="white" />}
-                    />
-                )}
+                {data?.myAssignedTaskById?.status !== TaskStatus.Finalizada &&
+                    data?.myAssignedTaskById?.status !== TaskStatus.Aprobada && (
+                        <ConfirmButton
+                            onConfirm={() => handleDeleteImage(fullScreenImage)}
+                            title="Eliminar foto"
+                            confirmTitle="¿Seguro que quiere eliminar la foto?"
+                            icon={<EvilIcons name="trash" size={22} color="white" />}
+                        />
+                    )}
             </View>
         );
 
@@ -534,68 +536,74 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                         <View>
                             <Label className="mb-1.5">Técnicos participantes</Label>
 
-                            {task.status !== TaskStatus.Finalizada && (
-                                <>
-                                    <View className="flex-row items-center space-x-2 mb-2">
-                                        <View className="flex-1">
-                                            <Dropdown
-                                                items={mappedTechs}
-                                                placeholder="Selecciona los participantes"
-                                                value={selectedOption ?? undefined}
-                                                alwaysShowPlaceholder
-                                                onValueChange={(value) => {
-                                                    setSelectedOption(value);
-                                                    if (value && value !== 'other') {
-                                                        const currentParticipants =
-                                                            watch('participants') || [];
-                                                        if (
-                                                            !currentParticipants.includes(
-                                                                value,
-                                                            )
-                                                        ) {
-                                                            setUserHasModifiedForm(true);
-                                                            setValue(
-                                                                'participants',
-                                                                [
-                                                                    ...currentParticipants,
-                                                                    value,
-                                                                ],
-                                                                {
-                                                                    shouldDirty: true,
-                                                                    shouldTouch: true,
-                                                                },
-                                                            );
-                                                            setSelectedOption(null);
-                                                        }
-                                                    }
-                                                }}
-                                            />
-                                        </View>
-                                    </View>
-
-                                    {selectedOption === 'other' && (
-                                        <View className="flex-row items-center space-x-2 mb-4">
+                            {task.status !== TaskStatus.Finalizada &&
+                                task.status !== TaskStatus.Aprobada && (
+                                    <>
+                                        <View className="flex-row items-center space-x-2 mb-2">
                                             <View className="flex-1">
-                                                <TextInput
-                                                    placeholder="Agregar otro participante"
-                                                    value={customParticipant}
-                                                    onChangeText={setCustomParticipant}
+                                                <Dropdown
+                                                    items={mappedTechs}
+                                                    placeholder="Selecciona los participantes"
+                                                    value={selectedOption ?? undefined}
+                                                    alwaysShowPlaceholder
+                                                    onValueChange={(value) => {
+                                                        setSelectedOption(value);
+                                                        if (value && value !== 'other') {
+                                                            const currentParticipants =
+                                                                watch('participants') ||
+                                                                [];
+                                                            if (
+                                                                !currentParticipants.includes(
+                                                                    value,
+                                                                )
+                                                            ) {
+                                                                setUserHasModifiedForm(
+                                                                    true,
+                                                                );
+                                                                setValue(
+                                                                    'participants',
+                                                                    [
+                                                                        ...currentParticipants,
+                                                                        value,
+                                                                    ],
+                                                                    {
+                                                                        shouldDirty: true,
+                                                                        shouldTouch: true,
+                                                                    },
+                                                                );
+                                                                setSelectedOption(null);
+                                                            }
+                                                        }
+                                                    }}
                                                 />
                                             </View>
-                                            <TouchableOpacity
-                                                onPress={addCustomParticipant}
-                                                className="bg-black p-2 rounded-md"
-                                            >
-                                                <AntDesign
-                                                    name="plus"
-                                                    size={20}
-                                                    color="white"
-                                                />
-                                            </TouchableOpacity>
                                         </View>
-                                    )}
-                                </>
-                            )}
+
+                                        {selectedOption === 'other' && (
+                                            <View className="flex-row items-center space-x-2 mb-4">
+                                                <View className="flex-1">
+                                                    <TextInput
+                                                        placeholder="Agregar otro participante"
+                                                        value={customParticipant}
+                                                        onChangeText={
+                                                            setCustomParticipant
+                                                        }
+                                                    />
+                                                </View>
+                                                <TouchableOpacity
+                                                    onPress={addCustomParticipant}
+                                                    className="bg-black p-2 rounded-md"
+                                                >
+                                                    <AntDesign
+                                                        name="plus"
+                                                        size={20}
+                                                        color="white"
+                                                    />
+                                                </TouchableOpacity>
+                                            </View>
+                                        )}
+                                    </>
+                                )}
 
                             <View className="flex-row flex-wrap mb-4">
                                 {watch('participants')?.map((participant) => {
@@ -608,7 +616,8 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                             key={participant}
                                             label={tech ? tech.fullName : participant}
                                             onCrossPress={
-                                                task.status !== TaskStatus.Finalizada
+                                                task.status !== TaskStatus.Finalizada &&
+                                                task.status !== TaskStatus.Aprobada
                                                     ? () => {
                                                           const currentParticipants =
                                                               watch('participants') || [];
@@ -655,7 +664,8 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
 
                         <View>
                             <Label className="mb-1.5">Fecha de inicio</Label>
-                            {task.status !== TaskStatus.Finalizada ? (
+                            {task.status !== TaskStatus.Finalizada &&
+                            task.status !== TaskStatus.Aprobada ? (
                                 <View>
                                     <TouchableOpacity
                                         onPress={() => setStartDatePickerVisibility(true)}
@@ -719,7 +729,8 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                         <View>
                             <Label className="mb-1.5">Fecha de cierre</Label>
 
-                            {task.status !== TaskStatus.Finalizada ? (
+                            {task.status !== TaskStatus.Finalizada &&
+                            task.status !== TaskStatus.Aprobada ? (
                                 <View>
                                     <TouchableOpacity
                                         onPress={() => setCloseDatePickerVisibility(true)}
@@ -772,7 +783,8 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
 
                         <View>
                             <Label className="mb-1.5">Numero de Acta</Label>
-                            {task.status !== TaskStatus.Finalizada ? (
+                            {task.status !== TaskStatus.Finalizada &&
+                            task.status !== TaskStatus.Aprobada ? (
                                 <Form {...formMethods}>
                                     <FormField
                                         name="actNumber"
@@ -803,7 +815,8 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
 
                         <View>
                             <Label className="mb-1.5">¿Se usaron materiales?</Label>
-                            {task.status !== TaskStatus.Finalizada ? (
+                            {task.status !== TaskStatus.Finalizada &&
+                            task.status !== TaskStatus.Aprobada ? (
                                 <Form {...formMethods}>
                                     <FormField
                                         name="useMaterials"
@@ -858,7 +871,8 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
 
                         <View>
                             <Label className="mb-1.5">Observaciones</Label>
-                            {task.status !== TaskStatus.Finalizada ? (
+                            {task.status !== TaskStatus.Finalizada &&
+                            task.status !== TaskStatus.Aprobada ? (
                                 <Form {...formMethods}>
                                     <FormField
                                         name="observations"
@@ -951,23 +965,25 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                     ))}
 
                                 {task.expenses.length === 0 &&
-                                    task.status === TaskStatus.Finalizada && (
+                                    (task.status === TaskStatus.Finalizada ||
+                                        task.status === TaskStatus.Aprobada) && (
                                         <Text className="text-muted-foreground">
                                             No hay gastos registrados
                                         </Text>
                                     )}
                             </View>
 
-                            {task.status !== TaskStatus.Finalizada && (
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="mt-2"
-                                    onPress={navigateToRegisterExpense}
-                                >
-                                    <ButtonText>Agregar gasto</ButtonText>
-                                </Button>
-                            )}
+                            {task.status !== TaskStatus.Finalizada &&
+                                task.status !== TaskStatus.Aprobada && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="mt-2"
+                                        onPress={navigateToRegisterExpense}
+                                    >
+                                        <ButtonText>Agregar gasto</ButtonText>
+                                    </Button>
+                                )}
                         </View>
 
                         <View>
@@ -1001,13 +1017,15 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                 ))}
 
                                 {imagesAmount === 0 &&
-                                    task.status === TaskStatus.Finalizada && (
+                                    (task.status === TaskStatus.Finalizada ||
+                                        task.status === TaskStatus.Aprobada) && (
                                         <Text className="text-muted-foreground">
                                             No hay imágenes registradas
                                         </Text>
                                     )}
 
                                 {task.status !== TaskStatus.Finalizada &&
+                                    task.status !== TaskStatus.Aprobada &&
                                     imagesAmount < MAX_IMAGE_AMOUNT && (
                                         <AddImage
                                             navigateToCameraScreen={
