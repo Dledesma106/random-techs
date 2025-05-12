@@ -25,13 +25,13 @@ const config = ({ config }: ConfigContext): ExpoConfig => {
         },
         android: {
             adaptiveIcon: {
-                foregroundImage: './assets/images/adaptive-icon.png',
+                foregroundImage: './assets/images/adaptive-logo.png',
                 backgroundColor: '#ffffff',
             },
             package: 'com.dledesma2020.randomtechs',
         },
         web: {
-            favicon: './assets/images/favicon.png',
+            favicon: './assets/images/logo.png',
         },
         extra: {
             eas: {
