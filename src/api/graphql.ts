@@ -33,7 +33,8 @@ export type Branch = {
     city: City;
     client: Client;
     id: Scalars['ID'];
-    number: Scalars['Int'];
+    name: Maybe<Scalars['String']>;
+    number: Maybe<Scalars['Int']>;
 };
 
 export type BranchCrudResult = {
@@ -47,7 +48,8 @@ export type BranchInput = {
     businessesIds: Array<Scalars['String']>;
     cityId: Scalars['String'];
     clientId: Scalars['String'];
-    number: Scalars['Int'];
+    name: InputMaybe<Scalars['String']>;
+    number: InputMaybe<Scalars['Int']>;
 };
 
 export type Business = {
@@ -280,6 +282,7 @@ export type Mutation = {
     finishTask: TaskCrudResult;
     generateApprovedExpensesReport: Scalars['String'];
     generateApprovedTasksReport: Scalars['String'];
+    generateUploadUrls: PresignedUrlResponse;
     login: LoginUserResult;
     logout: AuthResult;
     sendNewUserRandomPassword: UserCrudPothosRef;
@@ -397,15 +400,19 @@ export type MutationFinishTaskArgs = {
 };
 
 export type MutationGenerateApprovedExpensesReportArgs = {
-    endDate: Scalars['String'];
-    filters: InputMaybe<Scalars['JSON']>;
-    startDate: Scalars['String'];
+    endDate: Scalars['DateTime'];
+    startDate: Scalars['DateTime'];
 };
 
 export type MutationGenerateApprovedTasksReportArgs = {
-    endDate: InputMaybe<Scalars['String']>;
-    filters: InputMaybe<Array<TaskReportFilterInput>>;
-    startDate: InputMaybe<Scalars['String']>;
+    endDate: Scalars['DateTime'];
+    startDate: Scalars['DateTime'];
+};
+
+export type MutationGenerateUploadUrlsArgs = {
+    fileCount: Scalars['Int'];
+    mimeTypes: Array<Scalars['String']>;
+    prefix: Scalars['String'];
 };
 
 export type MutationLoginArgs = {
@@ -493,13 +500,20 @@ export type MyTaskInput = {
     useMaterials: Scalars['Boolean'];
 };
 
+export type PresignedUrlResponse = {
+    __typename?: 'PresignedUrlResponse';
+    message: Maybe<Scalars['String']>;
+    success: Scalars['Boolean'];
+    uploadUrls: Array<UploadUrlInfo>;
+};
+
 export type Preventive = {
     __typename?: 'Preventive';
     assigned: Array<User>;
     batteryChangedAt: Maybe<Scalars['DateTime']>;
     branch: Branch;
     business: Business;
-    frequency: Scalars['Int'];
+    frequency: Maybe<PreventiveFrequency>;
     id: Scalars['ID'];
     lastDoneAt: Maybe<Scalars['DateTime']>;
     months: Array<Scalars['String']>;
@@ -515,12 +529,23 @@ export type PreventiveCrudRef = {
     success: Scalars['Boolean'];
 };
 
+export const PreventiveFrequency = {
+    Anual: 'Anual',
+    Bimestral: 'Bimestral',
+    Cuatrimestral: 'Cuatrimestral',
+    Mensual: 'Mensual',
+    Semestral: 'Semestral',
+    Trimestral: 'Trimestral',
+} as const;
+
+export type PreventiveFrequency =
+    (typeof PreventiveFrequency)[keyof typeof PreventiveFrequency];
 export type PreventiveInput = {
     assignedIds: Array<Scalars['String']>;
     batteryChangedAt: InputMaybe<Scalars['DateTime']>;
     branchId: Scalars['String'];
     businessId: Scalars['String'];
-    frequency: Scalars['Int'];
+    frequency: InputMaybe<PreventiveFrequency>;
     lastDoneAt: InputMaybe<Scalars['DateTime']>;
     months: Array<Scalars['String']>;
     observations: InputMaybe<Scalars['String']>;
@@ -670,6 +695,8 @@ export type QueryExpensesArgs = {
     expenseDateFrom: InputMaybe<Scalars['DateTime']>;
     expenseDateTo: InputMaybe<Scalars['DateTime']>;
     expenseType: InputMaybe<Array<ExpenseType>>;
+    orderBy: InputMaybe<Scalars['String']>;
+    orderDirection: InputMaybe<Scalars['String']>;
     paySource: InputMaybe<Array<ExpensePaySource>>;
     registeredBy: InputMaybe<Array<Scalars['String']>>;
     skip: InputMaybe<Scalars['Int']>;
@@ -707,7 +734,10 @@ export type QueryPreventivesArgs = {
     business: InputMaybe<Array<Scalars['String']>>;
     city: InputMaybe<Array<Scalars['String']>>;
     client: InputMaybe<Array<Scalars['String']>>;
+    frequency: InputMaybe<Array<PreventiveFrequency>>;
+    months: InputMaybe<Array<Scalars['String']>>;
     skip?: InputMaybe<Scalars['Int']>;
+    status: InputMaybe<Array<PreventiveStatus>>;
     take?: InputMaybe<Scalars['Int']>;
 };
 
@@ -716,6 +746,9 @@ export type QueryPreventivesCountArgs = {
     business: InputMaybe<Array<Scalars['String']>>;
     city: InputMaybe<Array<Scalars['String']>>;
     client: InputMaybe<Array<Scalars['String']>>;
+    frequency: InputMaybe<Array<PreventiveFrequency>>;
+    months: InputMaybe<Array<Scalars['String']>>;
+    status: InputMaybe<Array<PreventiveStatus>>;
 };
 
 export type QueryProvinceArgs = {
@@ -741,7 +774,11 @@ export type QueryTasksArgs = {
     business: InputMaybe<Array<Scalars['String']>>;
     city: InputMaybe<Array<Scalars['String']>>;
     client: InputMaybe<Array<Scalars['String']>>;
+    endDate: InputMaybe<Scalars['DateTime']>;
+    orderBy: InputMaybe<Scalars['String']>;
+    orderDirection: InputMaybe<Scalars['String']>;
     skip: InputMaybe<Scalars['Int']>;
+    startDate: InputMaybe<Scalars['DateTime']>;
     status: InputMaybe<Array<TaskStatus>>;
     take: InputMaybe<Scalars['Int']>;
     taskType: InputMaybe<Array<TaskType>>;
@@ -752,6 +789,8 @@ export type QueryTasksCountArgs = {
     business: InputMaybe<Array<Scalars['String']>>;
     city: InputMaybe<Array<Scalars['String']>>;
     client: InputMaybe<Array<Scalars['String']>>;
+    endDate: InputMaybe<Scalars['DateTime']>;
+    startDate: InputMaybe<Scalars['DateTime']>;
     status: InputMaybe<Array<TaskStatus>>;
     taskType: InputMaybe<Array<TaskType>>;
 };
@@ -804,6 +843,7 @@ export type Task = {
     observations: Maybe<Scalars['String']>;
     openedAt: Scalars['DateTime'];
     participants: Array<Scalars['String']>;
+    preventive: Maybe<Preventive>;
     startedAt: Maybe<Scalars['DateTime']>;
     status: TaskStatus;
     taskNumber: Scalars['Int'];
@@ -830,11 +870,6 @@ export type TaskInput = {
     description: Scalars['String'];
     movitecTicket: InputMaybe<Scalars['String']>;
     taskType: TaskType;
-};
-
-export type TaskReportFilterInput = {
-    id: Scalars['String'];
-    value: Scalars['JSON'];
 };
 
 export const TaskStatus = {
@@ -867,6 +902,13 @@ export type UpdateMyTaskInput = {
     participants: InputMaybe<Array<Scalars['String']>>;
     startedAt: InputMaybe<Scalars['DateTime']>;
     useMaterials: Scalars['Boolean'];
+};
+
+export type UploadUrlInfo = {
+    __typename?: 'UploadUrlInfo';
+    key: Scalars['String'];
+    url: Scalars['String'];
+    urlExpire: Scalars['String'];
 };
 
 export type User = {
@@ -931,7 +973,8 @@ export type ClientsQuery = {
         branches: Array<{
             __typename?: 'Branch';
             id: string;
-            number: number;
+            number: number | null;
+            name: string | null;
             city: { __typename?: 'City'; name: string };
             businesses: Array<{ __typename?: 'Business'; id: string; name: string }>;
         }>;
@@ -1065,7 +1108,8 @@ export type MyAssignedTasksQuery = {
         branch: {
             __typename?: 'Branch';
             id: string;
-            number: number;
+            number: number | null;
+            name: string | null;
             city: {
                 __typename?: 'City';
                 id: string;
@@ -1104,7 +1148,8 @@ export type MyAssignedTaskByIdQuery = {
         auditor: { __typename?: 'User'; fullName: string } | null;
         branch: {
             __typename?: 'Branch';
-            number: number;
+            number: number | null;
+            name: string | null;
             city: {
                 __typename?: 'City';
                 name: string;
@@ -1178,17 +1223,18 @@ export type CreateMyTaskMutation = {
             observations: string | null;
             createdAt: any;
             startedAt: any | null;
+            closedAt: any | null;
             description: string;
             businessName: string | null;
             clientName: string | null;
             useMaterials: boolean | null;
             taskType: TaskType;
-            closedAt: any | null;
             business: { __typename?: 'Business'; id: string; name: string } | null;
             branch: {
                 __typename?: 'Branch';
                 id: string;
-                number: number;
+                number: number | null;
+                name: string | null;
                 city: {
                     __typename?: 'City';
                     id: string;
@@ -1511,6 +1557,10 @@ export const ClientsDocument = {
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'number' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
                                             },
                                             {
                                                 kind: 'Field',
@@ -2219,6 +2269,10 @@ export const MyAssignedTasksDocument = {
                                             },
                                             {
                                                 kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: { kind: 'Name', value: 'city' },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
@@ -2448,6 +2502,10 @@ export const MyAssignedTaskByIdDocument = {
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'number' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
                                             },
                                             {
                                                 kind: 'Field',
@@ -2862,6 +2920,10 @@ export const CreateMyTaskDocument = {
                                             },
                                             {
                                                 kind: 'Field',
+                                                name: { kind: 'Name', value: 'closedAt' },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
                                                     value: 'description',
@@ -2929,6 +2991,13 @@ export const CreateMyTaskDocument = {
                                                             name: {
                                                                 kind: 'Name',
                                                                 value: 'number',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
                                                             },
                                                         },
                                                         {

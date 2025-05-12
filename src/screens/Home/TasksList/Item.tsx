@@ -59,7 +59,7 @@ const Item = ({ task, navigation, style }: ItemProps) => {
                 <View className="flex flex-row items-center mb-1">
                     <Text className="text-xs font-medium">
                         {branch !== null
-                            ? `${branch?.client?.name} ${branch?.number}, ${branch?.city?.name}`
+                            ? `${branch?.client?.name} ${branch?.number ? `${branch.number}, ` : ''}${branch?.name ? `${branch.name}, ` : ''}${branch?.city?.name ?? ''}`
                             : `${task.clientName}`}
                     </Text>
                 </View>
