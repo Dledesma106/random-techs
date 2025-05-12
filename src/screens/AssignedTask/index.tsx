@@ -6,14 +6,7 @@ import { Image } from 'expo-image';
 import { useEffect, useState, useMemo } from 'react';
 import ContentLoader, { Rect } from 'react-content-loader/native';
 import { useForm } from 'react-hook-form';
-import {
-    Text,
-    View,
-    ScrollView,
-    RefreshControl,
-    TouchableOpacity,
-    ActivityIndicator,
-} from 'react-native';
+import { Text, View, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 import { ExpenseInput } from '@/api/graphql';
@@ -124,7 +117,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
     } = formMethods;
     const { pickImage } = useImagePicker();
     const { mutateAsync: updateTask } = useUpdateMyAssignedTask();
-    const { mutateAsync: finishTask, isPending: isFinishing } = useFinishTask();
+    const { mutateAsync: finishTask } = useFinishTask();
     const [customParticipant, setCustomParticipant] = useState('');
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
     const { data: techsData } = useGetTechnicians();
@@ -373,11 +366,11 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
         // Solo guardamos si:
         // 1. El usuario ha modificado el formulario
         // 2. El formulario tiene cambios
-        // 3. La tarea no está aprobada
+        // 3. La tarea no está finalizada
         if (
             userHasModifiedForm &&
             isFormDirty &&
-            data?.myAssignedTaskById?.status !== TaskStatus.Aprobada
+            data?.myAssignedTaskById?.status !== TaskStatus.Finalizada
         ) {
             const formData = watch() as FormInputs;
             const savePromise = debouncedSave(formData) as Promise<any> & {
@@ -450,11 +443,11 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                         <AntDesign name="close" size={20} color="white" />
                     </TouchableOpacity>
                 </View>
-                {data?.myAssignedTaskById?.status !== TaskStatus.Aprobada && (
+                {data?.myAssignedTaskById?.status !== TaskStatus.Finalizada && (
                     <ConfirmButton
                         onConfirm={() => handleDeleteImage(fullScreenImage)}
                         title="Eliminar foto"
-                        confirmMessage="¿Seguro que quiere eliminar la foto?"
+                        confirmTitle="¿Seguro que quiere eliminar la foto?"
                         icon={<EvilIcons name="trash" size={22} color="white" />}
                     />
                 )}
@@ -541,17 +534,15 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                         <View>
                             <Label className="mb-1.5">Técnicos participantes</Label>
 
-                            {task.status !== TaskStatus.Aprobada && (
+                            {task.status !== TaskStatus.Finalizada && (
                                 <>
                                     <View className="flex-row items-center space-x-2 mb-2">
                                         <View className="flex-1">
                                             <Dropdown
                                                 items={mappedTechs}
                                                 placeholder="Selecciona los participantes"
-                                                value={
-                                                    selectedOption ||
-                                                    'Selecciona los participantes'
-                                                }
+                                                value={selectedOption ?? undefined}
+                                                alwaysShowPlaceholder
                                                 onValueChange={(value) => {
                                                     setSelectedOption(value);
                                                     if (value && value !== 'other') {
@@ -617,7 +608,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                             key={participant}
                                             label={tech ? tech.fullName : participant}
                                             onCrossPress={
-                                                task.status !== TaskStatus.Aprobada
+                                                task.status !== TaskStatus.Finalizada
                                                     ? () => {
                                                           const currentParticipants =
                                                               watch('participants') || [];
@@ -664,7 +655,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
 
                         <View>
                             <Label className="mb-1.5">Fecha de inicio</Label>
-                            {task.status !== TaskStatus.Aprobada ? (
+                            {task.status !== TaskStatus.Finalizada ? (
                                 <View>
                                     <TouchableOpacity
                                         onPress={() => setStartDatePickerVisibility(true)}
@@ -728,7 +719,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                         <View>
                             <Label className="mb-1.5">Fecha de cierre</Label>
 
-                            {task.status !== TaskStatus.Aprobada ? (
+                            {task.status !== TaskStatus.Finalizada ? (
                                 <View>
                                     <TouchableOpacity
                                         onPress={() => setCloseDatePickerVisibility(true)}
@@ -781,7 +772,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
 
                         <View>
                             <Label className="mb-1.5">Numero de Acta</Label>
-                            {task.status !== TaskStatus.Aprobada ? (
+                            {task.status !== TaskStatus.Finalizada ? (
                                 <Form {...formMethods}>
                                     <FormField
                                         name="actNumber"
@@ -812,7 +803,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
 
                         <View>
                             <Label className="mb-1.5">¿Se usaron materiales?</Label>
-                            {task.status !== TaskStatus.Aprobada ? (
+                            {task.status !== TaskStatus.Finalizada ? (
                                 <Form {...formMethods}>
                                     <FormField
                                         name="useMaterials"
@@ -867,7 +858,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
 
                         <View>
                             <Label className="mb-1.5">Observaciones</Label>
-                            {task.status !== TaskStatus.Aprobada ? (
+                            {task.status !== TaskStatus.Finalizada ? (
                                 <Form {...formMethods}>
                                     <FormField
                                         name="observations"
@@ -897,7 +888,12 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                         </View>
 
                         <View className="items-start">
-                            <Label className="mb-1.5">Gastos</Label>
+                            <Label className="mb-1.5">
+                                Gastos - Total: ${' '}
+                                {task.expenses
+                                    .reduce((acc, expense) => acc + expense.amount, 0)
+                                    .toLocaleString('es-AR')}
+                            </Label>
 
                             <View className="space-y-2 w-full">
                                 {task.expenses
@@ -955,14 +951,14 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                     ))}
 
                                 {task.expenses.length === 0 &&
-                                    task.status === TaskStatus.Aprobada && (
+                                    task.status === TaskStatus.Finalizada && (
                                         <Text className="text-muted-foreground">
                                             No hay gastos registrados
                                         </Text>
                                     )}
                             </View>
 
-                            {task.status !== TaskStatus.Aprobada && (
+                            {task.status !== TaskStatus.Finalizada && (
                                 <Button
                                     variant="outline"
                                     size="sm"
@@ -1005,13 +1001,13 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                 ))}
 
                                 {imagesAmount === 0 &&
-                                    task.status === TaskStatus.Aprobada && (
+                                    task.status === TaskStatus.Finalizada && (
                                         <Text className="text-muted-foreground">
                                             No hay imágenes registradas
                                         </Text>
                                     )}
 
-                                {task.status !== TaskStatus.Aprobada &&
+                                {task.status !== TaskStatus.Finalizada &&
                                     imagesAmount < MAX_IMAGE_AMOUNT && (
                                         <AddImage
                                             navigateToCameraScreen={
@@ -1024,31 +1020,27 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                             </View>
                         </View>
                     </View>
+                    {/* Agregar espacio al final para el botón de finalizar */}
+                    {task.status !== TaskStatus.Finalizada &&
+                        task.status !== TaskStatus.Aprobada && <View className="h-24" />}
                 </ScrollView>
 
-                {task.status !== TaskStatus.Aprobada &&
-                    task.status !== TaskStatus.Finalizada && (
+                {task.status !== TaskStatus.Finalizada &&
+                    task.status !== TaskStatus.Aprobada && (
                         <View className="absolute bottom-6 right-0 left-0 flex items-center">
-                            <TouchableOpacity
-                                onPress={handleFinishTask}
-                                disabled={isFinishing}
-                                className="bg-black py-3 px-6 rounded-full flex-row items-center"
-                            >
-                                {isFinishing ? (
-                                    <ActivityIndicator size="small" color="white" />
-                                ) : (
-                                    <>
-                                        <Text className="text-white font-bold mr-2">
-                                            Finalizar Tarea
-                                        </Text>
-                                        <AntDesign
-                                            name="checkcircleo"
-                                            size={16}
-                                            color="white"
-                                        />
-                                    </>
-                                )}
-                            </TouchableOpacity>
+                            <ConfirmButton
+                                onConfirm={handleFinishTask}
+                                title="Finalizar Tarea"
+                                confirmTitle="¿Seguro que quiere finalizar la tarea?"
+                                confirmText="Una vez finalizada la tarea no podra seguir haciendo cambios"
+                                icon={
+                                    <AntDesign
+                                        name="checkcircleo"
+                                        size={15}
+                                        color="white"
+                                    />
+                                }
+                            />
                         </View>
                     )}
             </View>

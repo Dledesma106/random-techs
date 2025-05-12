@@ -1,11 +1,12 @@
+import { BlurView } from 'expo-blur';
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
 import Modal from 'react-native-modal';
-import { BlurView } from 'expo-blur';
 
 interface ConfirmButtonProps {
     title: string;
-    confirmMessage: string;
+    confirmTitle: string;
+    confirmText?: string;
     onConfirm: () => void;
     icon: JSX.Element;
     className?: string;
@@ -13,7 +14,8 @@ interface ConfirmButtonProps {
 
 const ConfirmButton: React.FC<ConfirmButtonProps> = ({
     title,
-    confirmMessage,
+    confirmTitle,
+    confirmText,
     onConfirm,
     icon,
 }) => {
@@ -49,8 +51,9 @@ const ConfirmButton: React.FC<ConfirmButtonProps> = ({
                 }
             >
                 <View className="flex flex-column justify-center gap-4 p-6 rounded-lg items-center bg-background border-border relative left-1">
-                    <Text className="font-bold text-lg text-center">
-                        {confirmMessage}
+                    <Text className="font-bold text-lg text-center">{confirmTitle}</Text>
+                    <Text className="text-center text-sm text-gray-500">
+                        {confirmText}
                     </Text>
                     <View className="flex flex-row">
                         <TouchableOpacity
