@@ -119,7 +119,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
         : undefined;
     const mappedBranches =
         selectedClient?.branches.map((branch) => ({
-            label: `${branch.number}, ${branch.city.name}`,
+            label: `${branch.number ? `${branch.number}, ` : ''}${branch.name ? `${branch.name}, ` : ''}${branch.city.name}`,
             value: branch.id,
         })) ?? [];
     const selectedBranch = watch('branchId')
@@ -352,7 +352,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                 <ConfirmButton
                     onConfirm={() => handleDeleteImage(fullScreenImage)}
                     title="Eliminar foto"
-                    confirmMessage="¿Seguro que quiere eliminar la foto?"
+                    confirmTitle="¿Seguro que quiere eliminar la foto?"
                     icon={<EvilIcons name="trash" size={22} color="white" />}
                 />
             </View>
@@ -470,10 +470,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                                     <Dropdown
                                         items={mappedTechsWithOther}
                                         placeholder="Selecciona los participantes"
-                                        value={
-                                            selectedOption ||
-                                            'Selecciona los participantes'
-                                        }
+                                        value={selectedOption ?? undefined}
                                         onValueChange={(value) => {
                                             setSelectedOption(value);
                                             if (value && value !== 'other') {
@@ -490,6 +487,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                                                 }
                                             }
                                         }}
+                                        alwaysShowPlaceholder
                                     />
                                 </View>
                             </View>
@@ -718,7 +716,12 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                         </View>
 
                         <View className="items-start">
-                            <Label className="mb-1.5">Gastos</Label>
+                            <Label className="mb-1.5">
+                                Gastos - Total: ${' '}
+                                {watch('expenses')
+                                    ?.reduce((acc, expense) => acc + expense.amount, 0)
+                                    .toLocaleString('es-AR') ?? 0}
+                            </Label>
 
                             <View className="space-y-2 w-full">
                                 {watch('expenses') &&
