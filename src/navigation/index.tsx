@@ -6,6 +6,7 @@ import { ColorSchemeName } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import LinkingConfiguration from './LinkingConfiguration';
+import { navigationRef } from './RootNavigation';
 import { RootStackParamList } from './types';
 
 import AccountSettings from '@/screens/AccountSettings';
@@ -27,8 +28,9 @@ import NotFoundScreen from '../screens/NotFoundScreen';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
     return (
-        <GestureHandlerRootView>
+        <GestureHandlerRootView style={{ flex: 1 }}>
             <NavigationContainer
+                ref={navigationRef}
                 linking={LinkingConfiguration}
                 theme={colorScheme === 'light' ? DarkTheme : DefaultTheme}
             >

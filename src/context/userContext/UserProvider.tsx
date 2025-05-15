@@ -6,8 +6,10 @@ import { useState, PropsWithChildren, useEffect } from 'react';
 import UserContext from './UserContext';
 
 import { LoginMutation } from '@/api/graphql';
+import { useRegisterExpoToken } from '@/hooks/api/auth/useRegisterExpoToken';
 import JWTTokenService from '@/lib/JWTTokenService';
 import { ProfileScreenRouteProp } from '@/navigation/types';
+import { registerForPushNotificationsAsync } from '@/services/notificationService';
 
 async function hashPassword(password: string) {
     return await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, password);
@@ -38,6 +40,7 @@ const UserProvider = ({ children }: PropsWithChildren) => {
     const [user, setUser] = useState<LoginMutation['login']['user'] | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const queryClient = useQueryClient();
+    const { mutateAsync: registerTokenMutationFn } = useRegisterExpoToken();
 
     useEffect(() => {
         queryClient.clear();
@@ -53,11 +56,20 @@ const UserProvider = ({ children }: PropsWithChildren) => {
     }, []);
 
     const loginUser = async (
-        user: NonNullable<LoginMutation['login']['user']>,
+        userData: NonNullable<LoginMutation['login']['user']>,
         password: string,
     ) => {
-        saveUserOnSecureStorage(user, password);
-        setUser(user);
+        await saveUserOnSecureStorage(userData, password);
+        setUser(userData);
+
+        try {
+            await registerForPushNotificationsAsync(registerTokenMutationFn);
+        } catch (error) {
+            console.error(
+                'Failed to register for push notifications during login:',
+                error,
+            );
+        }
     };
 
     function isLoggedIn() {
