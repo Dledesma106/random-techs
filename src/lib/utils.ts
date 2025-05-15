@@ -95,3 +95,27 @@ export function pascalCaseToSpaces(input: string): string {
         .replace(/([a-z])([A-Z])/g, '$1 $2')
         .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
 }
+
+// Función auxiliar para comparar fechas ignorando milisegundos
+export const areDatesEqual = (
+    date1: Date | string | undefined | null,
+    date2: Date | string | undefined | null,
+): boolean => {
+    // Si ambas fechas son nulas o indefinidas, son iguales
+    if (!date1 && !date2) return true;
+    // Si solo una es nula o indefinida, son diferentes
+    if (!date1 || !date2) return false;
+
+    // Convertir a objetos Date si son strings
+    const d1 = typeof date1 === 'string' ? new Date(date1) : date1;
+    const d2 = typeof date2 === 'string' ? new Date(date2) : date2;
+
+    // Comparar año, mes, día, hora y minuto
+    return (
+        d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate() &&
+        d1.getHours() === d2.getHours() &&
+        d1.getMinutes() === d2.getMinutes()
+    );
+};

@@ -14,7 +14,7 @@ import AddImage from '@/components/AddImage';
 import CollapsableText from '@/components/CollapsableText';
 import ConfirmButton from '@/components/ConfirmButton';
 import ImageThumbnail, { ThumbnailImage } from '@/components/ImageThumbnail';
-import { Badge, BadgeText } from '@/components/ui/badge';
+import TaskTypeBadge from '@/components/TaskTypeBadge';
 import { Button, ButtonText } from '@/components/ui/button';
 import Chip from '@/components/ui/Chip';
 import Dropdown from '@/components/ui/Dropdown';
@@ -28,12 +28,7 @@ import { useGetTechnicians } from '@/hooks/api/useGetTechnicians';
 import { useDebouncer } from '@/hooks/useDebouncer';
 import useImagePicker from '@/hooks/useImagePicker';
 import { showToast } from '@/lib/toast';
-import {
-    stringifyObject,
-    uploadPhoto,
-    deletePhoto,
-    pascalCaseToSpaces,
-} from '@/lib/utils';
+import { stringifyObject, uploadPhoto, deletePhoto, areDatesEqual } from '@/lib/utils';
 import { TaskStatus } from '@/models/types';
 import { AssignedTaskScreenRouteProp } from '@/navigation/types';
 
@@ -63,30 +58,6 @@ interface FormInputs {
     participants: string[];
     useMaterials: boolean;
 }
-
-// Función auxiliar para comparar fechas ignorando milisegundos
-const areDatesEqual = (
-    date1: Date | string | undefined | null,
-    date2: Date | string | undefined | null,
-): boolean => {
-    // Si ambas fechas son nulas o indefinidas, son iguales
-    if (!date1 && !date2) return true;
-    // Si solo una es nula o indefinida, son diferentes
-    if (!date1 || !date2) return false;
-
-    // Convertir a objetos Date si son strings
-    const d1 = typeof date1 === 'string' ? new Date(date1) : date1;
-    const d2 = typeof date2 === 'string' ? new Date(date2) : date2;
-
-    // Comparar año, mes, día, hora y minuto
-    return (
-        d1.getFullYear() === d2.getFullYear() &&
-        d1.getMonth() === d2.getMonth() &&
-        d1.getDate() === d2.getDate() &&
-        d1.getHours() === d2.getHours() &&
-        d1.getMinutes() === d2.getMinutes()
-    );
-};
 
 const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
     const { id } = route.params;
@@ -492,18 +463,14 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                         </>
                     )}
                     <View className="px-4 pt-4 space-y-4">
-                        <View className="items-start">
-                            <Badge className="mb-4">
-                                <BadgeText>{pascalCaseToSpaces(task.taskType)}</BadgeText>
-                            </Badge>
-
+                        <View className="items-start gap-2">
                             <Text className="text-muted-foreground">
                                 {task.business?.name ?? task.businessName}
                             </Text>
-
                             <Text className="text-xl font-bold">
                                 {task.branch?.client?.name ?? task.clientName}
                             </Text>
+                            <TaskTypeBadge type={task.taskType} />
                         </View>
 
                         <View>

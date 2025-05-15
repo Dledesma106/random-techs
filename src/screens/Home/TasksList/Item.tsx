@@ -3,9 +3,9 @@ import { es } from 'date-fns/locale';
 import { useState } from 'react';
 import { Text, View, Pressable, ViewProps } from 'react-native';
 
-import { MyAssignedTasksQuery } from '@/api/graphql';
-import { Badge, BadgeText } from '@/components/ui/badge';
-import { cn, pascalCaseToSpaces } from '@/lib/utils';
+import { MyAssignedTasksQuery, TaskType } from '@/api/graphql';
+import TaskTypeBadge from '@/components/TaskTypeBadge';
+import { cn } from '@/lib/utils';
 
 import { TaskListProps } from '.';
 
@@ -17,15 +17,35 @@ type ItemProps = {
     style?: ViewProps['style'];
 };
 
+const getTaskTypeBorderColor = (type: TaskType) => {
+    switch (type) {
+        case TaskType.Preventivo:
+            return 'border-green-500';
+        case TaskType.Correctivo:
+            return 'border-red-500';
+        case TaskType.Instalacion:
+            return 'border-blue-500';
+        case TaskType.Desmonte:
+            return 'border-yellow-500';
+        case TaskType.Actualizacion:
+            return 'border-purple-500';
+        case TaskType.InspeccionPolicial:
+            return 'border-orange-500';
+        default:
+            return 'border-gray-500';
+    }
+};
+
 const Item = ({ task, navigation, style }: ItemProps) => {
     const branch = task.branch;
-
     const [isPressed, setIsPressed] = useState(false);
+    const borderColor = getTaskTypeBorderColor(task.taskType);
 
     return (
         <Pressable
             className={cn(
-                'flex flex-col items-start rounded-lg border border-border p-3 text-left text-sm transition-all',
+                'flex flex-col items-start rounded-lg border-2 p-3 text-left text-sm transition-all',
+                borderColor,
                 isPressed && 'bg-accent',
             )}
             onPress={() => {
@@ -69,9 +89,7 @@ const Item = ({ task, navigation, style }: ItemProps) => {
                 {task.description}
             </Text>
 
-            <Badge>
-                <BadgeText>{pascalCaseToSpaces(task.taskType)}</BadgeText>
-            </Badge>
+            <TaskTypeBadge type={task.taskType} />
         </Pressable>
     );
 };
