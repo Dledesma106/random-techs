@@ -14,3 +14,7 @@ mutation login($email: String!, $password: String!) {
         expiresAt
     }
 }
+
+mutation RegisterExpoToken($token: String!) {
+  registerExpoToken(token: $token)
+}

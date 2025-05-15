@@ -285,6 +285,7 @@ export type Mutation = {
     generateUploadUrls: PresignedUrlResponse;
     login: LoginUserResult;
     logout: AuthResult;
+    registerExpoToken: Scalars['Boolean'];
     sendNewUserRandomPassword: UserCrudPothosRef;
     updateBranch: BranchCrudResult;
     updateBusiness: BusinessResult;
@@ -418,6 +419,10 @@ export type MutationGenerateUploadUrlsArgs = {
 export type MutationLoginArgs = {
     email: Scalars['String'];
     password: Scalars['String'];
+};
+
+export type MutationRegisterExpoTokenArgs = {
+    token: Scalars['String'];
 };
 
 export type MutationSendNewUserRandomPasswordArgs = {
@@ -960,6 +965,15 @@ export type LoginMutation = {
             roles: Array<Role>;
         } | null;
     };
+};
+
+export type RegisterExpoTokenMutationVariables = Exact<{
+    token: Scalars['String'];
+}>;
+
+export type RegisterExpoTokenMutation = {
+    __typename?: 'Mutation';
+    registerExpoToken: boolean;
 };
 
 export type ClientsQueryVariables = Exact<{ [key: string]: never }>;
@@ -1526,6 +1540,54 @@ export const LoginDocument = {
         },
     ],
 } as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;
+export const RegisterExpoTokenDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'RegisterExpoToken' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'token' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'registerExpoToken' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'token' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'token' },
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    RegisterExpoTokenMutation,
+    RegisterExpoTokenMutationVariables
+>;
 export const ClientsDocument = {
     kind: 'Document',
     definitions: [
