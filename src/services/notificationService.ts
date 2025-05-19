@@ -1,7 +1,8 @@
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
+import { Alert, Platform } from 'react-native';
 
+import { showToast } from '@/lib/toast';
 import { navigate } from '@/navigation/RootNavigation'; // Ajusta la ruta si es necesario
 
 Notifications.setNotificationHandler({
@@ -60,15 +61,24 @@ async function registerForPushNotificationsAsync(
     }
 
     try {
-        const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+        const projectId = Constants.expoConfig?.extra?.['eas']?.projectId;
         if (!projectId) {
             console.error('Project ID not found in app config. Cannot get push token.');
+            Alert.alert(
+                'Error',
+                'No se pudo obtener el token de notificación por falta de projectId',
+            );
+            showToast(
+                'No se pudo obtener el token de notificación por falta de projectId',
+                'error',
+            );
             return null;
         }
         token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
         console.log('Expo Push Token:', token);
     } catch (e) {
         console.error('Failed to get push token', e);
+        showToast('No se pudo obtener el token de notificación: ' + e, 'error');
         return null;
     }
 
