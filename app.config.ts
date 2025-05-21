@@ -29,6 +29,7 @@ const config = ({ config }: ConfigContext): ExpoConfig => {
                 backgroundColor: '#ffffff',
             },
             package: 'com.dledesma2020.randomtechs',
+            googleServicesFile: './google-services.json',
         },
         web: {
             favicon: './assets/images/logo.png',
