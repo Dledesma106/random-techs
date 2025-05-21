@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "537193940101",
+    "project_id": "random-techs",
+    "storage_bucket": "random-techs.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:537193940101:android:f63f6473b7414bae3d95ec",
+        "android_client_info": {
+          "package_name": "com.dledesma2020.randomtechs"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDm_-wq6mMssG5hdESiJWaQbqyg-JmyM0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
