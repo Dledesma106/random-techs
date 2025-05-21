@@ -32,6 +32,7 @@ interface LoginForm {
 
 const apiHost = Constants.expoConfig?.extra?.['apiHost'];
 const apiBaseUrl = Constants.expoConfig?.extra?.['apiBaseUrl'];
+const projectId = Constants.expoConfig?.extra?.['eas']?.projectId;
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -78,6 +79,7 @@ const LoginScreen = ({ navigation }: Props) => {
                                     ...S3Credentials,
                                     apiHost,
                                     apiBaseUrl,
+                                    projectId,
                                 })}
                             />
                         )}
