@@ -20,6 +20,16 @@ export type Scalars = {
     JSON: any;
 };
 
+export type AttachmentFile = {
+    __typename?: 'AttachmentFile';
+    filename: Scalars['String'];
+    key: Scalars['String'];
+    mimeType: Scalars['String'];
+    size: Scalars['Int'];
+    url: Scalars['String'];
+    urlExpire: Maybe<Scalars['DateTime']>;
+};
+
 export type AuthResult = {
     __typename?: 'AuthResult';
     message: Maybe<Scalars['String']>;
@@ -118,9 +128,18 @@ export type ClientResult = {
     success: Scalars['Boolean'];
 };
 
+export type DownloadTaskPhotosResult = {
+    __typename?: 'DownloadTaskPhotosResult';
+    message: Maybe<Scalars['String']>;
+    success: Scalars['Boolean'];
+    url: Maybe<Scalars['String']>;
+};
+
 export type Expense = {
     __typename?: 'Expense';
+    administrativeNotes: Maybe<Scalars['String']>;
     amount: Scalars['Float'];
+    attachmentFiles: Array<AttachmentFile>;
     auditor: Maybe<User>;
     cityName: Maybe<Scalars['String']>;
     createdAt: Scalars['DateTime'];
@@ -133,6 +152,7 @@ export type Expense = {
     id: Scalars['ID'];
     images: Array<Image>;
     installments: Maybe<Scalars['Int']>;
+    invoiceType: ExpenseInvoiceType;
     observations: Maybe<Scalars['String']>;
     paySource: ExpensePaySource;
     paySourceBank: Maybe<ExpensePaySourceBank>;
@@ -158,6 +178,7 @@ export type ExpenseInput = {
     filenames: InputMaybe<Array<Scalars['String']>>;
     imageKeys: InputMaybe<Array<Scalars['String']>>;
     installments: Scalars['Int'];
+    invoiceType: ExpenseInvoiceType;
     mimeTypes: InputMaybe<Array<Scalars['String']>>;
     observations: InputMaybe<Scalars['String']>;
     paySource: ExpensePaySource;
@@ -165,6 +186,15 @@ export type ExpenseInput = {
     sizes: InputMaybe<Array<Scalars['Int']>>;
 };
 
+export const ExpenseInvoiceType = {
+    FacturaElectronicaAdjunta: 'FacturaElectronicaAdjunta',
+    FacturaPapel: 'FacturaPapel',
+    FacturaViaMailOWhatsapp: 'FacturaViaMailOWhatsapp',
+    SinFactura: 'SinFactura',
+} as const;
+
+export type ExpenseInvoiceType =
+    (typeof ExpenseInvoiceType)[keyof typeof ExpenseInvoiceType];
 export const ExpensePaySource = {
     Credito: 'Credito',
     Debito: 'Debito',
@@ -237,6 +267,13 @@ export type FileInput = {
     url: Scalars['String'];
 };
 
+export type GeneratePresignedUrlsResponse = {
+    __typename?: 'GeneratePresignedUrlsResponse';
+    message: Maybe<Scalars['String']>;
+    presignedUrls: Array<PresignedUrlInfo>;
+    success: Scalars['Boolean'];
+};
+
 export type Image = {
     __typename?: 'Image';
     id: Scalars['ID'];
@@ -279,9 +316,11 @@ export type Mutation = {
     deleteProvince: ProvinceCrudResult;
     deleteTask: TaskCrudResult;
     deleteUser: UserCrudPothosRef;
+    downloadTaskPhotos: DownloadTaskPhotosResult;
     finishTask: TaskCrudResult;
     generateApprovedExpensesReport: Scalars['String'];
     generateApprovedTasksReport: Scalars['String'];
+    generatePresignedUrls: GeneratePresignedUrlsResponse;
     generateUploadUrls: PresignedUrlResponse;
     login: LoginUserResult;
     logout: AuthResult;
@@ -291,6 +330,7 @@ export type Mutation = {
     updateBusiness: BusinessResult;
     updateCity: CityCrudRef;
     updateClient: ClientResult;
+    updateExpenseAdministrative: ExpenseCrudResult;
     updateExpenseDiscountAmount: ExpenseCrudResult;
     updateExpenseStatus: ExpenseCrudResult;
     updateMyAssignedTask: TaskCrudResult;
@@ -396,6 +436,12 @@ export type MutationDeleteUserArgs = {
     id: Scalars['String'];
 };
 
+export type MutationDownloadTaskPhotosArgs = {
+    businessId: InputMaybe<Scalars['String']>;
+    endDate: Scalars['DateTime'];
+    startDate: Scalars['DateTime'];
+};
+
 export type MutationFinishTaskArgs = {
     id: Scalars['String'];
 };
@@ -408,6 +454,12 @@ export type MutationGenerateApprovedExpensesReportArgs = {
 export type MutationGenerateApprovedTasksReportArgs = {
     endDate: Scalars['DateTime'];
     startDate: Scalars['DateTime'];
+};
+
+export type MutationGeneratePresignedUrlsArgs = {
+    fileCount: Scalars['Int'];
+    mimeTypes: Array<Scalars['String']>;
+    prefix: Scalars['String'];
 };
 
 export type MutationGenerateUploadUrlsArgs = {
@@ -447,6 +499,11 @@ export type MutationUpdateCityArgs = {
 export type MutationUpdateClientArgs = {
     data: ClientInput;
     id: Scalars['String'];
+};
+
+export type MutationUpdateExpenseAdministrativeArgs = {
+    id: Scalars['String'];
+    input: UpdateExpenseAdministrativeInput;
 };
 
 export type MutationUpdateExpenseDiscountAmountArgs = {
@@ -503,6 +560,13 @@ export type MyTaskInput = {
     startedAt: InputMaybe<Scalars['DateTime']>;
     taskType: TaskType;
     useMaterials: Scalars['Boolean'];
+};
+
+export type PresignedUrlInfo = {
+    __typename?: 'PresignedUrlInfo';
+    expiresIn: Scalars['Int'];
+    key: Scalars['String'];
+    url: Scalars['String'];
 };
 
 export type PresignedUrlResponse = {
@@ -604,6 +668,7 @@ export type Query = {
     expensesCount: Scalars['Int'];
     file: File;
     files: Array<File>;
+    getTaskPhotosWithInfo: Array<Scalars['String']>;
     images: Array<Image>;
     myAssignedTaskById: Maybe<Task>;
     myAssignedTasks: Array<Task>;
@@ -720,6 +785,12 @@ export type QueryExpensesCountArgs = {
 
 export type QueryFileArgs = {
     id: Scalars['String'];
+};
+
+export type QueryGetTaskPhotosWithInfoArgs = {
+    businessId: InputMaybe<Scalars['String']>;
+    endDate: Scalars['DateTime'];
+    startDate: Scalars['DateTime'];
 };
 
 export type QueryMyAssignedTaskByIdArgs = {
@@ -895,6 +966,14 @@ export const TaskType = {
 } as const;
 
 export type TaskType = (typeof TaskType)[keyof typeof TaskType];
+export type UpdateExpenseAdministrativeInput = {
+    administrativeNotes: InputMaybe<Scalars['String']>;
+    fileKeys: InputMaybe<Array<Scalars['String']>>;
+    filenames: InputMaybe<Array<Scalars['String']>>;
+    mimeTypes: InputMaybe<Array<Scalars['String']>>;
+    sizes: InputMaybe<Array<Scalars['Int']>>;
+};
+
 export type UpdateMyTaskInput = {
     actNumber: InputMaybe<Scalars['String']>;
     closedAt: InputMaybe<Scalars['DateTime']>;
@@ -1006,6 +1085,7 @@ export type MyExpenseByIdQuery = {
         id: string;
         amount: number;
         expenseType: ExpenseType;
+        invoiceType: ExpenseInvoiceType;
         cityName: string | null;
         expenseNumber: string;
         paySource: ExpensePaySource;
@@ -1737,6 +1817,10 @@ export const MyExpenseByIdDocument = {
                                 {
                                     kind: 'Field',
                                     name: { kind: 'Name', value: 'expenseType' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'invoiceType' },
                                 },
                                 {
                                     kind: 'Field',

@@ -19,6 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
     ExpenseInput,
+    ExpenseInvoiceType,
     ExpensePaySource,
     ExpensePaySourceBank,
     ExpenseType,
@@ -33,7 +34,13 @@ import { useUserContext } from '@/context/userContext/useUser';
 import { useGetTechnicians } from '@/hooks/api/useGetTechnicians';
 import useImagePicker from '@/hooks/useImagePicker';
 import { showToast } from '@/lib/toast';
-import { deletePhoto, getFileSignedUrl, stringifyObject, uploadPhoto } from '@/lib/utils';
+import {
+    deletePhoto,
+    getFileSignedUrl,
+    pascalCaseToSpaces,
+    stringifyObject,
+    uploadPhoto,
+} from '@/lib/utils';
 import { addFullScreenCameraListener } from '@/screens/FullScreenCamera';
 
 import CollapsableText from '../CollapsableText';
@@ -66,6 +73,7 @@ export type ExpenseFormValues = {
     doneBy: string;
     observations: string;
     expenseType: ExpenseType;
+    invoiceType: ExpenseInvoiceType;
     images?: InputImage[];
     files?: InputFile[];
     installments?: number;
@@ -104,8 +112,9 @@ const ExpenseForm = ({ onFinish }: Props) => {
     const paySources = Object.values(ExpensePaySource);
     const paySourceBanks = Object.values(ExpensePaySourceBank);
     const expenseTypes = Object.values(ExpenseType);
+    const invoiceTypes = Object.values(ExpenseInvoiceType);
     const paySource = watch('paySource');
-    const needsBank = ['Debito', 'Credito'].includes(paySource);
+    const needsBank = ['Debito', 'Credito', 'Transferencia'].includes(paySource);
     const isOtherTechnician = watch('selectedDoneBy') === 'Otro';
     const cityOptions = [
         { label: 'Trelew', value: 'Trelew' },
@@ -144,6 +153,10 @@ const ExpenseForm = ({ onFinish }: Props) => {
             showToast('La fuente de pago es requerida', 'error');
             return;
         }
+        if (!data.invoiceType) {
+            showToast('El tipo de facturación es requerido', 'error');
+            return;
+        }
         if (needsBank && !data.paySourceBank) {
             showToast('Especifique el banco emisor', 'error');
             return;
@@ -176,6 +189,7 @@ const ExpenseForm = ({ onFinish }: Props) => {
             doneBy: data.doneBy,
             observations: data.observations ?? '',
             expenseType: data.expenseType,
+            invoiceType: data.invoiceType,
             imageKeys: data.images?.map((img) => img.key) ?? [],
             fileKeys: data.files?.map((file) => file.key) ?? [],
             filenames: data.files?.map((file) => file.name) ?? [],
@@ -386,6 +400,16 @@ const ExpenseForm = ({ onFinish }: Props) => {
 
                         <RHFDropdown
                             control={control}
+                            name="invoiceType"
+                            items={invoiceTypes.map((type) => ({
+                                label: pascalCaseToSpaces(type),
+                                value: type,
+                            }))}
+                            label="Tipo de factura"
+                        />
+
+                        <RHFDropdown
+                            control={control}
                             name="paySource"
                             items={paySources.map((type) => ({
                                 label: type,
@@ -453,18 +477,20 @@ const ExpenseForm = ({ onFinish }: Props) => {
                             maximumDate={new Date()}
                         />
                     </View>
-                    <Text className="mb-2 text-gray-800 font-bold">Pagado por</Text>
-                    <Dropdown
-                        items={techniciansOptions}
-                        placeholder="Selecciona al comprador"
-                        value={watch('selectedDoneBy')}
-                        onValueChange={(value) => {
-                            setValue('doneBy', value === 'Otro' ? '' : (value ?? ''));
-                            setValue('selectedDoneBy', value ?? '');
-                        }}
-                    />
+                    <View className="py-2">
+                        <Text className="mb-2 text-gray-800 font-bold">Pagado por</Text>
+                        <Dropdown
+                            items={techniciansOptions}
+                            placeholder="Selecciona al comprador"
+                            value={watch('selectedDoneBy')}
+                            onValueChange={(value) => {
+                                setValue('doneBy', value === 'Otro' ? '' : (value ?? ''));
+                                setValue('selectedDoneBy', value ?? '');
+                            }}
+                        />
+                    </View>
                     {isOtherTechnician && (
-                        <View className="py-4">
+                        <View className="py-2">
                             <Text className="mb-2 text-gray-800 font-bold">
                                 Nombre comprador
                             </Text>
@@ -482,7 +508,7 @@ const ExpenseForm = ({ onFinish }: Props) => {
                             />
                         </View>
                     )}
-                    <View>
+                    <View className="py-2">
                         <Text className="mb-2 text-gray-800 font-bold">
                             Ciudad donde se registra el gasto
                         </Text>
