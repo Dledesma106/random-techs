@@ -51,7 +51,9 @@ const ConfirmButton: React.FC<ConfirmButtonProps> = ({
                 }
             >
                 <View className="flex flex-column justify-center gap-4 p-6 rounded-lg items-center bg-background border-border relative left-1">
-                    <Text className="font-bold text-lg text-center">{confirmTitle}</Text>
+                    <Text className="font-bold text-lg text-center text-black">
+                        {confirmTitle}
+                    </Text>
                     <Text className="text-center text-sm text-gray-500">
                         {confirmText}
                     </Text>

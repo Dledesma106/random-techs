@@ -7,11 +7,16 @@ import { Text, View, ScrollView, Image, TouchableOpacity } from 'react-native';
 
 import CollapsableText from './CollapsableText';
 
-import { TaskStatus } from '@/api/graphql';
+import { ExpenseInvoiceType, TaskStatus } from '@/api/graphql';
 import { MyExpenseByIdQuery, ExpenseInput } from '@/api/graphql';
 import ConfirmButton from '@/components/ConfirmButton';
 import FileViewer from '@/components/FileViewer';
-import { getFileSignedUrl, getS3SignedUrl, stringifyObject } from '@/lib/utils';
+import {
+    getFileSignedUrl,
+    getS3SignedUrl,
+    pascalCaseToSpaces,
+    stringifyObject,
+} from '@/lib/utils';
 
 const isDevelopment = Constants.expoConfig?.extra?.['environment'] === 'development';
 
@@ -29,6 +34,7 @@ export type ExpenseDetailType =
           files?: { url: string; filename?: string; size?: number }[] | null;
           createdAt?: string;
           task?: { status: TaskStatus };
+          invoiceType?: ExpenseInvoiceType;
       });
 
 interface ExpenseDetailProps {
@@ -143,6 +149,13 @@ const ExpenseDetail = ({ onDelete, expense, canDelete = true }: ExpenseDetailPro
                 </View>
 
                 <View className="mb-4">
+                    <Text className="mb-2 text-gray-800 font-bold">Tipo de factura</Text>
+                    <Text className="text-gray-600">
+                        {pascalCaseToSpaces(expense.invoiceType)}
+                    </Text>
+                </View>
+
+                <View className="mb-4">
                     <Text className="mb-2 text-gray-800 font-bold">Fuente de pago</Text>
                     <Text className="text-gray-600">{expense.paySource}</Text>
                 </View>
@@ -154,7 +167,7 @@ const ExpenseDetail = ({ onDelete, expense, canDelete = true }: ExpenseDetailPro
                     </View>
                 )}
 
-                {['Credito', 'Debito'].includes(expense.paySource) && (
+                {['Credito', 'Debito', 'Transferencia'].includes(expense.paySource) && (
                     <View className="mb-4">
                         <Text className="mb-2 text-gray-800 font-bold">Banco emisor</Text>
                         <Text className="text-gray-600">{expense.paySourceBank}</Text>
@@ -255,7 +268,8 @@ const ExpenseDetail = ({ onDelete, expense, canDelete = true }: ExpenseDetailPro
             {canDelete && (
                 <ConfirmButton
                     title="Eliminar Gasto"
-                    confirmMessage="¿Seguro que quiere eliminar el gasto?"
+                    confirmTitle="Eliminar Gasto"
+                    confirmText="¿Seguro que quiere eliminar el gasto?"
                     onConfirm={handleDeleteExpense}
                     icon={<EvilIcons name="trash" size={22} color="white" />}
                 />
