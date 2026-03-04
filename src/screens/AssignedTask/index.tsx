@@ -338,11 +338,14 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
         // 1. El usuario ha modificado el formulario
         // 2. El formulario tiene cambios
         // 3. La tarea no está finalizada
+        // 4. NO hay un DateTimePickerModal abierto
         if (
             userHasModifiedForm &&
             isFormDirty &&
             data?.myAssignedTaskById?.status !== TaskStatus.Finalizada &&
-            data?.myAssignedTaskById?.status !== TaskStatus.Aprobada
+            data?.myAssignedTaskById?.status !== TaskStatus.Aprobada &&
+            !isStartDatePickerVisible &&
+            !isCloseDatePickerVisible
         ) {
             const formData = watch() as FormInputs;
             const savePromise = debouncedSave(formData) as Promise<any> & {
@@ -358,6 +361,8 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
         userHasModifiedForm,
         data?.myAssignedTaskById?.status,
         debouncedSave,
+        isStartDatePickerVisible,
+        isCloseDatePickerVisible,
     ]);
 
     const handleFinishTask = async () => {
@@ -659,6 +664,7 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                         isVisible={isStartDatePickerVisible}
                                         mode="datetime"
                                         onConfirm={(date) => {
+                                            setStartDatePickerVisibility(false);
                                             setUserHasModifiedForm(true);
                                             setValue('startedAt', date);
 
@@ -671,8 +677,6 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                                 // Si la fecha de inicio es mayor, actualizar la fecha de cierre
                                                 setValue('closedAt', date);
                                             }
-
-                                            setStartDatePickerVisibility(false);
                                         }}
                                         onCancel={() =>
                                             setStartDatePickerVisibility(false)
@@ -724,9 +728,9 @@ const AssignedTask = ({ route, navigation }: AssignedTaskScreenRouteProp) => {
                                         isVisible={isCloseDatePickerVisible}
                                         mode="datetime"
                                         onConfirm={(date) => {
+                                            setCloseDatePickerVisibility(false);
                                             setUserHasModifiedForm(true);
                                             setValue('closedAt', date);
-                                            setCloseDatePickerVisibility(false);
                                         }}
                                         onCancel={() =>
                                             setCloseDatePickerVisibility(false)

@@ -578,6 +578,7 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                                     isVisible={isStartDatePickerVisible}
                                     mode="datetime"
                                     onConfirm={(date) => {
+                                        setStartDatePickerVisibility(false);
                                         setValue('startedAt', date);
                                         // Verificar si la fecha de inicio es mayor a la fecha de cierre existente
                                         const currentClosedAt = watch('closedAt');
@@ -585,7 +586,6 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                                             // Si la fecha de inicio es mayor, actualizar la fecha de cierre
                                             setValue('closedAt', date);
                                         }
-                                        setStartDatePickerVisibility(false);
                                     }}
                                     onCancel={() => setStartDatePickerVisibility(false)}
                                     date={watch('startedAt') || new Date()}
@@ -617,8 +617,8 @@ const RegisterTask = ({ navigation }: RegisterTaskScreenRouteProp) => {
                                     isVisible={isClosedDatePickerVisible}
                                     mode="datetime"
                                     onConfirm={(date) => {
-                                        setValue('closedAt', date);
                                         setClosedDatePickerVisibility(false);
+                                        setValue('closedAt', date);
                                     }}
                                     onCancel={() => setClosedDatePickerVisibility(false)}
                                     date={watch('closedAt') || new Date()}
